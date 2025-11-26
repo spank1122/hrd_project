@@ -482,12 +482,16 @@
   </div>
 
   <script>
-    // Configuration
+    // ========================================
+    // 🔧 Configuration
+    // ========================================
     const CONFIG = {
       APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby8mvClK8QLmiSVyu91y4M1qaRt1xpRBIRPkbSAsh1rRXJP_u3iF1Ic2j1k8WTkb0-e0g/exec'
     };
 
-    // รับค่าจาก URL Parameters
+    // ========================================
+    // 🔧 รับค่า Prefill จาก URL Parameters
+    // ========================================
     const urlParams = new URLSearchParams(window.location.search);
     const prefillData = {
       name: urlParams.get('name') || '',
@@ -498,7 +502,9 @@
 
     console.log('📥 Prefill Data:', prefillData);
 
-    // Signature Canvas
+    // ========================================
+    // 🎨 Signature Canvas Setup
+    // ========================================
     let canvas, ctx, isDrawing = false, hasSignature = false;
 
     function initCanvas() {
@@ -552,7 +558,9 @@
       hasSignature = false;
     }
 
-    // HR Master Data
+    // ========================================
+    // 📋 HR Master Data & Form Logic
+    // ========================================
     let hrMasterData = [];
 
     function showStatus(message, type = 'info') {
@@ -566,29 +574,50 @@
       }
     }
 
+    // ========================================
+    // ✅ JSONP: โหลดข้อมูล HR Master Data
+    // ========================================
     function loadHRMasterData() {
       showStatus('⏳ กำลังโหลดข้อมูลพนักงาน...', 'loading');
 
-      fetch(CONFIG.APPS_SCRIPT_URL + '?action=getHRMasterData')
-        .then(res => res.json())
-        .then(result => {
-          console.log('📊 HR Master Data:', result);
-          
-          if (result.success && result.data) {
-            hrMasterData = result.data;
-            populateRequesterDropdown();
-            applyPrefillData();
-            showStatus('✅ โหลดข้อมูลสำเร็จ (' + hrMasterData.length + ' คน)', 'success');
-          } else {
-            showStatus('❌ ไม่สามารถโหลดข้อมูลได้: ' + (result.message || ''), 'error');
-          }
-        })
-        .catch(error => {
-          console.error('❌ Error:', error);
-          showStatus('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
-        });
+      // สร้าง callback function ชื่อ unique
+      const callbackName = 'hrDataCallback_' + Date.now();
+      
+      // กำหนด callback function
+      window[callbackName] = function(result) {
+        console.log('📊 HR Master Data:', result);
+        
+        if (result.success && result.data) {
+          hrMasterData = result.data;
+          populateRequesterDropdown();
+          applyPrefillData();
+          showStatus('✅ โหลดข้อมูลสำเร็จ (' + hrMasterData.length + ' คน)', 'success');
+        } else {
+          showStatus('❌ ไม่สามารถโหลดข้อมูลได้: ' + (result.message || ''), 'error');
+        }
+        
+        // ลบ script tag และ callback
+        document.body.removeChild(script);
+        delete window[callbackName];
+      };
+
+      // สร้าง script tag สำหรับ JSONP
+      const script = document.createElement('script');
+      script.src = CONFIG.APPS_SCRIPT_URL + 
+                   '?action=getHRMasterData' +
+                   '&callback=' + callbackName;
+      
+      script.onerror = function() {
+        showStatus('❌ เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
+        delete window[callbackName];
+      };
+      
+      document.body.appendChild(script);
     }
 
+    // ========================================
+    // 📋 Populate Dropdown
+    // ========================================
     function populateRequesterDropdown() {
       const select = document.getElementById('name');
       select.innerHTML = '<option value="">-- เลือกชื่อผู้แจ้ง --</option>';
@@ -601,6 +630,9 @@
       });
     }
 
+    // ========================================
+    // 🔄 Prefill Data
+    // ========================================
     function applyPrefillData() {
       if (prefillData.email) {
         const matchedIndex = hrMasterData.findIndex(person => {
@@ -621,6 +653,9 @@
       }
     }
 
+    // ========================================
+    // 👤 Name Change Handler
+    // ========================================
     document.getElementById('name').addEventListener('change', function() {
       const index = parseInt(this.value);
       
@@ -635,6 +670,9 @@
       document.getElementById('email').value = generateEmailFromName(person.email);
     });
 
+    // ========================================
+    // 📧 Generate Email
+    // ========================================
     function generateEmailFromName(fullNameEN) {
       if (!fullNameEN) return '';
       const parts = fullNameEN.trim().split(/\s+/);
@@ -647,7 +685,9 @@
       return firstName + lastNamePrefix + '@carpetmaker.co.th';
     }
 
-    // Form Submission
+    // ========================================
+    // 📤 Form Submission (ใช้ FormData แบบ URL-encoded)
+    // ========================================
     document.getElementById('itRequestForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
@@ -666,14 +706,32 @@
       const formData = collectFormData();
       console.log('📦 Form Data:', formData);
 
-      fetch(CONFIG.APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-        .then(res => res.json())
-        .then(result => {
-          console.log('✅ Result:', result);
+      // สร้าง FormData สำหรับส่ง
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = CONFIG.APPS_SCRIPT_URL;
+      form.target = 'submitFrame_' + Date.now();
+
+      // เพิ่มทุกฟิลด์ลงใน form
+      for (const key in formData) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = formData[key];
+        form.appendChild(input);
+      }
+
+      // สร้าง iframe สำหรับรับ response
+      const iframe = document.createElement('iframe');
+      iframe.name = form.target;
+      iframe.style.display = 'none';
+      
+      iframe.onload = function() {
+        try {
+          const response = iframe.contentDocument.body.textContent;
+          const result = JSON.parse(response);
+          
+          console.log('✅ Submit Result:', result);
           
           if (result.success) {
             showStatus('✅ บันทึกสำเร็จ! เลขที่คำขอ: ' + result.requestNo, 'success');
@@ -690,15 +748,26 @@
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'ส่งคำขอ';
           }
-        })
-        .catch(error => {
-          console.error('❌ Error:', error);
+        } catch (error) {
+          console.error('❌ Error parsing response:', error);
           showStatus('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'ส่งคำขอ';
-        });
+        }
+        
+        // ลบ iframe
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      };
+
+      document.body.appendChild(iframe);
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
     });
 
+    // ========================================
+    // 📦 Collect Form Data
+    // ========================================
     function collectFormData() {
       const formData = {};
       const nameSelect = document.getElementById('name');
@@ -760,9 +829,11 @@
       return formData;
     }
 
-    // Initialize
+    // ========================================
+    // 🚀 Initialize on Load
+    // ========================================
     window.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Initializing...');
+      console.log('🚀 Initializing IT Request Form...');
       initCanvas();
       loadHRMasterData();
     });
