@@ -23,7 +23,6 @@
       margin: 0 auto;
     }
 
-    /* Header Card */
     .form-header {
       background: #673ab7;
       color: white;
@@ -43,7 +42,6 @@
       opacity: 0.9;
     }
 
-    /* Question Cards */
     .question-card {
       background: white;
       border-radius: 8px;
@@ -64,7 +62,6 @@
       margin-left: 4px;
     }
 
-    /* Input Styles */
     input[type="text"],
     input[type="email"],
     input[type="date"],
@@ -109,7 +106,6 @@
       padding: 13px 15px;
     }
 
-    /* Checkbox & Radio Styles */
     .options-group {
       margin-top: 16px;
     }
@@ -145,7 +141,6 @@
       border-radius: 4px;
     }
 
-    /* Signature Section */
     .signature-section {
       background: #f8f9fa;
       padding: 16px;
@@ -171,7 +166,6 @@
       margin: 12px 0;
     }
 
-    /* Buttons */
     .button-group {
       display: flex;
       gap: 12px;
@@ -216,7 +210,6 @@
       cursor: not-allowed;
     }
 
-    /* Status Messages */
     #status {
       margin-top: 16px;
       padding: 16px;
@@ -258,7 +251,12 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Responsive */
+    .helper-text {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 8px;
+    }
+
     @media (max-width: 768px) {
       .form-header h1 {
         font-size: 24px;
@@ -282,19 +280,6 @@
       button {
         width: 100%;
       }
-    }
-
-    /* Loading State */
-    .loading-dropdown {
-      color: #80868b;
-      font-style: italic;
-    }
-
-    /* Helper Text */
-    .helper-text {
-      font-size: 12px;
-      color: #5f6368;
-      margin-top: 8px;
     }
   </style>
 </head>
@@ -497,41 +482,37 @@
   </div>
 
   <script>
-    // ========================================
-    // 🔧 รับค่า Prefill จาก Apps Script Template
-    // ========================================
+    // Configuration
+    const CONFIG = {
+      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby8mvClK8QLmiSVyu91y4M1qaRt1xpRBIRPkbSAsh1rRXJP_u3iF1Ic2j1k8WTkb0-e0g/exec'
+    };
+
+    // รับค่าจาก URL Parameters
+    const urlParams = new URLSearchParams(window.location.search);
     const prefillData = {
-      name: '<?= name ?>',
-      dept: '<?= dept ?>',
-      email: '<?= email ?>',
-      purpose: '<?= purpose ?>'
+      name: urlParams.get('name') || '',
+      dept: urlParams.get('dept') || '',
+      email: urlParams.get('email') || '',
+      purpose: urlParams.get('purpose') || ''
     };
 
     console.log('📥 Prefill Data:', prefillData);
 
-    // ========================================
-    // 🎨 Signature Canvas Setup
-    // ========================================
-    let canvas, ctx;
-    let isDrawing = false;
-    let hasSignature = false;
+    // Signature Canvas
+    let canvas, ctx, isDrawing = false, hasSignature = false;
 
     function initCanvas() {
       canvas = document.getElementById('signatureCanvas');
       ctx = canvas.getContext('2d');
-      
       ctx.strokeStyle = '#000';
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      // Mouse events
       canvas.addEventListener('mousedown', startDrawing);
       canvas.addEventListener('mousemove', draw);
       canvas.addEventListener('mouseup', stopDrawing);
       canvas.addEventListener('mouseout', stopDrawing);
-
-      // Touch events
       canvas.addEventListener('touchstart', handleTouch);
       canvas.addEventListener('touchmove', handleTouch);
       canvas.addEventListener('touchend', stopDrawing);
@@ -560,12 +541,8 @@
       e.preventDefault();
       const touch = e.touches[0];
       const mouseEvent = new MouseEvent(
-        e.type === 'touchstart' ? 'mousedown' : 
-        e.type === 'touchmove' ? 'mousemove' : 'mouseup',
-        {
-          clientX: touch.clientX,
-          clientY: touch.clientY
-        }
+        e.type === 'touchstart' ? 'mousedown' : e.type === 'touchmove' ? 'mousemove' : 'mouseup',
+        { clientX: touch.clientX, clientY: touch.clientY }
       );
       canvas.dispatchEvent(mouseEvent);
     }
@@ -575,9 +552,7 @@
       hasSignature = false;
     }
 
-    // ========================================
-    // 📋 HR Master Data & Form Logic
-    // ========================================
+    // HR Master Data
     let hrMasterData = [];
 
     function showStatus(message, type = 'info') {
@@ -587,40 +562,33 @@
       statusDiv.style.display = 'block';
 
       if (type === 'success' || type === 'error') {
-        setTimeout(() => {
-          statusDiv.style.display = 'none';
-        }, 5000);
+        setTimeout(() => statusDiv.style.display = 'none', 5000);
       }
     }
 
-    // ✅ โหลดข้อมูลจาก HR Master Data
     function loadHRMasterData() {
       showStatus('⏳ กำลังโหลดข้อมูลพนักงาน...', 'loading');
 
-      google.script.run
-        .withSuccessHandler(function(result) {
-          console.log('📊 HR Master Data Result:', result);
+      fetch(CONFIG.APPS_SCRIPT_URL + '?action=getHRMasterData')
+        .then(res => res.json())
+        .then(result => {
+          console.log('📊 HR Master Data:', result);
           
           if (result.success && result.data) {
             hrMasterData = result.data;
             populateRequesterDropdown();
-            
-            // ✅ Prefill ถ้ามีข้อมูลส่งมา
             applyPrefillData();
-            
             showStatus('✅ โหลดข้อมูลสำเร็จ (' + hrMasterData.length + ' คน)', 'success');
           } else {
             showStatus('❌ ไม่สามารถโหลดข้อมูลได้: ' + (result.message || ''), 'error');
           }
         })
-        .withFailureHandler(function(error) {
-          console.error('❌ Error loading HR data:', error);
+        .catch(error => {
+          console.error('❌ Error:', error);
           showStatus('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
-        })
-        .getHRMasterData();
+        });
     }
 
-    // ✅ เติมข้อมูลลง Dropdown
     function populateRequesterDropdown() {
       const select = document.getElementById('name');
       select.innerHTML = '<option value="">-- เลือกชื่อผู้แจ้ง --</option>';
@@ -629,42 +597,30 @@
         const option = document.createElement('option');
         option.value = index;
         option.textContent = person.name;
-        option.dataset.dept = person.dept;
-        option.dataset.email = person.email;
         select.appendChild(option);
       });
     }
 
-    // ✅ Prefill ข้อมูลจาก URL parameters
     function applyPrefillData() {
-      console.log('🔄 Applying prefill data...');
-      
-      // ถ้ามี email ส่งมา ให้หาและเลือก requester นั้น
-      if (prefillData.email && prefillData.email !== '') {
+      if (prefillData.email) {
         const matchedIndex = hrMasterData.findIndex(person => {
-          const generatedEmail = generateEmailFromName(person.email);
-          return generatedEmail.toLowerCase() === prefillData.email.toLowerCase();
+          const email = generateEmailFromName(person.email);
+          return email.toLowerCase() === prefillData.email.toLowerCase();
         });
         
         if (matchedIndex !== -1) {
           document.getElementById('name').value = matchedIndex;
           document.getElementById('dept').value = hrMasterData[matchedIndex].dept;
-          
-          const email = generateEmailFromName(hrMasterData[matchedIndex].email);
-          document.getElementById('email').value = email;
-          
-          console.log('✅ Auto-selected requester:', hrMasterData[matchedIndex].name);
+          document.getElementById('email').value = generateEmailFromName(hrMasterData[matchedIndex].email);
+          console.log('✅ Auto-selected:', hrMasterData[matchedIndex].name);
         }
       }
       
-      // Prefill purpose
-      if (prefillData.purpose && prefillData.purpose !== '') {
+      if (prefillData.purpose) {
         document.getElementById('purpose').value = prefillData.purpose;
-        console.log('✅ Prefilled purpose');
       }
     }
 
-    // ✅ เมื่อเลือกชื่อผู้แจ้ง → Auto-fill แผนกและอีเมล
     document.getElementById('name').addEventListener('change', function() {
       const index = parseInt(this.value);
       
@@ -676,68 +632,58 @@
 
       const person = hrMasterData[index];
       document.getElementById('dept').value = person.dept || '';
-      
-      // ✅ สร้างอีเมลจากชื่ออังกฤษ (ชื่อเต็ม + นามสกุล 2 ตัว + @carpetmaker.co.th)
-      const email = generateEmailFromName(person.email);
-      document.getElementById('email').value = email;
-      
-      console.log('✅ Selected:', person.name, '→ Email:', email);
+      document.getElementById('email').value = generateEmailFromName(person.email);
     });
 
-    // ✅ ฟังก์ชันสร้างอีเมล
     function generateEmailFromName(fullNameEN) {
       if (!fullNameEN) return '';
-      
-      // แยกชื่อและนามสกุล
       const parts = fullNameEN.trim().split(/\s+/);
       if (parts.length < 2) return fullNameEN.toLowerCase() + '@carpetmaker.co.th';
       
       const firstName = parts[0].toLowerCase();
       const lastName = parts[parts.length - 1].toLowerCase();
-      const lastNamePrefix = lastName.substring(0, 2); // เอา 2 ตัวแรก
+      const lastNamePrefix = lastName.substring(0, 2);
       
       return firstName + lastNamePrefix + '@carpetmaker.co.th';
     }
 
-    // ========================================
-    // 📤 Form Submission
-    // ========================================
+    // Form Submission
     document.getElementById('itRequestForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
-      // ตรวจสอบลายเซ็น
       if (!hasSignature) {
         showStatus('❌ กรุณาวาดลายเซ็นก่อนส่งฟอร์ม', 'error');
         document.getElementById('signatureCanvas').scrollIntoView({ behavior: 'smooth' });
         return;
       }
 
-      // ปิดปุ่ม submit
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="spinner"></span>กำลังส่งข้อมูล...';
 
       showStatus('⏳ กำลังบันทึกข้อมูล...', 'loading');
 
-      // รวบรวมข้อมูลจากฟอร์ม
       const formData = collectFormData();
-      
       console.log('📦 Form Data:', formData);
 
-      // ส่งข้อมูลผ่าน google.script.run
-      google.script.run
-        .withSuccessHandler(function(result) {
-          console.log('✅ Submit Result:', result);
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+        .then(res => res.json())
+        .then(result => {
+          console.log('✅ Result:', result);
           
           if (result.success) {
             showStatus('✅ บันทึกสำเร็จ! เลขที่คำขอ: ' + result.requestNo, 'success');
             
-            // รีเซ็ตฟอร์ม
             setTimeout(() => {
               document.getElementById('itRequestForm').reset();
               clearSignature();
               submitBtn.disabled = false;
               submitBtn.innerHTML = 'ส่งคำขอ';
+              loadHRMasterData();
             }, 2000);
           } else {
             showStatus('❌ เกิดข้อผิดพลาด: ' + result.message, 'error');
@@ -745,115 +691,78 @@
             submitBtn.innerHTML = 'ส่งคำขอ';
           }
         })
-        .withFailureHandler(function(error) {
-          console.error('❌ Submit Error:', error);
+        .catch(error => {
+          console.error('❌ Error:', error);
           showStatus('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'ส่งคำขอ';
-        })
-        .saveITRequestFromForm(formData);
+        });
     });
 
-    // ========================================
-    // 📦 รวบรวมข้อมูลจากฟอร์ม
-    // ========================================
     function collectFormData() {
-      const form = document.getElementById('itRequestForm');
       const formData = {};
-
-      // ชื่อผู้แจ้ง
       const nameSelect = document.getElementById('name');
       const selectedIndex = parseInt(nameSelect.value);
+
       if (!isNaN(selectedIndex) && selectedIndex >= 0) {
         formData['ชื่อผู้แจ้ง'] = hrMasterData[selectedIndex].name;
+        formData['Email'] = generateEmailFromName(hrMasterData[selectedIndex].email);
       }
 
-      // แผนกและอีเมล
       formData['แผนกของผู้แจ้ง'] = document.getElementById('dept').value;
-      
-      // ✅ สร้างอีเมลจากชื่ออังกฤษของคนที่เลือก
-      if (!isNaN(selectedIndex) && selectedIndex >= 0) {
-        const email = generateEmailFromName(hrMasterData[selectedIndex].email);
-        formData['Email'] = email;
-      } else {
-        formData['Email'] = document.getElementById('email').value;
-      }
-      
-      // Purpose
       formData['สำหรับใช้ในงาน (โปรดระบุ)'] = document.getElementById('purpose').value;
 
       // ขอเพิ่มอุปกรณ์
       const equipment = [];
-      document.querySelectorAll('input[name="equipment"]:checked').forEach(cb => {
-        equipment.push(cb.value);
-      });
+      document.querySelectorAll('input[name="equipment"]:checked').forEach(cb => equipment.push(cb.value));
       if (document.getElementById('equipOther').checked) {
-        const otherText = document.getElementById('equipOtherText').value;
-        if (otherText) equipment.push(otherText);
+        const text = document.getElementById('equipOtherText').value;
+        if (text) equipment.push(text);
       }
       formData['ขอเพิ่มอุปกรณ์'] = equipment.join(', ');
 
       // โปรแกรมที่ใช้งาน
       const software = [];
-      document.querySelectorAll('input[name="software"]:checked').forEach(cb => {
-        software.push(cb.value);
-      });
+      document.querySelectorAll('input[name="software"]:checked').forEach(cb => software.push(cb.value));
       if (document.getElementById('softwareOther').checked) {
-        const otherText = document.getElementById('softwareOtherText').value;
-        if (otherText) software.push(otherText);
+        const text = document.getElementById('softwareOtherText').value;
+        if (text) software.push(text);
       }
       formData['โปรแกรมที่ใช้งาน'] = software.join(', ');
 
-      // นามบัตร
       const businessCard = document.querySelector('input[name="businessCard"]:checked');
       formData['นามบัตร'] = businessCard ? businessCard.value : '';
 
-      // เครื่องเขียน
       const stationery = document.querySelector('input[name="stationery"]:checked');
       formData['เครื่องเขียน'] = stationery ? stationery.value : '';
 
-      // โทรศัพท์มือถือ
       const mobilePhone = document.querySelector('input[name="mobilePhone"]:checked');
       formData['โทรศัพท์มือถือ'] = mobilePhone ? mobilePhone.value : '';
       formData['เบอร์โทรศัพท์'] = document.getElementById('phoneNumber').value;
 
-      // เหตุผล
       formData['เหตุผลที่สั่งเพิ่ม'] = document.getElementById('reason').value;
-
-      // Specs
       formData['Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)'] = document.getElementById('specs').value;
-
-      // งบประมาณ
       formData['ราคา /งบประมาณที่ตั้งไว้ /งบประมาณที่ได้รับการอนุมัติ'] = document.getElementById('budget').value;
 
       // การตั้งงบประมาณ
       const budgetTypes = [];
-      document.querySelectorAll('input[name="budgetType"]:checked').forEach(cb => {
-        budgetTypes.push(cb.value);
-      });
+      document.querySelectorAll('input[name="budgetType"]:checked').forEach(cb => budgetTypes.push(cb.value));
       if (document.getElementById('budgetTypeOther').checked) {
-        const otherText = document.getElementById('budgetTypeOtherText').value;
-        if (otherText) budgetTypes.push(otherText);
+        const text = document.getElementById('budgetTypeOtherText').value;
+        if (text) budgetTypes.push(text);
       }
       formData['การตั้งงบประมาณ'] = budgetTypes.join(', ');
 
-      // กำหนดส่งมอบ
       formData['กำหนดส่งมอบ'] = document.getElementById('deliveryDate').value;
-
-      // ลายเซ็น (Base64)
       formData['requesterSignature'] = canvas.toDataURL('image/png');
-
-      // Timestamp
       formData['Time'] = new Date().toISOString();
 
       return formData;
     }
 
-    // ========================================
-    // 🚀 Initialize on Load
-    // ========================================
+    // Initialize
     window.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Initializing IT Request Form...');
+      console.log('🚀 Initializing...');
       initCanvas();
       loadHRMasterData();
     });
