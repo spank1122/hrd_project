@@ -686,7 +686,7 @@
     }
 
     // ========================================
-    // 📤 Form Submission (ใช้ FormData แบบ URL-encoded)
+    // 📤 Form Submission (ใช้ fetch POST)
     // ========================================
     document.getElementById('itRequestForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -706,63 +706,68 @@
       const formData = collectFormData();
       console.log('📦 Form Data:', formData);
 
-      // สร้าง FormData สำหรับส่ง
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = CONFIG.APPS_SCRIPT_URL;
-      form.target = 'submitFrame_' + Date.now();
-
-      // เพิ่มทุกฟิลด์ลงใน form
+      // สร้าง URL-encoded string
+      const params = new URLSearchParams();
       for (const key in formData) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = formData[key];
-        form.appendChild(input);
+        params.append(key, formData[key]);
       }
 
-      // สร้าง iframe สำหรับรับ response
-      const iframe = document.createElement('iframe');
-      iframe.name = form.target;
-      iframe.style.display = 'none';
-      
-      iframe.onload = function() {
-        try {
-          const response = iframe.contentDocument.body.textContent;
-          const result = JSON.parse(response);
+      // ส่งด้วย fetch
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: params,
+        redirect: 'follow'
+      })
+        .then(response => response.text())
+        .then(text => {
+          console.log('📥 Raw Response:', text);
           
-          console.log('✅ Submit Result:', result);
-          
-          if (result.success) {
-            showStatus('✅ บันทึกสำเร็จ! เลขที่คำขอ: ' + result.requestNo, 'success');
+          try {
+            const result = JSON.parse(text);
+            console.log('✅ Submit Result:', result);
             
-            setTimeout(() => {
-              document.getElementById('itRequestForm').reset();
-              clearSignature();
+            if (result.success) {
+              showStatus('✅ บันทึกสำเร็จ! เลขที่คำขอ: ' + result.requestNo, 'success');
+              
+              setTimeout(() => {
+                document.getElementById('itRequestForm').reset();
+                clearSignature();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'ส่งคำขอ';
+                loadHRMasterData();
+              }, 2000);
+            } else {
+              showStatus('❌ เกิดข้อผิดพลาด: ' + result.message, 'error');
               submitBtn.disabled = false;
               submitBtn.innerHTML = 'ส่งคำขอ';
-              loadHRMasterData();
-            }, 2000);
-          } else {
-            showStatus('❌ เกิดข้อผิดพลาด: ' + result.message, 'error');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'ส่งคำขอ';
+            }
+          } catch (error) {
+            console.error('❌ Error parsing response:', error);
+            console.error('Response text:', text);
+            
+            // ถ้า parse ไม่ได้ แต่ส่งสำเร็จ (redirect)
+            if (text.includes('success') || text.includes('requestNo')) {
+              showStatus('✅ ส่งคำขอสำเร็จแล้ว', 'success');
+              setTimeout(() => {
+                document.getElementById('itRequestForm').reset();
+                clearSignature();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'ส่งคำขอ';
+                loadHRMasterData();
+              }, 2000);
+            } else {
+              showStatus('❌ เกิดข้อผิดพลาด: ไม่สามารถอ่าน response ได้', 'error');
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = 'ส่งคำขอ';
+            }
           }
-        } catch (error) {
-          console.error('❌ Error parsing response:', error);
+        })
+        .catch(error => {
+          console.error('❌ Submit Error:', error);
           showStatus('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'ส่งคำขอ';
-        }
-        
-        // ลบ iframe
-        setTimeout(() => document.body.removeChild(iframe), 1000);
-      };
-
-      document.body.appendChild(iframe);
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
+        });
     });
 
     // ========================================
