@@ -104,7 +104,7 @@
 
     .form-wrapper {
       display: grid;
-      grid-template-columns: 1fr; /* ❗ ตอนนี้เหลือคอลัมน์เดียว เต็มจอ */
+      grid-template-columns: 1fr; /* ฟอร์มเต็มจอ */
       animation: fadeInUp 0.8s ease-out;
     }
 
@@ -226,7 +226,7 @@
       width: auto;
     }
 
-    /* การดำเนินการ layout */
+    /* การดำเนินการ layout ใหม่ */
     .action-group {
       background: #f8fafc;
       border-radius: 10px;
@@ -235,10 +235,9 @@
     }
 
     .action-row {
-      display: grid;
-      grid-template-columns: 220px minmax(0,1fr); /* ซ้ายคงที่ ขวายืด */
-      align-items: flex-start;
-      gap: 8px 16px;
+      display: flex;
+      align-items: center;            /* checkbox + text อยู่กลางบรรทัดเดียวกัน */
+      gap: 16px;
       margin-bottom: 8px;
       font-size: 14px;
       color: var(--text-dark);
@@ -246,17 +245,32 @@
 
     .action-row:last-child { margin-bottom: 0; }
 
+    .action-left {
+      min-width: 260px;               /* ความกว้าง fix ให้ทุกแถวตรงกัน */
+      display: flex;
+      align-items: center;
+    }
+
     .action-left label {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-weight: 500;
+      white-space: nowrap;           /* แต่งตั้ง / โอนย้าย ฯลฯ เป็นบรรทัดเดียว */
+      cursor: pointer;
+    }
+
+    .action-text {
+      display: inline-block;
     }
 
     .required-mark {
       color: var(--danger);
       font-weight: 700;
       margin-left: 2px;
+    }
+
+    .action-right {
+      flex: 1;
     }
 
     .action-right input[type="text"] {
@@ -313,15 +327,10 @@
     @media (max-width: 768px) {
       .form-section { padding: 24px; }
       .header-title { font-size: 28px; }
-      .emp-grid {
-        grid-template-columns: 1fr;
-      }
-      .action-row {
-        grid-template-columns: 1fr;
-      }
-      .from-to-row {
-        grid-template-columns: auto 1fr;
-      }
+      .emp-grid { grid-template-columns: 1fr; }
+      .action-row { flex-direction: column; align-items: flex-start; }
+      .action-left { min-width: 0; }
+      .from-to-row { grid-template-columns: auto 1fr; }
     }
   </style>
 </head>
@@ -337,7 +346,7 @@
       <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
     </div>
 
-    <!-- ฟอร์มเต็มจอ -->
+    <!-- ฟอร์ม -->
     <div class="form-wrapper">
       <form class="form-section" id="actionForm">
         <h2 class="form-title">📝 ข้อมูลใบดำเนินการ</h2>
@@ -387,7 +396,8 @@
               <div class="action-left">
                 <label>
                   <input type="radio" name="actionType" value="appoint" data-label="แต่งตั้ง">
-                  แต่งตั้ง <span class="required-mark">*</span>
+                  <span class="action-text">แต่งตั้ง</span>
+                  <span class="required-mark">*</span>
                 </label>
               </div>
               <div class="action-right" data-for="appoint">
@@ -401,7 +411,8 @@
               <div class="action-left">
                 <label>
                   <input type="radio" name="actionType" value="transfer" data-label="โอนย้าย">
-                  โอนย้าย <span class="required-mark">*</span>
+                  <span class="action-text">โอนย้าย</span>
+                  <span class="required-mark">*</span>
                 </label>
               </div>
               <div class="action-right" data-for="transfer">
@@ -419,7 +430,8 @@
               <div class="action-left">
                 <label>
                   <input type="radio" name="actionType" value="changeStatus" data-label="เปลี่ยนสภาพ">
-                  เปลี่ยนสภาพ <span class="required-mark">*</span>
+                  <span class="action-text">เปลี่ยนสภาพ</span>
+                  <span class="required-mark">*</span>
                 </label>
               </div>
               <div class="action-right" data-for="changeStatus">
@@ -437,7 +449,8 @@
               <div class="action-left">
                 <label>
                   <input type="radio" name="actionType" value="promote" data-label="เลื่อนตำแหน่ง">
-                  เลื่อนตำแหน่ง <span class="required-mark">*</span>
+                  <span class="action-text">เลื่อนตำแหน่ง</span>
+                  <span class="required-mark">*</span>
                 </label>
               </div>
               <div class="action-right" data-for="promote">
@@ -455,7 +468,8 @@
               <div class="action-left">
                 <label>
                   <input type="radio" name="actionType" value="passProbation" data-label="ผ่านทดลองงาน">
-                  ผ่านทดลองงาน <span class="required-mark">*</span>
+                  <span class="action-text">ผ่านทดลองงาน</span>
+                  <span class="required-mark">*</span>
                 </label>
               </div>
               <div class="action-right" data-for="passProbation">
@@ -469,7 +483,8 @@
               <div class="action-left">
                 <label>
                   <input type="radio" name="actionType" value="terminate" data-label="ให้ออกจากงานโดยไม่สมัครใจ/ลาออก">
-                  ให้ออกจากงานโดยไม่สมัครใจ/ลาออก <span class="required-mark">*</span>
+                  <span class="action-text">ให้ออกจากงานโดยไม่สมัครใจ/ลาออก</span>
+                  <span class="required-mark">*</span>
                 </label>
               </div>
               <div class="action-right" data-for="terminate">
@@ -483,7 +498,8 @@
               <div class="action-left">
                 <label>
                   <input type="radio" name="actionType" value="increaseSalary" data-label="ขึ้นค่าจ้าง/เงินเดือน">
-                  ขึ้นค่าจ้าง / เงินเดือน <span class="required-mark">*</span>
+                  <span class="action-text">ขึ้นค่าจ้าง / เงินเดือน</span>
+                  <span class="required-mark">*</span>
                 </label>
               </div>
               <div class="action-right" data-for="increaseSalary">
@@ -501,7 +517,8 @@
               <div class="action-left">
                 <label>
                   <input type="radio" name="actionType" value="decreaseSalary" data-label="ตัดค่าจ้าง/เงินเดือน">
-                  ตัดค่าจ้าง / เงินเดือน <span class="required-mark">*</span>
+                  <span class="action-text">ตัดค่าจ้าง / เงินเดือน</span>
+                  <span class="required-mark">*</span>
                 </label>
               </div>
               <div class="action-right" data-for="decreaseSalary">
@@ -519,7 +536,8 @@
               <div class="action-left">
                 <label>
                   <input type="radio" name="actionType" value="other" data-label="อื่นๆ">
-                  อื่นๆ <span class="required-mark">*</span>
+                  <span class="action-text">อื่นๆ</span>
+                  <span class="required-mark">*</span>
                 </label>
               </div>
               <div class="action-right" data-for="other">
@@ -576,7 +594,7 @@
       initActionInputs();
     });
 
-    // ---------- Signature ----------
+    // -------- Signature ----------
     function initializeSignaturePad() {
       const canvas = document.getElementById('signaturePad');
       const ctx = canvas.getContext('2d');
@@ -653,7 +671,7 @@
       return canvas.toDataURL('image/png');
     }
 
-    // ---------- Employees ----------
+    // -------- Employees ----------
     function loadEmployees() {
       const select = document.getElementById('employee');
       select.innerHTML = '<option value="">กำลังโหลดรายชื่อพนักงาน...</option>';
@@ -671,8 +689,6 @@
             option.textContent = `${emp.name} (${emp.position || '-'})`;
             select.appendChild(option);
           });
-
-          console.log('👥 Loaded employees:', employeeList.length);
         })
         .catch(err => {
           console.error('❌ Error loadEmployees:', err);
@@ -698,7 +714,7 @@
       });
     }
 
-    // ---------- Action inputs ----------
+    // -------- Action inputs ----------
     function initActionInputs() {
       const allInputs = document.querySelectorAll('.action-right input[type="text"]');
       allInputs.forEach(i => { i.disabled = true; i.value = ''; });
@@ -718,7 +734,7 @@
       });
     }
 
-    // ---------- Listeners ----------
+    // -------- Listeners ----------
     function setupFormListeners() {
       document.getElementById('employee').addEventListener('change', () => {
         const id = document.getElementById('employee').value;
@@ -733,7 +749,7 @@
       document.getElementById('actionForm').addEventListener('submit', handleSubmit);
     }
 
-    // ---------- Submit ----------
+    // -------- Submit ----------
     function handleSubmit(e) {
       e.preventDefault();
 
@@ -787,8 +803,6 @@
         proposerSignature: signatureDataUrl || null
       };
 
-      console.log('📦 Sending createDocument formData:', formData);
-
       fetch(GAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -799,8 +813,6 @@
       })
         .then(res => res.json())
         .then(json => {
-          console.log('✅ createDocument response:', json);
-
           if (!json.success) {
             showNotification(json.message || 'สร้างเอกสารไม่สำเร็จ', 'error');
             return;
@@ -809,7 +821,6 @@
           const docNo = json.docNumber || 'ไม่ทราบเลขที่';
           showNotification(`สร้างใบดำเนินการสำเร็จ เลขที่เอกสาร: ${docNo}`, 'success');
 
-          // ถ้าอยาก redirect ไปหน้าเซ็น reviewer เปิดบรรทัดด้านล่าง
           // window.location.href = `signature-reviewer.html?doc=${encodeURIComponent(docNo)}`;
 
           document.getElementById('actionForm').reset();
@@ -823,7 +834,7 @@
         });
     }
 
-    // ---------- Util ----------
+    // -------- Util ----------
     function goBack() {
       window.history.back();
     }
