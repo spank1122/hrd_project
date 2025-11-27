@@ -119,161 +119,151 @@
 
   <script>
     // ========================================
-    // 🔧 Configuration
+    // CONFIG
     // ========================================
     const CONFIG = {
-      WEB_APP_URL: 'https://script.google.com/macros/s/AKfycby8mvClK8QLmiSVyu91y4M1qaRt1xpRBIRPkbSAsh1rRXJP_u3iF1Ic2j1k8WTkb0-e0g/exec',
-      FORM_URL: 'https://spank1122.github.io/hrd_project/form.html/'
+      WEB_APP_URL: "https://script.google.com/macros/s/AKfycby8mvClK8QLmiSVyu91y4M1qaRt1xpRBIRPkbSAsh1rRXJP_u3iF1Ic2j1k8WTkb0-e0g/exec",
+      FORM_URL: "https://spank1122.github.io/hrd_project/form.html"
     };
 
-    // ตัวแปรเก็บข้อมูลดิบเพื่อใช้ในการค้นหา (Client-side search)
     let allCandidates = [];
 
     // ========================================
-    // 🎯 Menu Switching
+    // MENU SWITCHING
     // ========================================
-    function showMenu(menuNum) {
-      document.querySelectorAll('.menu-content').forEach(m => m.classList.remove('active'));
-      document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('menu' + menuNum).classList.add('active');
-      document.querySelectorAll('.menu-tab')[menuNum - 1].classList.add('active');
+    function showMenu(n) {
+      document.querySelectorAll('.menu-content').forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.menu-tab').forEach(e => e.classList.remove('active'));
+      document.getElementById("menu" + n).classList.add("active");
+      document.querySelectorAll('.menu-tab')[n - 1].classList.add("active");
     }
 
     // ========================================
-    // 📥 Server Communication (JSONP)
+    // LOAD CANDIDATES (JSONP)
     // ========================================
     function loadCandidatesFromSheet() {
-      document.getElementById('loader').style.display = 'block';
-      document.getElementById('candidatesList').innerHTML = '';
-      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('loader').style.display = "block";
+      document.getElementById('errorMessage').style.display = "none";
+      document.getElementById('candidatesList').innerHTML = "";
 
-      // สร้าง URL สำหรับ JSONP
-      const callbackName = 'onCandidatesLoaded';
+      // Ensure JSONP logic works by appending a timestamp to bypass caching
       const url = CONFIG.WEB_APP_URL +
-                  '?action=getCandidates' +
-                  '&callback=' + callbackName +
-                  '&_=' + Date.now(); // กัน cache
+        "?action=getCandidates" +
+        "&callback=onCandidatesLoaded" +
+        "&_=" + Date.now();
 
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.src = url;
-      script.onerror = function() {
-        document.getElementById('loader').style.display = 'none';
-        const errorDiv = document.getElementById('errorMessage');
-        errorDiv.style.display = 'block';
-        errorDiv.innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อ (โหลดสคริปต์ JSONP ไม่สำเร็จ)';
+      script.onerror = () => {
+        document.getElementById('loader').style.display = "none";
+        const err = document.getElementById('errorMessage');
+        err.innerText = "เกิดข้อผิดพลาด: โหลดข้อมูลจากเซิร์ฟเวอร์ไม่ได้";
+        err.style.display = "block";
       };
       document.body.appendChild(script);
     }
 
-    // callback ที่ Apps Script จะเรียกผ่าน JSONP
+    // ========================================
+    // CALLBACK FROM APPS SCRIPT (JSONP)
+    // ========================================
     function onCandidatesLoaded(result) {
-      document.getElementById('loader').style.display = 'none';
+      document.getElementById('loader').style.display = "none";
 
-      if (!result || !result.success) {
-        const errorDiv = document.getElementById('errorMessage');
-        errorDiv.style.display = 'block';
-        errorDiv.innerText =
-          'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + (result && result.message ? result.message : 'ข้อมูลว่างเปล่า');
+      if (!result || !result.success || !result.data) {
+        document.getElementById('errorMessage').innerText =
+          "ไม่สามารถโหลดข้อมูลได้";
+        document.getElementById('errorMessage').style.display = "block";
         return;
       }
 
-      allCandidates = result.data || [];
-      if (allCandidates.length === 0) {
-        document.getElementById('candidatesList').innerHTML =
-          '<div style="text-align:center; padding:20px; color:#666;">❌ ไม่พบข้อมูลผู้ผ่านการสัมภาษณ์</div>';
-        return;
-      }
-
+      allCandidates = result.data;
       renderList(allCandidates);
     }
 
     // ========================================
-    // ฟังก์ชันวาด HTML รายชื่อ
+    // RENDER LIST
     // ========================================
-    function renderList(data) {
-      const listContainer = document.getElementById('candidatesList');
-      let html = '';
+function renderList(data) {
+  const listContainer = document.getElementById('candidatesList');
+  let html = '';
 
-      data.forEach(item => {
-        let generatedEmail = '';
-        if (item.nameEN) {
-          generatedEmail = item.nameEN.replace(/\s+/g, '').toLowerCase() + '@carpetmaker.co.th';
-        }
+  if (!data || data.length === 0) {
+    listContainer.innerHTML =
+      '<div style="text-align:center; padding:20px; color:#666;">❌ ไม่พบข้อมูลผู้ผ่านการสัมภาษณ์</div>';
+    return;
+  }
 
-        html += `
-          <div class="candidate-card">
-            <div class="info-row">
-              <div class="info-label">👤 ชื่อ-สกุล (TH):</div>
-              <div class="info-value"><strong>${item.name || '-'}</strong></div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">🔤 ชื่อ-สกุล (EN):</div>
-              <div class="info-value">${item.nameEN || '-'}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">💼 ตำแหน่ง:</div>
-              <div class="info-value">${item.position || '-'}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">🏢 ส่วนงาน:</div>
-              <div class="info-value">${item.dept || '-'}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">📱 เบอร์โทร:</div>
-              <div class="info-value">${item.phone || '-'}</div>
-            </div>
-            
-            <button class="btn btn-primary"
-              onclick="openITRequestForm('${generatedEmail}', '${item.position || ''}', '${item.name || ''}', '${item.dept || ''}')">
-              🖊️ เปิดฟอร์มขอเพิ่ม IT
-            </button>
-          </div>
-        `;
-      });
+  data.forEach(item => {
+    html += `
+      <div class="candidate-card">
+        <div class="info-row">
+          <div class="info-label">👤 ชื่อ-สกุล (TH):</div>
+          <div class="info-value"><strong>${item.name || '-'}</strong></div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">🔤 ชื่อ-สกุล (EN):</div>
+          <div class="info-value">${item.nameEN || '-'}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">💼 ตำแหน่ง:</div>
+          <div class="info-value">${item.position || '-'}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">🏢 ส่วนงาน:</div>
+          <div class="info-value">${item.dept || '-'}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">📱 เบอร์โทร:</div>
+          <div class="info-value">${item.phone || '-'}</div>
+        </div>
+        
+        <button class="btn btn-primary"
+          onclick="openITRequestForm(
+            '${item.email || ''}',
+            '${item.purpose || ''}',
+            '${item.name || ''}',
+            '${item.dept || ''}',
+            '${item.nameEN || ''}'
+          )">
+          🖊️ เปิดฟอร์มขอเพิ่ม IT
+        </button>
+      </div>
+    `;
+  });
 
-      listContainer.innerHTML = html;
-    }
+  listContainer.innerHTML = html;
+}
 
     // ========================================
-    // 🔍 Search Function (Client-side)
+    // SEARCH
     // ========================================
     function filterCandidates() {
-      const query = document.getElementById('searchCandidate').value.toLowerCase();
-      
-      const filtered = allCandidates.filter(item => {
-        const name = (item.name || '').toLowerCase();
-        const dept = (item.dept || '').toLowerCase();
-        const pos = (item.position || '').toLowerCase();
-        return name.includes(query) || dept.includes(query) || pos.includes(query);
+      const q = document.getElementById("searchCandidate").value.toLowerCase();
+
+      const filtered = allCandidates.filter(c => {
+        return (c.name || "").toLowerCase().includes(q)
+          || (c.dept || "").toLowerCase().includes(q)
+          || (c.position || "").toLowerCase().includes(q);
       });
 
       renderList(filtered);
     }
 
     // ========================================
-    // 📝 Open IT Request Form
+    // OPEN IT FORM (GitHub)
     // ========================================
-    function openITRequestForm(email, position, fullname, dept) {
-      const purposeVal = `${position} / ${fullname}`;
-      
-      const params = new URLSearchParams();
-      if (email)    params.append('email', email);
-      if (fullname) params.append('name', fullname);
-      if (dept)     params.append('dept', dept);
-      params.append('purpose', purposeVal);
+    function openITRequestForm(email, purpose, fullname, dept, candidateEn) {
+  const params = new URLSearchParams();
+  if (email) params.append('email', email);          // อีเมลที่ generate จาก Apps Script
+  if (fullname) params.append('name', fullname);     // ชื่อไทย (ไว้ใช้อนาคตได้)
+  if (dept) params.append('dept', dept);             // แผนก
+  if (purpose) params.append('purpose', purpose);    // ตำแหน่ง /คำนำหน้า ชื่อไทย /ชื่อ EN
+  if (candidateEn) params.append('candidateEn', candidateEn); // ชื่ออังกฤษดิบ
 
-      const url = `${CONFIG.FORM_URL}?${params.toString()}`;
-      window.open(url, '_blank');
-      console.log('Opening:', url);
-    }
+  const url = `${CONFIG.FORM_URL}?${params.toString()}`;
+  window.open(url, '_blank');
+}
 
-    // ========================================
-    // 🚀 Initialize
-    // ========================================
-    window.onload = function() {
-      console.log('🚀 System Loaded');
-      loadCandidatesFromSheet();
-    };
   </script>
 </body>
 </html>
