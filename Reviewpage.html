@@ -269,16 +269,13 @@
     </div>
     
     <div class="content">
-      <!-- Loading State -->
       <div id="loadingDiv" class="loading">
         <div class="spinner"></div>
         <p>กำลังโหลดข้อมูล...</p>
       </div>
       
-      <!-- Alert Messages -->
       <div id="alertDiv" class="alert"></div>
       
-      <!-- Main Content -->
       <div id="mainContent" style="display: none;">
         <div class="section-title">📄 ข้อมูลคำขอ</div>
         
@@ -312,13 +309,11 @@
           </button>
         </div>
         
-        <!-- Reject Reason Section (Hidden by default) -->
         <div class="form-group" id="rejectReasonDiv" style="display: none;">
           <label class="form-label">💬 เหตุผลในการไม่อนุมัติ:</label>
           <textarea id="rejectReason" placeholder="กรุณาระบุเหตุผลที่ไม่อนุมัติคำขอนี้..."></textarea>
         </div>
         
-        <!-- Action Buttons -->
         <div class="button-group" id="mainButtons">
           <button class="btn btn-approve" onclick="submitReview('approve')">
             ✅ อนุมัติ
@@ -328,7 +323,6 @@
           </button>
         </div>
         
-        <!-- Reject Confirmation Buttons (Hidden by default) -->
         <div id="rejectButtons" class="button-group" style="display: none;">
           <button class="btn btn-reject" onclick="submitReview('reject')">
             ❌ ยืนยันไม่อนุมัติ
@@ -463,67 +457,62 @@
       const signatureData = canvas.toDataURL('image/png');
       console.log('📸 Signature captured (length: ' + signatureData.length + ')');
       
-      const callbackName = 'jsonpCallback_' + Date.now();
-      
-      // Define callback function
-      window[callbackName] = function(result) {
-        console.log('📦 Submit Result:', result);
-        
-        if (result && result.success) {
-          const message = action === 'approve' ? 
-            '✅ อนุมัติสำเร็จ! ระบบจะส่งต่อให้ผู้อนุมัติ' :
-            '✅ บันทึกสำเร็จ! ระบบจะแจ้งผู้แจ้งทราบ';
-          
-          showAlert(message, 'success');
-          console.log('✅ Action completed successfully');
-          
-          // Close window after 3 seconds
-          setTimeout(() => {
-            console.log('🔚 Attempting to close window...');
-            window.close();
-            
-            // Fallback message if window doesn't close
-            setTimeout(() => {
-              showAlert('✅ เสร็จสิ้น! คุณสามารถปิดหน้าต่างนี้ได้', 'success');
-            }, 500);
-          }, 3000);
-        } else {
-          const errorMsg = result && result.message ? result.message : 'เกิดข้อผิดพลาด';
-          console.error('❌ Submit failed:', errorMsg);
-          showAlert('❌ ' + errorMsg, 'error');
-          
-          // Re-enable buttons
-          buttons.forEach(btn => btn.disabled = false);
-        }
-        
-        // Cleanup
-        cleanup(callbackName);
-      };
-      
-      // Create and inject script tag
+      // Prepare POST data
       const actionValue = action === 'approve' ? 'Approved' : 'Rejected';
-      const script = createJsonpScript(
-        callbackName,
-        CONFIG.APPS_SCRIPT_URL + 
-        '?action=saveReviewAction' +
-        '&requestNo=' + encodeURIComponent(requestNo) +
-        '&session=' + encodeURIComponent(sessionToken) +
-        '&reviewAction=' + encodeURIComponent(actionValue) +
-        '&signature=' + encodeURIComponent(signatureData) +
-        '&comment=' + encodeURIComponent(rejectReason) +
-        '&callback=' + callbackName
-      );
       
-      console.log('📡 Submitting via JSONP (URL length: ' + script.src.length + ')');
-      
-      script.onerror = function() {
-        console.error('❌ Network error during submit');
-        showAlert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
-        buttons.forEach(btn => btn.disabled = false);
-        cleanup(callbackName);
+      const postData = {
+        action: 'saveReviewAction',
+        requestNo: requestNo,
+        sessionId: sessionToken,
+        reviewAction: actionValue,
+        signatureData: signatureData,
+        comment: rejectReason
       };
       
-      document.body.appendChild(script);
+      console.log('📡 Submitting via POST...');
+      
+      // Submit via POST
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Required for Apps Script cross-origin
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postData)
+      })
+      .then(() => {
+        // Note: no-cors mode cannot read response
+        // We assume success if no error is thrown
+        console.log('✅ Request sent successfully');
+        
+        const message = action === 'approve' ? 
+          '✅ อนุมัติสำเร็จ! ระบบกำลังดำเนินการส่งต่อให้ผู้อนุมัติ' :
+          '✅ บันทึกสำเร็จ! ระบบจะแจ้งผู้แจ้งทราบ';
+        
+        showAlert(message, 'success');
+        
+        // Hide buttons after success
+        document.getElementById('mainButtons').style.display = 'none';
+        document.getElementById('rejectButtons').style.display = 'none';
+        
+        // Close window after 3 seconds
+        setTimeout(() => {
+          console.log('🔚 Attempting to close window...');
+          window.close();
+          
+          // Fallback message if window doesn't close (browser security)
+          setTimeout(() => {
+            showAlert('✅ เสร็จสิ้น! คุณสามารถปิดหน้าต่างนี้ได้', 'success');
+          }, 500);
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error('❌ Submit failed:', error);
+        showAlert('❌ เกิดข้อผิดพลาดในการส่งข้อมูล: ' + error.message, 'error');
+        
+        // Re-enable buttons
+        buttons.forEach(btn => btn.disabled = false);
+      });
     }
     
     // ============================================
