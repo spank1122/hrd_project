@@ -87,9 +87,7 @@
       touch-action: none;
     }
     
-    .form-group {
-      margin: 20px 0;
-    }
+    .form-group { margin: 20px 0; }
     
     .form-label {
       display: block;
@@ -269,16 +267,13 @@
     </div>
     
     <div class="content">
-      <!-- Loading State -->
       <div id="loadingDiv" class="loading">
         <div class="spinner"></div>
         <p>กำลังโหลดข้อมูล...</p>
       </div>
       
-      <!-- Alert Messages -->
       <div id="alertDiv" class="alert"></div>
       
-      <!-- Main Content -->
       <div id="mainContent" style="display: none;">
         <div class="section-title">📄 ข้อมูลคำขอ</div>
         
@@ -312,13 +307,11 @@
           </button>
         </div>
         
-        <!-- Reject Reason Section (Hidden by default) -->
         <div class="form-group" id="rejectReasonDiv" style="display: none;">
           <label class="form-label">💬 เหตุผลในการไม่อนุมัติ:</label>
           <textarea id="rejectReason" placeholder="กรุณาระบุเหตุผลที่ไม่อนุมัติคำขอนี้..."></textarea>
         </div>
         
-        <!-- Action Buttons -->
         <div class="button-group" id="mainButtons">
           <button class="btn btn-approve" onclick="submitReview('approve')">
             ✅ อนุมัติ
@@ -328,7 +321,6 @@
           </button>
         </div>
         
-        <!-- Reject Confirmation Buttons (Hidden by default) -->
         <div id="rejectButtons" class="button-group" style="display: none;">
           <button class="btn btn-reject" onclick="submitReview('reject')">
             ❌ ยืนยันไม่อนุมัติ
@@ -342,16 +334,10 @@
   </div>
   
   <script>
-    // ============================================
-    // CONFIGURATION
-    // ============================================
     const CONFIG = {
       APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec'
     };
     
-    // ============================================
-    // GLOBAL VARIABLES
-    // ============================================
     const urlParams = new URLSearchParams(window.location.search);
     const requestNo = urlParams.get('requestNo');
     const sessionToken = urlParams.get('session');
@@ -359,42 +345,28 @@
     let canvas, ctx, isDrawing = false, hasSignature = false;
     let requestData = {};
     
-    // ============================================
-    // INITIALIZATION
-    // ============================================
     window.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 Review Page Initialized');
       console.log('📋 Request No:', requestNo);
       console.log('🔐 Session Token:', sessionToken ? sessionToken.substring(0, 10) + '...' : 'null');
       
-      // Validate URL parameters
       if (!requestNo || !sessionToken) {
         console.error('❌ Missing URL parameters!');
         showAlert('❌ ลิงก์ไม่ถูกต้อง กรุณาใช้ลิงก์จากอีเมล', 'error');
         return;
       }
       
-      // Initialize components
       setupCanvas();
       loadRequestData();
     });
     
-    // ============================================
-    // API FUNCTIONS
-    // ============================================
-    
-    /**
-     * Load request data from server via JSONP
-     */
     function loadRequestData() {
       document.getElementById('loadingDiv').style.display = 'block';
       
       const callbackName = 'jsonpCallback_' + Date.now();
       
       console.log('📡 Fetching request data...');
-      console.log('🔗 API URL:', CONFIG.APPS_SCRIPT_URL);
       
-      // Define callback function
       window[callbackName] = function(result) {
         console.log('📦 Server Response:', result);
         
@@ -408,11 +380,9 @@
           document.getElementById('loadingDiv').style.display = 'none';
         }
         
-        // Cleanup
         cleanup(callbackName);
       };
       
-      // Create and inject script tag
       const script = createJsonpScript(
         callbackName,
         CONFIG.APPS_SCRIPT_URL + 
@@ -422,11 +392,9 @@
         '&callback=' + callbackName
       );
       
-      console.log('📡 JSONP Request URL:', script.src);
-      
       script.onerror = function() {
-        console.error('❌ Network error - cannot connect to server');
-        showAlert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต', 'error');
+        console.error('❌ Network error');
+        showAlert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
         document.getElementById('loadingDiv').style.display = 'none';
         cleanup(callbackName);
       };
@@ -434,122 +402,91 @@
       document.body.appendChild(script);
     }
     
-    /**
-     * Submit review action (approve/reject)
-     */
     function submitReview(action) {
       console.log('📝 Submitting review action:', action);
       
-      // Validate signature
       if (!hasSignature) {
         showAlert('❌ กรุณาลงลายเซ็นก่อนดำเนินการ', 'error');
         return;
       }
       
-      // Validate reject reason
       const rejectReason = action === 'reject' ? document.getElementById('rejectReason').value.trim() : '';
       if (action === 'reject' && !rejectReason) {
         showAlert('❌ กรุณาระบุเหตุผลในการไม่อนุมัติ', 'error');
         return;
       }
       
-      // Disable all buttons
       const buttons = document.querySelectorAll('button');
       buttons.forEach(btn => btn.disabled = true);
       
       showAlert('⏳ กำลังบันทึกข้อมูล...', 'warning');
       
-      // Get signature data
       const signatureData = canvas.toDataURL('image/png');
       console.log('📸 Signature captured (length: ' + signatureData.length + ')');
       
-      const callbackName = 'jsonpCallback_' + Date.now();
-      
-      // Define callback function
-      window[callbackName] = function(result) {
-        console.log('📦 Submit Result:', result);
-        
-        if (result && result.success) {
-          const message = action === 'approve' ? 
-            '✅ อนุมัติสำเร็จ! ระบบจะส่งต่อให้ผู้อนุมัติ' :
-            '✅ บันทึกสำเร็จ! ระบบจะแจ้งผู้แจ้งทราบ';
-          
-          showAlert(message, 'success');
-          console.log('✅ Action completed successfully');
-          
-          // Close window after 3 seconds
-          setTimeout(() => {
-            console.log('🔚 Attempting to close window...');
-            window.close();
-            
-            // Fallback message if window doesn't close
-            setTimeout(() => {
-              showAlert('✅ เสร็จสิ้น! คุณสามารถปิดหน้าต่างนี้ได้', 'success');
-            }, 500);
-          }, 3000);
-        } else {
-          const errorMsg = result && result.message ? result.message : 'เกิดข้อผิดพลาด';
-          console.error('❌ Submit failed:', errorMsg);
-          showAlert('❌ ' + errorMsg, 'error');
-          
-          // Re-enable buttons
-          buttons.forEach(btn => btn.disabled = false);
-        }
-        
-        // Cleanup
-        cleanup(callbackName);
-      };
-      
-      // Create and inject script tag
       const actionValue = action === 'approve' ? 'Approved' : 'Rejected';
-      const script = createJsonpScript(
-        callbackName,
-        CONFIG.APPS_SCRIPT_URL + 
-        '?action=saveReviewAction' +
-        '&requestNo=' + encodeURIComponent(requestNo) +
-        '&session=' + encodeURIComponent(sessionToken) +
-        '&reviewAction=' + encodeURIComponent(actionValue) +
-        '&signature=' + encodeURIComponent(signatureData) +
-        '&comment=' + encodeURIComponent(rejectReason) +
-        '&callback=' + callbackName
-      );
       
-      console.log('📡 Submitting via JSONP (URL length: ' + script.src.length + ')');
-      
-      script.onerror = function() {
-        console.error('❌ Network error during submit');
-        showAlert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
-        buttons.forEach(btn => btn.disabled = false);
-        cleanup(callbackName);
+      const postData = {
+        action: 'saveReviewAction',
+        requestNo: requestNo,
+        sessionId: sessionToken,
+        reviewAction: actionValue,
+        signatureData: signatureData,
+        comment: rejectReason
       };
       
-      document.body.appendChild(script);
+      console.log('📡 Submitting via POST...');
+      console.log('📊 Data size: ~' + Math.round(JSON.stringify(postData).length / 1024) + ' KB');
+      
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postData)
+      })
+      .then(() => {
+        console.log('✅ Request sent successfully');
+        
+        const message = action === 'approve' ? 
+          '✅ อนุมัติสำเร็จ! ระบบกำลังดำเนินการส่งต่อให้ผู้อนุมัติ' :
+          '✅ บันทึกสำเร็จ! ระบบจะแจ้งผู้แจ้งทราบ';
+        
+        showAlert(message, 'success');
+        
+        document.getElementById('mainButtons').style.display = 'none';
+        document.getElementById('rejectButtons').style.display = 'none';
+        
+        setTimeout(() => {
+          console.log('🔚 Closing window...');
+          window.close();
+          setTimeout(() => {
+            showAlert('✅ เสร็จสิ้น! คุณสามารถปิดหน้าต่างนี้ได้', 'success');
+          }, 500);
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error('❌ Submit failed:', error);
+        showAlert('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+        buttons.forEach(btn => btn.disabled = false);
+      });
     }
     
-    // ============================================
-    // UI FUNCTIONS
-    // ============================================
-    
-    /**
-     * Display loaded request data
-     */
     function displayRequestData() {
       console.log('✅ Displaying request data:', requestData);
       
       document.getElementById('loadingDiv').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
       
-      // Populate data
       document.getElementById('requestNo').textContent = requestData.requestNo || requestNo;
       document.getElementById('requesterName').textContent = requestData.requesterName || '-';
       document.getElementById('requesterDept').textContent = requestData.requesterDept || '-';
       
-      // Status badge
       const statusElement = document.getElementById('requestStatus');
       const status = requestData.status || 'Pending Review';
       statusElement.textContent = status;
       
-      // Apply status badge style
       statusElement.className = 'status-badge';
       if (status.includes('Pending')) {
         statusElement.classList.add('status-pending');
@@ -560,9 +497,6 @@
       }
     }
     
-    /**
-     * Show reject reason textarea
-     */
     function showRejectReason() {
       document.getElementById('rejectReasonDiv').style.display = 'block';
       document.getElementById('mainButtons').style.display = 'none';
@@ -570,9 +504,6 @@
       document.getElementById('rejectReason').focus();
     }
     
-    /**
-     * Cancel reject and return to main buttons
-     */
     function cancelReject() {
       document.getElementById('rejectReasonDiv').style.display = 'none';
       document.getElementById('rejectReason').value = '';
@@ -580,9 +511,6 @@
       document.getElementById('rejectButtons').style.display = 'none';
     }
     
-    /**
-     * Show alert message
-     */
     function showAlert(message, type) {
       const alertDiv = document.getElementById('alertDiv');
       alertDiv.textContent = message;
@@ -591,7 +519,6 @@
       
       console.log((type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅') + ' Alert:', message);
       
-      // Auto-hide non-loading messages
       if (type !== 'warning' || !message.includes('กำลัง')) {
         setTimeout(() => {
           alertDiv.style.display = 'none';
@@ -599,13 +526,6 @@
       }
     }
     
-    // ============================================
-    // SIGNATURE CANVAS
-    // ============================================
-    
-    /**
-     * Setup signature canvas
-     */
     function setupCanvas() {
       canvas = document.getElementById('signatureCanvas');
       ctx = canvas.getContext('2d');
@@ -614,13 +534,11 @@
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       
-      // Mouse events
       canvas.addEventListener('mousedown', startDrawing);
       canvas.addEventListener('mousemove', draw);
       canvas.addEventListener('mouseup', stopDrawing);
       canvas.addEventListener('mouseout', stopDrawing);
       
-      // Touch events
       canvas.addEventListener('touchstart', handleTouch);
       canvas.addEventListener('touchmove', handleTouch);
       canvas.addEventListener('touchend', stopDrawing);
@@ -628,9 +546,6 @@
       console.log('✅ Signature canvas initialized');
     }
     
-    /**
-     * Start drawing
-     */
     function startDrawing(e) {
       isDrawing = true;
       const rect = canvas.getBoundingClientRect();
@@ -641,9 +556,6 @@
       hasSignature = true;
     }
     
-    /**
-     * Draw on canvas
-     */
     function draw(e) {
       if (!isDrawing) return;
       const rect = canvas.getBoundingClientRect();
@@ -653,16 +565,10 @@
       ctx.stroke();
     }
     
-    /**
-     * Stop drawing
-     */
     function stopDrawing() {
       isDrawing = false;
     }
     
-    /**
-     * Handle touch events
-     */
     function handleTouch(e) {
       e.preventDefault();
       const touch = e.touches[0];
@@ -677,9 +583,6 @@
       canvas.dispatchEvent(mouseEvent);
     }
     
-    /**
-     * Clear signature
-     */
     function clearSignature() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       hasSignature = false;
@@ -687,13 +590,6 @@
       showAlert('✅ ล้างลายเซ็นแล้ว', 'success');
     }
     
-    // ============================================
-    // UTILITY FUNCTIONS
-    // ============================================
-    
-    /**
-     * Create JSONP script element
-     */
     function createJsonpScript(callbackName, url) {
       const script = document.createElement('script');
       script.id = 'jsonpScript_' + callbackName;
@@ -701,16 +597,11 @@
       return script;
     }
     
-    /**
-     * Cleanup JSONP callback and script
-     */
     function cleanup(callbackName) {
-      // Remove callback function
       if (window[callbackName]) {
         delete window[callbackName];
       }
       
-      // Remove script tag
       const scriptTag = document.getElementById('jsonpScript_' + callbackName);
       if (scriptTag && scriptTag.parentNode) {
         scriptTag.parentNode.removeChild(scriptTag);
