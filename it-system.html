@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบฟอร์มขอเพิ่ม IT - The Carpetmaker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ================= STYLES ================= */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    
+    /* Header */
+    .header { text-align: center; color: white; margin-bottom: 30px; animation: fadeInDown 0.6s ease-out; }
+    .header h1 { font-size: 32px; font-weight: 600; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+    .header p { font-size: 16px; opacity: 0.95; }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Menu Tabs */
+    .menu-tabs { display: flex; gap: 10px; margin-bottom: 20px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); flex-wrap: wrap; }
+    .menu-tab { flex: 1; padding: 12px 16px; background: #f5f5f5; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: inherit; min-width: 120px; }
+    .menu-tab:hover { background: #e0e0e0; transform: translateY(-2px); }
+    .menu-tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+
+    /* Content Area */
+    .content-area { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); min-height: 600px; animation: fadeIn 0.6s ease-out 0.3s both; }
+    .menu-content { display: none; }
+    .menu-content.active { display: block; animation: fadeInUp 0.4s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Components */
+    .section-title { font-size: 24px; font-weight: 600; color: #333; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #667eea; }
+    
+    .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+    .search-box input { flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; font-family: inherit; }
+    .search-box input:focus { outline: none; border-color: #667eea; }
+    .search-box button { padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-family: inherit; }
+
+    .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start; }
+    .alert-info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+    .alert-error { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+
+    /* Cards */
+    .candidate-card { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: all 0.3s; position: relative; }
+    .candidate-card:hover { border-color: #667eea; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    
+    .info-row { display: flex; margin-bottom: 8px; font-size: 15px; align-items: baseline; }
+    .info-label { font-weight: 600; color: #555; min-width: 120px; }
+    .info-value { color: #333; flex: 1; word-break: break-word; }
+
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-top: 10px; }
+    .btn-primary:hover { box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); transform: translateY(-1px); }
+
+    /* Loading Spinner */
+    .loader { border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid #667eea; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .info-row { flex-direction: column; }
+      .info-label { margin-bottom: 2px; color: #777; font-size: 14px; }
+      .menu-tabs { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>💻 ระบบฟอร์มขอเพิ่มเทคโนโลยีสารสนเทศ</h1>
+      <p>The Carpetmaker Co., Ltd.</p>
+    </div>
+
+    <div class="menu-tabs">
+      <button class="menu-tab active" onclick="showMenu(1)">📝 เลือกรายชื่อ (HRD)</button>
+      <button class="menu-tab" onclick="showMenu(2)">🔍 ติดตามสถานะ</button>
+      <button class="menu-tab" onclick="showMenu(3)">✅ ผลการอนุมัติ</button>
+    </div>
+
+    <div class="content-area">
+      <div id="menu1" class="menu-content active">
+        <h2 class="section-title">📝 ผู้ผ่านการสัมภาษณ์ (จาก HRD)</h2>
+        
+        <div class="alert alert-info">
+          <span>ℹ️</span>
+          <div>ระบบจะดึงรายชื่อจากชีต HRD Demo อัตโนมัติ หากไม่พบข้อมูลให้กดรีเฟรชหน้าเว็บ</div>
+        </div>
+
+        <div class="search-box">
+          <input type="text" id="searchCandidate" placeholder="🔍 ค้นหาชื่อ, แผนก หรือตำแหน่ง..." onkeyup="filterCandidates()">
+        </div>
+
+        <div id="loader" class="loader"></div>
+        <div id="errorMessage" style="color: red; text-align: center; display: none;"></div>
+
+        <div id="candidatesList">
+          </div>
+      </div>
+
+      <div id="menu2" class="menu-content">
+        <h2 class="section-title">🔍 ติดตามสถานะคำขอ</h2>
+        <p style="text-align: center; color: #888; margin-top: 40px;">ระบบกำลังปรับปรุง...</p>
+      </div>
+
+      <div id="menu3" class="menu-content">
+        <h2 class="section-title">✅ ผลการอนุมัติ</h2>
+        <p style="text-align: center; color: #888; margin-top: 40px;">ระบบกำลังปรับปรุง...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========================================
+    // 🔧 Configuration
+    // ========================================
+    const CONFIG = {
+      // URL ของ Web App นี้ หรือ URL ปลายทางของฟอร์ม
+      FORM_URL: 'https://spank1122.github.io/hrd_project/' 
+    };
+
+    // ตัวแปรเก็บข้อมูลดิบเพื่อใช้ในการค้นหา (Client-side search)
+    let allCandidates = [];
+
+    // ========================================
+    // 🎯 Menu Switching
+    // ========================================
+    function showMenu(menuNum) {
+      document.querySelectorAll('.menu-content').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('menu' + menuNum).classList.add('active');
+      document.querySelectorAll('.menu-tab')[menuNum - 1].classList.add('active');
+    }
+
+    // ========================================
+    // 📥 Server Communication
+    // ========================================
+    
+    // เรียกฟังก์ชันนี้ทันทีเมื่อโหลดหน้าเว็บ
+    function loadCandidatesFromSheet() {
+      // แสดง Loader
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('candidatesList').innerHTML = '';
+      document.getElementById('errorMessage').style.display = 'none';
+
+      // เรียก Function ฝั่ง Server: getITCandidatesFromHRD()
+      google.script.run
+        .withSuccessHandler(displayCandidates)
+        .withFailureHandler(onFailure)
+        .getITCandidatesFromHRD();
+    }
+
+    // ฟังก์ชันแสดงผลเมื่อได้ข้อมูลกลับมา
+    function displayCandidates(data) {
+      // ซ่อน Loader
+      document.getElementById('loader').style.display = 'none';
+      const listContainer = document.getElementById('candidatesList');
+      
+      // เก็บข้อมูลลงตัวแปร Global เพื่อใช้ค้นหา
+      allCandidates = data;
+
+      if (!data || data.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">❌ ไม่พบข้อมูลผู้ผ่านการสัมภาษณ์</div>';
+        return;
+      }
+
+      renderList(data);
+    }
+
+    // ฟังก์ชันวาด HTML (แยกออกมาเพื่อให้ Re-render ตอนค้นหาได้)
+    function renderList(data) {
+      const listContainer = document.getElementById('candidatesList');
+      let html = '';
+
+      data.forEach(item => {
+        // สร้าง Email จำลองจากชื่อภาษาอังกฤษ (เนื่องจากในชีตไม่มี Email)
+        // สูตร: ชื่อภาษาอังกฤษ(ตัดช่องว่าง)(ตัวเล็ก) + @carpetmaker.co.th
+        // หากไม่มีชื่ออังกฤษ ให้เป็นค่าว่าง
+        let generatedEmail = '';
+        if (item.nameEN) {
+          generatedEmail = item.nameEN.replace(/\s+/g, '').toLowerCase() + '@carpetmaker.co.th';
+        }
+
+        html += `
+          <div class="candidate-card">
+            <div class="info-row">
+              <div class="info-label">👤 ชื่อ-สกุล (TH):</div>
+              <div class="info-value"><strong>${item.name || '-'}</strong></div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">🔤 ชื่อ-สกุล (EN):</div>
+              <div class="info-value">${item.nameEN || '-'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">💼 ตำแหน่ง:</div>
+              <div class="info-value">${item.position || '-'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">🏢 ส่วนงาน:</div>
+              <div class="info-value">${item.dept || '-'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">📱 เบอร์โทร:</div>
+              <div class="info-value">${item.phone || '-'}</div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="openITRequestForm('${generatedEmail}', '${item.position}', '${item.name}', '${item.dept}')">
+              🖊️ เปิดฟอร์มขอเพิ่ม IT
+            </button>
+          </div>
+        `;
+      });
+
+      listContainer.innerHTML = html;
+    }
+
+    // จัดการกรณี Error
+    function onFailure(error) {
+      document.getElementById('loader').style.display = 'none';
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.style.display = 'block';
+      errorDiv.innerHTML = 'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + error.message;
+    }
+
+    // ========================================
+    // 🔍 Search Function (Client-side)
+    // ========================================
+    function filterCandidates() {
+      const query = document.getElementById('searchCandidate').value.toLowerCase();
+      
+      const filtered = allCandidates.filter(item => {
+        const name = (item.name || '').toLowerCase();
+        const dept = (item.dept || '').toLowerCase();
+        const pos = (item.position || '').toLowerCase();
+        return name.includes(query) || dept.includes(query) || pos.includes(query);
+      });
+
+      renderList(filtered);
+    }
+
+    // ========================================
+    // 📝 Open IT Request Form
+    // ========================================
+    function openITRequestForm(email, position, fullname, dept) {
+      // สร้าง URL Query Params
+      // หมายเหตุ: purpose ในที่นี้ผมเอา ชื่อ + ตำแหน่งไปใส่รวมกัน
+      const purposeVal = `${position} / ${fullname}`;
+      
+      const params = new URLSearchParams();
+      if(email) params.append('email', email);
+      if(fullname) params.append('name', fullname); // ส่งชื่อไปด้วยเผื่อฟอร์มใช้
+      if(dept) params.append('dept', dept);         // ส่งแผนกไปด้วย
+      params.append('purpose', purposeVal);
+
+      const url = `${CONFIG.FORM_URL}?${params.toString()}`;
+      
+      // เปิดแท็บใหม่
+      window.open(url, '_blank');
+      console.log('Opening:', url);
+    }
+
+    // ========================================
+    // 🚀 Initialize
+    // ========================================
+    window.onload = function() {
+      console.log('🚀 System Loaded');
+      loadCandidatesFromSheet(); // เริ่มดึงข้อมูลทันทีเมื่อเปิดเว็บ
+    };
+
+  </script>
+</body>
+</html>
