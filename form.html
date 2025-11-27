@@ -475,7 +475,7 @@
     // CONFIG
     // ================================
     const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec'
+      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec'
     };
 
     // ================================
@@ -584,7 +584,6 @@
 
         // Cleanup
         try {
-          // This ensures we clean up the script tag that was created in the outer scope
           const scripts = document.head.getElementsByTagName('script');
           for (let i = 0; i < scripts.length; i++) {
              if (scripts[i].src.includes(callbackName)) {
@@ -692,7 +691,7 @@
         // fallback ถ้ามี email ถูกส่งตรงมา
         document.getElementById('email').value = prefillData.email;
       }
-    } // End of applyPrefillData
+    }
 
     // ================================
     // Event Listeners
@@ -750,49 +749,22 @@
 
       fetch(CONFIG.APPS_SCRIPT_URL, {
         method: 'POST',
+        mode: 'no-cors',
         body: params,
         redirect: 'follow'
       })
-      .then(r => r.text())
-      .then(text => {
-        console.log('📥 Raw Response:', text);
-        try {
-          const result = JSON.parse(text);
-          console.log('✅ Submit Result:', result);
-          if (result.success) {
-            showStatus('✅ บันทึกสำเร็จ! เลขที่คำขอ: ' + result.requestNo, 'success');
-            setTimeout(() => {
-              document.getElementById('itRequestForm').reset();
-              clearSignature();
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = 'ส่งคำขอ';
-              loadHRMasterData();
-              loadDocNo();
-            }, 2000);
-          } else {
-            showStatus('❌ เกิดข้อผิดพลาด: ' + result.message, 'error');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'ส่งคำขอ';
-          }
-        } catch (err) {
-          console.error('❌ Error parsing response:', err);
-          // Fallback if JSON parse fails but response implies success
-          if (text.includes('success') || text.includes('requestNo')) {
-            showStatus('✅ ส่งคำขอสำเร็จแล้ว', 'success');
-            setTimeout(() => {
-              document.getElementById('itRequestForm').reset();
-              clearSignature();
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = 'ส่งคำขอ';
-              loadHRMasterData();
-              loadDocNo();
-            }, 2000);
-          } else {
-            showStatus('❌ เกิดข้อผิดพลาด: ไม่สามารถอ่าน response ได้', 'error');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'ส่งคำขอ';
-          }
-        }
+      .then(() => {
+        // เนื่องจากใช้ no-cors จะไม่ได้ response กลับมา
+        // ถือว่าสำเร็จทันที
+        showStatus('✅ ส่งคำขอสำเร็จแล้ว!', 'success');
+        setTimeout(() => {
+          document.getElementById('itRequestForm').reset();
+          clearSignature();
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'ส่งคำขอ';
+          loadHRMasterData();
+          loadDocNo();
+        }, 2000);
       })
       .catch(err => {
         console.error('❌ Submit Error:', err);
