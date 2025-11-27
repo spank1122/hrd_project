@@ -118,6 +118,7 @@
       overflow: hidden;
       animation: fadeInUp 0.8s ease-out;
       animation-fill-mode: both;
+      cursor: pointer;
     }
 
     .system-card:nth-child(1) {
@@ -484,7 +485,7 @@
     <!-- Cards Grid -->
     <div class="cards-grid">
       <!-- Card 1: IT Request -->
-      <div class="system-card">
+      <div class="system-card" onclick="openITRequest()">
         <span class="status-badge active">ใช้งานได้</span>
         
         <div class="card-icon">💻</div>
@@ -495,14 +496,14 @@
           ระบบขออุปกรณ์ IT สำหรับพนักงานใหม่ ครบถ้วนด้วยระบบอนุมัติ 3 ขั้นตอน
         </p>
 
-        <button class="btn btn-primary" onclick="openITRequest()">
+        <button class="btn btn-primary">
           <span class="btn-text">🖊️ เปิดฟอร์มขอเพิ่ม IT</span>
         </button>
       </div>
 
       <!-- Card 2: Action Form -->
-      <div class="system-card pink">
-        <span class="status-badge coming-soon">Coming Soon</span>
+      <div class="system-card pink" onclick="openActionForm()">
+        <span class="status-badge active">ใช้งานได้</span>
         
         <div class="card-icon">📝</div>
         
@@ -512,8 +513,8 @@
           ระบบจัดการเอกสารดำเนินการต่างๆ สำหรับแผนก HR พร้อมระบบติดตามงาน
         </p>
 
-        <button class="btn btn-disabled" disabled>
-          <span class="btn-text">📝 กำลังพัฒนา</span>
+        <button class="btn btn-secondary">
+          <span class="btn-text">📝 เปิดระบบ</span>
         </button>
       </div>
     </div>
@@ -534,11 +535,11 @@
     // 🔧 Configuration
     // ========================================
 
-      const CONFIG = {
-  WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec',
-  IT_SYSTEM_URL: 'it-system.html',
-  ACTION_FORM_URL: 'form.html'
-      };
+    const CONFIG = {
+      WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec',
+      IT_SYSTEM_URL: 'it-system.html',
+      ACTION_FORM_URL: 'action-form-hub.html'
+    };
 
     // ========================================
     // 🎯 Open IT Request System
@@ -546,6 +547,13 @@
     function openITRequest() {
       window.open(CONFIG.IT_SYSTEM_URL, '_blank');
       showNotification('เปิดระบบ IT Request ในแท็บใหม่แล้ว');
+    }
+
+    // ========================================
+    // 🎯 Open Action Form Hub
+    // ========================================
+    function openActionForm() {
+      window.location.href = CONFIG.ACTION_FORM_URL;
     }
 
     // ========================================
@@ -577,7 +585,7 @@
     console.log('🎯 HR Document Management System Loaded');
     console.log('📋 Systems:', {
       'IT Request': '✅ Active',
-      'Action Form': '🔄 Coming Soon'
+      'Action Form': '✅ Active'
     });
   </script>
 </body>
