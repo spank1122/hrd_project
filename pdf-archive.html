@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คลังเอกสาร PDF - The Carpetmaker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --pink-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --text-dark: #2d3748;
+      --text-light: #718096;
+      --border: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .btn-back {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateX(-2px);
+    }
+
+    .header-title {
+      color: white;
+      font-size: 36px;
+      font-weight: 700;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      margin-bottom: 8px;
+    }
+
+    .header-subtitle {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 16px;
+      font-weight: 300;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Filter Section */
+    .filter-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .filter-input input,
+    .filter-input select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .filter-input input:focus,
+    .filter-input select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-input label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      animation: fadeInUp 0.8s ease-out 0.1s both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Card */
+    .pdf-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pdf-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    }
+
+    .pdf-preview {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: white;
+    }
+
+    .pdf-card:nth-child(2) .pdf-preview,
+    .pdf-card:nth-child(3) .pdf-preview {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .pdf-content {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pdf-title {
+      font-weight: 700;
+      color: var(--text-dark);
+      font-size: 15px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .pdf-info {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+
+    .pdf-date {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    .pdf-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-view {
+      background: var(--purple-gradient);
+      color: white;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-view:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-download {
+      background: var(--pink-gradient);
+      color: white;
+      box-shadow: 0 2px 8px rgba(240, 147, 251, 0.3);
+    }
+
+    .btn-download:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      grid-column: 1 / -1;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+
+    .empty-text {
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .header-title {
+        font-size: 28px;
+      }
+
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goBack()">← ย้อนกลับ</button>
+        <div></div>
+      </div>
+      <h1 class="header-title">คลังเอกสาร PDF</h1>
+      <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-grid">
+        <div class="filter-input">
+          <label>ค้นหา</label>
+          <input type="text" placeholder="ค้นหาเอกสาร..." id="searchInput">
+        </div>
+        <div class="filter-input">
+          <label>ประเภท</label>
+          <select id="typeFilter">
+            <option value="">-- ทั้งหมด --</option>
+            <option value="recruitment">ขอจ้างพนักงาน</option>
+            <option value="promotion">ขอเลื่อนตำแหน่ง</option>
+            <option value="salary">ขอปรับเงินเดือน</option>
+          </select>
+        </div>
+        <div class="filter-input">
+          <label>เรียงลำดับ</label>
+          <select id="sortFilter">
+            <option value="newest">ใหม่สุด</option>
+            <option value="oldest">เก่าสุด</option>
+            <option value="name">ชื่อ (ก-ฮ)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid" id="pdfGrid"></div>
+  </div>
+
+  <script>
+    // Mock Data
+    const documents = [
+      {
+        id: 'DOC-001',
+        title: 'สมชาย สมการ - ขอจ้างพนักงาน',
+        type: 'recruitment',
+        date: '2025-11-22',
+        employee: 'สมชาย สมการ'
+      },
+      {
+        id: 'DOC-002',
+        title: 'วิไล วิศวะ - ขอเลื่อนตำแหน่ง',
+        type: 'promotion',
+        date: '2025-11-21',
+        employee: 'วิไล วิศวะ'
+      },
+      {
+        id: 'DOC-003',
+        title: 'สมหญิง สมดี - ขอปรับเงินเดือน',
+        type: 'salary',
+        date: '2025-11-20',
+        employee: 'สมหญิง สมดี'
+      },
+      {
+        id: 'DOC-004',
+        title: 'สมชาย สมการ - ขอเลื่อนตำแหน่ง',
+        type: 'promotion',
+        date: '2025-11-19',
+        employee: 'สมชาย สมการ'
+      }
+    ];
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      displayPDFs(documents);
+      setupFilters();
+    });
+
+    function displayPDFs(docs) {
+      const grid = document.getElementById('pdfGrid');
+      
+      if (docs.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📄</div>
+            <div class="empty-title">ไม่พบเอกสาร</div>
+            <div class="empty-text">ลองปรับเงื่อนไขการค้นหาใหม่</div>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = docs.map(doc => `
+        <div class="pdf-card">
+          <div class="pdf-preview">📄</div>
+          <div class="pdf-content">
+            <div class="pdf-title">${doc.title}</div>
+            <div class="pdf-info">${getTypeLabel(doc.type)}</div>
+            <div class="pdf-date">${new Date(doc.date).toLocaleDateString('th-TH')}</div>
+            <div class="pdf-actions">
+              <button class="btn btn-view" onclick="viewPDF('${doc.id}')">👁️ ดู</button>
+              <button class="btn btn-download" onclick="downloadPDF('${doc.id}')">⬇️ ดาวน์โหลด</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setupFilters() {
+      document.getElementById('searchInput').addEventListener('input', applyFilters);
+      document.getElementById('typeFilter').addEventListener('change', applyFilters);
+      document.getElementById('sortFilter').addEventListener('change', applyFilters);
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const type = document.getElementById('typeFilter').value;
+      const sort = document.getElementById('sortFilter').value;
+
+      let filtered = documents.filter(doc => {
+        return (doc.title.toLowerCase().includes(search) || doc.id.toLowerCase().includes(search)) &&
+               (!type || doc.type === type);
+      });
+
+      // Sort
+      if (sort === 'newest') {
+        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (sort === 'oldest') {
+        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+      } else if (sort === 'name') {
+        filtered.sort((a, b) => a.title.localeCompare(b.title, 'th'));
+      }
+
+      displayPDFs(filtered);
+    }
+
+    function getTypeLabel(type) {
+      const labels = {
+        'recruitment': 'ขอจ้างพนักงาน',
+        'promotion': 'ขอเลื่อนตำแหน่ง',
+        'salary': 'ขอปรับเงินเดือน'
+      };
+      return labels[type] || type;
+    }
+
+    function viewPDF(docId) {
+      alert(`📖 กำลังเปิด ${docId}...`);
+      // ในการจริง จะเปิด PDF viewer
+    }
+
+    function downloadPDF(docId) {
+      alert(`⬇️ ดาวน์โหลด ${docId}...`);
+      // ในการจริง จะดาวน์โหลด PDF
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+</body>
+</html>
