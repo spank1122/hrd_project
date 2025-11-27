@@ -747,6 +747,7 @@
       const params = new URLSearchParams();
       for (const key in formData) params.append(key, formData[key]);
 
+      // FIX: Cleaned up Git conflict and consolidated logic
       fetch(CONFIG.APPS_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -754,8 +755,8 @@
         redirect: 'follow'
       })
       .then(() => {
-        // เนื่องจากใช้ no-cors จะไม่ได้ response กลับมา
-        // ถือว่าสำเร็จทันที
+        // เนื่องจากใช้ no-cors จะไม่ได้ response body กลับมา (Opaque Response)
+        // ถือว่าสำเร็จถ้าไม่เข้า catch
         showStatus('✅ ส่งคำขอสำเร็จแล้ว!', 'success');
         setTimeout(() => {
           document.getElementById('itRequestForm').reset();
