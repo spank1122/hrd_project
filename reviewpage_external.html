@@ -58,7 +58,7 @@
       canvas {
         border: 2px dashed #d4d4d8;
         border-radius: 8px;
-        width: 100%;
+        width: 100%;           /* ยืดเต็มความกว้างการ์ด */
         background: #fff;
         margin: 10px 0 8px;
       }
@@ -181,7 +181,7 @@
 
         <div style="margin-top:16px;">
           <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
-          <!-- 🔻 ย่อ canvas ลง เพื่อลดขนาด dataURL -->
+          <!-- ขนาดจริงของ canvas (พิกเซล) -->
           <canvas id="signCanvas" width="300" height="120"></canvas>
           <button class="btn btn-secondary" type="button" id="clearSignBtn">ล้างลายเซ็น</button>
         </div>
@@ -277,36 +277,57 @@
         canvas.addEventListener('touchend', stopDraw);
       }
 
+      // ✅ แปลงตำแหน่งเมาส์/นิ้ว → พิกัดจริงบน canvas (คำนึงถึงการ scale width:100%)
+      function getCanvasPos(e) {
+        const rect   = canvas.getBoundingClientRect();
+        const scaleX = canvas.width  / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+          x: (e.clientX - rect.left) * scaleX,
+          y: (e.clientY - rect.top)  * scaleY
+        };
+      }
+
       function startDraw(e) {
+        e.preventDefault();
         isDrawing = true;
         hasSignature = true;
-        const r = canvas.getBoundingClientRect();
+        const p = getCanvasPos(e);
         ctx.beginPath();
-        ctx.moveTo(e.clientX - r.left, e.clientY - r.top);
+        ctx.moveTo(p.x, p.y);
       }
 
       function draw(e) {
         if (!isDrawing) return;
-        const r = canvas.getBoundingClientRect();
-        ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+        e.preventDefault();
+        const p = getCanvasPos(e);
+        ctx.lineTo(p.x, p.y);
         ctx.stroke();
       }
 
-      function stopDraw() {
+      function stopDraw(e) {
+        if (e) e.preventDefault();
         isDrawing = false;
       }
 
       function handleTouch(e) {
         e.preventDefault();
-        const t = e.touches[0];
-        const type =
-          e.type === 'touchstart' ? 'mousedown' :
-          e.type === 'touchmove'  ? 'mousemove' : 'mouseup';
-        const ev = new MouseEvent(type, {
+        const t = e.touches[0] || e.changedTouches[0];
+        if (!t) return;
+
+        const fakeEvent = {
           clientX: t.clientX,
           clientY: t.clientY
-        });
-        canvas.dispatchEvent(ev);
+        };
+
+        if (e.type === 'touchstart') {
+          startDraw(fakeEvent);
+        } else if (e.type === 'touchmove') {
+          draw(fakeEvent);
+        } else if (e.type === 'touchend') {
+          stopDraw(fakeEvent);
+        }
       }
 
       function clearSignature() {
@@ -320,7 +341,8 @@
         document.getElementById('subtitle').textContent =
           'กำลังโหลดรายละเอียดคำขอ #' + requestNo + ' ...';
 
-        jsonpRequest('getWorkflowRequest',
+        jsonpRequest(
+          'getWorkflowRequest',
           { requestNo: requestNo, session: sessionId },
           function(res) {
             if (!res || !res.success) {
@@ -362,45 +384,44 @@
 
       // ---------- submit review ----------
       function submitReview() {
-  if (!hasSignature) {
-    setStatus('กรุณาวาดลายเซ็นก่อนบันทึก', 'error');
-    canvas.scrollIntoView({behavior: 'smooth', block: 'center'});
-    return;
-  }
+        if (!hasSignature) {
+          setStatus('กรุณาวาดลายเซ็นก่อนบันทึก', 'error');
+          canvas.scrollIntoView({behavior: 'smooth', block: 'center'});
+          return;
+        }
 
-  const actionEl = document.querySelector('input[name="reviewAction"]:checked');
-  const action = actionEl ? actionEl.value : 'Approved';
-  const comment = document.getElementById('comment').value || '';
+        const actionEl = document.querySelector('input[name="reviewAction"]:checked');
+        const action = actionEl ? actionEl.value : 'Approved';
+        const comment = document.getElementById('comment').value || '';
 
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  setStatus('กำลังบันทึกผลการทบทวน...', 'info');
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        setStatus('กำลังบันทึกผลการทบทวน...', 'info');
 
-  // 🔻 ใช้ JPEG + quality 0.4 เพื่อลดขนาด
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.4);
-  const base64  = dataUrl.split(',')[1] || dataUrl;   // ส่งเฉพาะ base64
-  console.log('signature dataUrl length =', dataUrl.length);
-  console.log('signature base64 length  =', base64.length);
+        // ใช้ JPEG + quality 0.4 เพื่อลดขนาด
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.4);
+        const base64  = dataUrl.split(',')[1] || dataUrl;   // ส่งเฉพาะ base64
+        console.log('signature dataUrl length =', dataUrl.length);
+        console.log('signature base64 length  =', base64.length);
 
-  const payload = {
-    requestNo: requestNo,
-    session:   sessionId,
-    reviewAction: action,
-    signature: base64,   // 👈 ส่งเฉพาะ base64
-    comment:   comment
-  };
+        const payload = {
+          requestNo: requestNo,
+          session:   sessionId,
+          reviewAction: action,
+          signature: base64,   // ส่งเฉพาะ base64
+          comment:   comment
+        };
 
-  jsonpRequest('saveReviewAction', payload, function(res) {
-    console.log('JSONP saveReviewAction result:', res);
-    if (!res || !res.success) {
-      setStatus('บันทึกไม่สำเร็จ: ' + (res && res.message ? res.message : ''), 'error');
-      btn.disabled = false;
-      return;
-    }
-    setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
-  });
-}
-
+        jsonpRequest('saveReviewAction', payload, function(res) {
+          console.log('JSONP saveReviewAction result:', res);
+          if (!res || !res.success) {
+            setStatus('บันทึกไม่สำเร็จ: ' + (res && res.message ? res.message : ''), 'error');
+            btn.disabled = false;
+            return;
+          }
+          setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
+        });
+      }
 
       // ---------- init ----------
       window.addEventListener('DOMContentLoaded', function() {
@@ -426,3 +447,4 @@
     </script>
   </body>
 </html>
+
