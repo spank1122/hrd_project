@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="th">
+<html>
   <head>
     <meta charset="UTF-8">
-    <title>ทบทวนคำขอ IT Request</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทบทวนคำขอเพิ่ม IT (External)</title>
     <style>
       body {
         font-family: "Sarabun", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -52,18 +51,10 @@
         font-size: 11px;
         font-weight: 600;
       }
-      .badge-pending {
-        background: #e0f2fe;
-        color: #1d4ed8;
-      }
-      .badge-approved {
-        background: #dcfce7;
-        color: #166534;
-      }
-      .badge-rejected {
-        background: #fee2e2;
-        color: #b91c1c;
-      }
+      .badge-pending  { background: #e0f2fe; color: #1d4ed8; }
+      .badge-approved { background: #dcfce7; color: #166534; }
+      .badge-rejected { background: #fee2e2; color: #b91c1c; }
+
       canvas {
         border: 2px dashed #d4d4d8;
         border-radius: 8px;
@@ -71,6 +62,7 @@
         background: #fff;
         margin: 10px 0 8px;
       }
+
       .btn {
         border: none;
         border-radius: 8px;
@@ -116,6 +108,7 @@
       .status-info    { background:#eff6ff; color:#1d4ed8; }
       .status-success { background:#dcfce7; color:#166534; }
       .status-error   { background:#fee2e2; color:#b91c1c; }
+
       .radio-group {
         display: flex;
         gap: 16px;
@@ -188,7 +181,8 @@
 
         <div style="margin-top:16px;">
           <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
-          <canvas id="signCanvas" width="800" height="200"></canvas>
+          <!-- 🔻 ย่อ canvas ลง เพื่อลดขนาด dataURL -->
+          <canvas id="signCanvas" width="400" height="140"></canvas>
           <button class="btn btn-secondary" type="button" id="clearSignBtn">ล้างลายเซ็น</button>
         </div>
 
@@ -201,18 +195,13 @@
     </div>
 
     <script>
-      // 🔗 ใส่ URL Web App ของ UnifiedWebApp.gs ตรงนี้
-      const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+      // ====== CONFIG ======
+      const WEB_APP_URL =
+        'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
 
       let requestNo = '';
       let sessionId = '';
       let canvas, ctx, isDrawing = false, hasSignature = false;
-
-      // ---------- helper: query param ----------
-      function getQueryParam(name) {
-        const url = new URL(window.location.href);
-        return url.searchParams.get(name) || '';
-      }
 
       // ---------- helper status ----------
       function setStatus(msg, type) {
@@ -220,6 +209,54 @@
         box.textContent = msg;
         box.style.display = 'block';
         box.className = 'status status-' + type;
+      }
+
+      // ---------- JSONP helper (ใช้ทั้ง get & save) ----------
+      function buildQuery(params) {
+        return Object.keys(params)
+          .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
+          .join('&');
+      }
+
+      function jsonpRequest(action, params, callback) {
+        const cbName = 'WF_JSONP_' + action + '_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+
+        params = Object.assign({}, params, {
+          action: action,
+          callback: cbName
+        });
+
+        const script = document.createElement('script');
+        script.src = WEB_APP_URL + '?' + buildQuery(params);
+
+        let timeoutId;
+
+        window[cbName] = function(res) {
+          console.log('JSONP', action, 'result:', res);
+          cleanup();
+          callback && callback(res);
+        };
+
+        script.onerror = function() {
+          console.error('JSONP', action, 'onerror');
+          cleanup();
+          callback && callback({ success: false, message: 'โหลด JSONP ไม่สำเร็จ' });
+        };
+
+        function cleanup() {
+          if (timeoutId) clearTimeout(timeoutId);
+          if (script.parentNode) script.parentNode.removeChild(script);
+          delete window[cbName];
+        }
+
+        // กันเผื่อ script ไม่ตอบเลย
+        timeoutId = setTimeout(function() {
+          console.error('JSONP', action, 'timeout');
+          cleanup();
+          callback && callback({ success: false, message: 'timeout' });
+        }, 15000);
+
+        document.body.appendChild(script);
       }
 
       // ---------- canvas ----------
@@ -278,62 +315,14 @@
         hasSignature = false;
       }
 
-      // ---------- generic JSONP helper ----------
-      function jsonpCall(params, callback) {
-        const callbackName = 'WF_JSONP_' + Date.now() + '_' + Math.floor(Math.random()*10000);
-        params = params || {};
-        params.callback = callbackName;
-
-        // ประกอบ URL
-        const query = Object.keys(params)
-          .map(k => k + '=' + encodeURIComponent(params[k]))
-          .join('&');
-
-        const url = WEB_APP_URL + '?' + query;
-
-        const script = document.createElement('script');
-        script.src = url;
-
-        window[callbackName] = function(res) {
-          try {
-            callback(res);
-          } finally {
-            // cleanup
-            delete window[callbackName];
-            if (script.parentNode) {
-              script.parentNode.removeChild(script);
-            }
-          }
-        };
-
-        script.onerror = function() {
-          callback({
-            success: false,
-            message: 'โหลด JSONP ไม่สำเร็จ'
-          });
-          delete window[callbackName];
-          if (script.parentNode) {
-            script.parentNode.removeChild(script);
-          }
-        };
-
-        document.body.appendChild(script);
-      }
-
-      // ---------- load data from server (JSONP) ----------
+      // ---------- load data from server ----------
       function loadRequest() {
         document.getElementById('subtitle').textContent =
           'กำลังโหลดรายละเอียดคำขอ #' + requestNo + ' ...';
 
-        jsonpCall(
-          {
-            action: 'getWorkflowRequest',
-            requestNo: requestNo,
-            session: sessionId
-          },
+        jsonpRequest('getWorkflowRequest',
+          { requestNo: requestNo, session: sessionId },
           function(res) {
-            console.log('JSONP getWorkflowRequest result:', res);
-
             if (!res || !res.success) {
               const msg = (res && res.message)
                 ? res.message
@@ -359,11 +348,11 @@
             else if (st.indexOf('Rejected') === 0) cls = 'badge badge-rejected';
             statusEl.innerHTML = '<span class="'+cls+'">'+st+'</span>';
 
-            document.getElementById('forWork').textContent  = d.forWork   || '-';
-            document.getElementById('reason').textContent   = d.reason    || '-';
+            document.getElementById('forWork').textContent  = d.forWork     || '-';
+            document.getElementById('reason').textContent   = d.reason      || '-';
             document.getElementById('items').textContent    = d.itemRequest || '-';
             document.getElementById('programs').textContent = d.programUse  || '-';
-            document.getElementById('budget').textContent   = d.budget     || '-';
+            document.getElementById('budget').textContent   = d.budget      || '-';
 
             document.getElementById('subtitle').textContent =
               'โปรดตรวจสอบรายละเอียดด้านล่าง และทบทวนคำขอ';
@@ -371,7 +360,7 @@
         );
       }
 
-      // ---------- submit review (JSONP) ----------
+      // ---------- submit review ----------
       function submitReview() {
         if (!hasSignature) {
           setStatus('กรุณาวาดลายเซ็นก่อนบันทึก', 'error');
@@ -387,43 +376,39 @@
         btn.disabled = true;
         setStatus('กำลังบันทึกผลการทบทวน...', 'info');
 
+        // ⚠️ จุดสำคัญ: ลดขนาด signature / เช็คความยาว
         const signatureData = canvas.toDataURL('image/png');
+        console.log('signature length =', signatureData.length);
 
-        jsonpCall(
-          {
-            action: 'saveReviewAction',
-            requestNo: requestNo,
-            session: sessionId,
-            reviewAction: action,
-            signature: signatureData,
-            comment: comment
-          },
-          function(res) {
-            console.log('JSONP saveReviewAction result:', res);
-            if (!res || !res.success) {
-              const msg = (res && res.message)
-                ? res.message
-                : ('res = ' + JSON.stringify(res));
-              setStatus('บันทึกไม่สำเร็จ: ' + msg, 'error');
-              btn.disabled = false;
-              return;
-            }
-            setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
+        const payload = {
+          requestNo: requestNo,
+          session:   sessionId,
+          reviewAction: action,
+          signature: signatureData,
+          comment:   comment
+        };
+
+        jsonpRequest('saveReviewAction', payload, function(res) {
+          if (!res || !res.success) {
+            setStatus('บันทึกไม่สำเร็จ: ' + (res && res.message ? res.message : ''), 'error');
+            btn.disabled = false;
+            return;
           }
-        );
+          setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
+        });
       }
 
       // ---------- init ----------
       window.addEventListener('DOMContentLoaded', function() {
         console.log('Review page (external JSONP) DOMContentLoaded');
-
         initCanvas();
         document.getElementById('clearSignBtn').addEventListener('click', clearSignature);
         document.getElementById('submitBtn').addEventListener('click', submitReview);
 
-        // อ่าน requestNo & session จาก query string
-        requestNo = getQueryParam('requestNo');
-        sessionId = getQueryParam('session');
+        // อ่าน query string ด้วย window.location
+        const params = new URLSearchParams(window.location.search);
+        requestNo = params.get('requestNo') || '';
+        sessionId = params.get('session') || '';
 
         console.log('query requestNo:', requestNo, 'session:', sessionId);
 
@@ -432,7 +417,6 @@
             'ลิงก์ไม่ถูกต้อง (ขาด requestNo หรือ session)';
           return;
         }
-
         loadRequest();
       });
     </script>
