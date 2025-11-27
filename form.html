@@ -278,7 +278,6 @@
     </div>
 
     <form id="itRequestForm">
-      <!-- ชื่อผู้แจ้ง -->
       <div class="question-card">
         <label class="question-label">
           ชื่อผู้แจ้ง <span class="required">*</span>
@@ -288,7 +287,6 @@
         </select>
       </div>
 
-      <!-- แผนกของผู้แจ้ง -->
       <div class="question-card">
         <label class="question-label">
           แผนกของผู้แจ้ง <span class="required">*</span>
@@ -297,7 +295,6 @@
                placeholder="แผนกจะแสดงอัตโนมัติเมื่อเลือกชื่อ" readonly required>
       </div>
 
-      <!-- ขอเพิ่มอุปกรณ์ -->
       <div class="question-card">
         <label class="question-label">ขอเพิ่มอุปกรณ์</label>
         <div class="options-group">
@@ -325,7 +322,6 @@
         </div>
       </div>
 
-      <!-- โปรแกรมที่ใช้งาน -->
       <div class="question-card">
         <label class="question-label">โปรแกรมที่ใช้งาน</label>
         <div class="options-group">
@@ -345,7 +341,6 @@
         </div>
       </div>
 
-      <!-- นามบัตร -->
       <div class="question-card">
         <label class="question-label">นามบัตร</label>
         <div class="options-group">
@@ -360,7 +355,6 @@
         </div>
       </div>
 
-      <!-- Email -->
       <div class="question-card">
         <label class="question-label">Email</label>
         <input type="email" id="email" name="Email" placeholder="อีเมลสำหรับนามบัตร" readonly>
@@ -369,7 +363,6 @@
         </p>
       </div>
 
-      <!-- เครื่องเขียน -->
       <div class="question-card">
         <label class="question-label">เครื่องเขียน</label>
         <div class="options-group">
@@ -384,7 +377,6 @@
         </div>
       </div>
 
-      <!-- โทรศัพท์มือถือ -->
       <div class="question-card">
         <label class="question-label">โทรศัพท์มือถือ</label>
         <div class="options-group">
@@ -399,13 +391,11 @@
         </div>
       </div>
 
-      <!-- เบอร์โทร -->
       <div class="question-card">
         <label class="question-label">กรณีต้องการโทรศัพท์มือถือ กรุณาระบุเบอร์</label>
         <input type="text" id="phoneNumber" name="เบอร์โทรศัพท์" placeholder="เบอร์โทรศัพท์">
       </div>
 
-      <!-- สำหรับใช้ในงาน -->
       <div class="question-card">
         <label class="question-label">
           สำหรับใช้ในงาน (โปรดระบุ) <span class="required">*</span>
@@ -414,7 +404,6 @@
                   placeholder="โปรดระบุวัตถุประสงค์การใช้งาน" required></textarea>
       </div>
 
-      <!-- เหตุผล -->
       <div class="question-card">
         <label class="question-label">
           เหตุผลที่สั่งเพิ่ม <span class="required">*</span>
@@ -423,14 +412,12 @@
                   placeholder="โปรดระบุเหตุผล" required></textarea>
       </div>
 
-      <!-- Spec -->
       <div class="question-card">
         <label class="question-label">Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)</label>
         <textarea id="specs" name="Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)"
                   placeholder="ระบุรายละเอียดสเปค"></textarea>
       </div>
 
-      <!-- งบประมาณ -->
       <div class="question-card">
         <label class="question-label">ราคา /งบประมาณที่ตั้งไว้ /งบประมาณที่ได้รับการอนุมัติ</label>
         <input type="text" id="budget"
@@ -438,7 +425,6 @@
                placeholder="ระบุงบประมาณ">
       </div>
 
-      <!-- การตั้งงบประมาณ -->
       <div class="question-card">
         <label class="question-label">การตั้งงบประมาณ</label>
         <div class="options-group">
@@ -460,13 +446,11 @@
         </div>
       </div>
 
-      <!-- กำหนดส่งมอบ -->
       <div class="question-card">
         <label class="question-label">กำหนดส่งมอบ</label>
         <input type="date" id="deliveryDate" name="กำหนดส่งมอบ">
       </div>
 
-      <!-- ลายเซ็น -->
       <div class="question-card">
         <div class="signature-section">
           <h3>✍️ ลายเซ็นผู้แจ้ง <span class="required">*</span></h3>
@@ -477,7 +461,6 @@
         </div>
       </div>
 
-      <!-- ปุ่มส่ง -->
       <div class="question-card">
         <div class="button-group">
           <button type="submit" class="btn-submit" id="submitBtn">ส่งคำขอ</button>
@@ -599,7 +582,16 @@
           showStatus('❌ ไม่สามารถโหลดข้อมูลได้: ' + (result.message || ''), 'error');
         }
 
-        document.body.removeChild(script);
+        // Cleanup
+        try {
+          // This ensures we clean up the script tag that was created in the outer scope
+          const scripts = document.head.getElementsByTagName('script');
+          for (let i = 0; i < scripts.length; i++) {
+             if (scripts[i].src.includes(callbackName)) {
+                 document.head.removeChild(scripts[i]);
+             }
+          }
+        } catch(e) {}
         delete window[callbackName];
       };
 
@@ -613,7 +605,7 @@
         delete window[callbackName];
       };
 
-      document.body.appendChild(script);
+      document.head.appendChild(script);
     }
 
     // ================================
@@ -631,7 +623,15 @@
         } else if (docNoEl) {
           docNoEl.textContent = '-';
         }
-        document.body.removeChild(script);
+        
+        try {
+            const scripts = document.head.getElementsByTagName('script');
+            for (let i = 0; i < scripts.length; i++) {
+                if (scripts[i].src.includes(callbackName)) {
+                    document.head.removeChild(scripts[i]);
+                }
+            }
+        } catch(e) {}
         delete window[callbackName];
       };
 
@@ -646,7 +646,7 @@
         delete window[callbackName];
       };
 
-      document.body.appendChild(script);
+      document.head.appendChild(script);
     }
 
     // ================================
@@ -692,8 +692,12 @@
         // fallback ถ้ามี email ถูกส่งตรงมา
         document.getElementById('email').value = prefillData.email;
       }
-    }
+    } // End of applyPrefillData
 
+    // ================================
+    // Event Listeners
+    // ================================
+    
     // เมื่อเลือกชื่อผู้แจ้ง → เติมแผนก
     document.getElementById('name').addEventListener('change', function() {
       const index = parseInt(this.value);
@@ -772,6 +776,7 @@
           }
         } catch (err) {
           console.error('❌ Error parsing response:', err);
+          // Fallback if JSON parse fails but response implies success
           if (text.includes('success') || text.includes('requestNo')) {
             showStatus('✅ ส่งคำขอสำเร็จแล้ว', 'success');
             setTimeout(() => {
