@@ -35,7 +35,7 @@
     .content {
       background: white;
       padding: 32px;
-      margin-bottom: 2px;
+      border-radius: 0 0 12px 12px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
@@ -84,6 +84,7 @@
       background: white;
       cursor: crosshair;
       margin: 12px 0;
+      touch-action: none;
     }
     
     .form-group {
@@ -139,6 +140,7 @@
     .btn-approve:hover {
       background: #059669;
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
     
     .btn-reject {
@@ -149,6 +151,7 @@
     .btn-reject:hover {
       background: #dc2626;
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
     
     .btn-secondary {
@@ -156,9 +159,15 @@
       color: white;
     }
     
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+    
     .btn:disabled {
       background: #d1d5db;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
     
     .alert {
@@ -166,6 +175,18 @@
       border-radius: 8px;
       margin: 16px 0;
       display: none;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .alert-success {
@@ -178,6 +199,12 @@
       background: #fee2e2;
       color: #991b1b;
       border-left: 4px solid #ef4444;
+    }
+    
+    .alert-warning {
+      background: #fef3c7;
+      color: #92400e;
+      border-left: 4px solid #f59e0b;
     }
     
     .loading {
@@ -200,54 +227,99 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-approved {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .container { max-width: 100%; }
+      .header h1 { font-size: 24px; }
+      .content { padding: 20px; }
+      .button-group { flex-direction: column; }
+      .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>📋 ทบทวนคำขอเพิ่ม IT</h1>
-      <p>กรุณาตรวจสอบรายละเอียดและลงลายเซ็น</p>
+      <p>กรุณาตรวจสอบรายละเอียดและลงลายเซ็นเพื่อดำเนินการ</p>
     </div>
     
     <div class="content">
+      <!-- Loading State -->
       <div id="loadingDiv" class="loading">
         <div class="spinner"></div>
         <p>กำลังโหลดข้อมูล...</p>
       </div>
       
+      <!-- Alert Messages -->
       <div id="alertDiv" class="alert"></div>
       
+      <!-- Main Content -->
       <div id="mainContent" style="display: none;">
         <div class="section-title">📄 ข้อมูลคำขอ</div>
         
         <div class="info-grid">
           <div class="info-row">
-            <div class="info-label">เลขที่คำขอ:</div>
+            <div class="info-label">🔢 เลขที่คำขอ:</div>
             <div class="info-value" id="requestNo">-</div>
           </div>
           <div class="info-row">
-            <div class="info-label">ผู้แจ้ง:</div>
+            <div class="info-label">👤 ผู้แจ้ง:</div>
             <div class="info-value" id="requesterName">-</div>
           </div>
           <div class="info-row">
-            <div class="info-label">แผนก:</div>
+            <div class="info-label">🏢 แผนก:</div>
             <div class="info-value" id="requesterDept">-</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">📊 สถานะ:</div>
+            <div class="info-value">
+              <span id="requestStatus" class="status-badge status-pending">-</span>
+            </div>
           </div>
         </div>
         
         <div class="signature-section">
           <h3 class="section-title">✍️ ลายเซ็นผู้ทบทวน</h3>
-          <p style="color: #666; margin-bottom: 12px;">กรุณาลงลายเซ็นด้านล่าง</p>
+          <p style="color: #666; margin-bottom: 12px;">กรุณาลงลายเซ็นด้านล่างด้วยเมาส์หรือนิ้ว</p>
           <canvas id="signatureCanvas" class="signature-canvas" width="800" height="150"></canvas>
-          <button class="btn btn-secondary" onclick="clearSignature()">🗑️ ล้างลายเซ็น</button>
+          <button class="btn btn-secondary" onclick="clearSignature()" style="max-width: 200px;">
+            🗑️ ล้างลายเซ็น
+          </button>
         </div>
         
+        <!-- Reject Reason Section (Hidden by default) -->
         <div class="form-group" id="rejectReasonDiv" style="display: none;">
           <label class="form-label">💬 เหตุผลในการไม่อนุมัติ:</label>
-          <textarea id="rejectReason" placeholder="กรุณาระบุเหตุผล..."></textarea>
+          <textarea id="rejectReason" placeholder="กรุณาระบุเหตุผลที่ไม่อนุมัติคำขอนี้..."></textarea>
         </div>
         
-        <div class="button-group">
+        <!-- Action Buttons -->
+        <div class="button-group" id="mainButtons">
           <button class="btn btn-approve" onclick="submitReview('approve')">
             ✅ อนุมัติ
           </button>
@@ -256,6 +328,7 @@
           </button>
         </div>
         
+        <!-- Reject Confirmation Buttons (Hidden by default) -->
         <div id="rejectButtons" class="button-group" style="display: none;">
           <button class="btn btn-reject" onclick="submitReview('reject')">
             ❌ ยืนยันไม่อนุมัติ
@@ -269,7 +342,16 @@
   </div>
   
   <script>
-    // Get URL parameters
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const CONFIG = {
+      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec'
+    };
+    
+    // ============================================
+    // GLOBAL VARIABLES
+    // ============================================
     const urlParams = new URLSearchParams(window.location.search);
     const requestNo = urlParams.get('requestNo');
     const sessionToken = urlParams.get('session');
@@ -277,175 +359,361 @@
     let canvas, ctx, isDrawing = false, hasSignature = false;
     let requestData = {};
     
-    // Initialize
+    // ============================================
+    // INITIALIZATION
+    // ============================================
     window.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Review Page Initialized');
+      console.log('📋 Request No:', requestNo);
+      console.log('🔐 Session Token:', sessionToken ? sessionToken.substring(0, 10) + '...' : 'null');
+      
+      // Validate URL parameters
       if (!requestNo || !sessionToken) {
+        console.error('❌ Missing URL parameters!');
         showAlert('❌ ลิงก์ไม่ถูกต้อง กรุณาใช้ลิงก์จากอีเมล', 'error');
         return;
       }
       
-      loadRequestData();
+      // Initialize components
       setupCanvas();
+      loadRequestData();
     });
     
-    // Load request data
+    // ============================================
+    // API FUNCTIONS
+    // ============================================
+    
+    /**
+     * Load request data from server via JSONP
+     */
     function loadRequestData() {
       document.getElementById('loadingDiv').style.display = 'block';
       
-      google.script.run
-        .withSuccessHandler(function(result) {
-          console.log('Response:', result);
-          
-          if (result.success) {
-            requestData = result.data;
-            displayRequestData();
-          } else {
-            showAlert('❌ ' + (result.message || 'ไม่สามารถโหลดข้อมูลได้'), 'error');
-          }
-        })
-        .withFailureHandler(function(error) {
-          console.error('Error:', error);
-          showAlert('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
-        })
-        .getWorkflowRequest(requestNo, sessionToken);
-    }
-    
-    function displayRequestData() {
-      document.getElementById('loadingDiv').style.display = 'none';
-      document.getElementById('mainContent').style.display = 'block';
+      const callbackName = 'jsonpCallback_' + Date.now();
       
-      document.getElementById('requestNo').textContent = requestData.requestNo || requestNo;
-      document.getElementById('requesterName').textContent = requestData.requesterName || '-';
-      document.getElementById('requesterDept').textContent = requestData.requesterDept || '-';
-    }
-    
-    // Signature canvas setup
-    function setupCanvas() {
-      canvas = document.getElementById('signatureCanvas');
-      ctx = canvas.getContext('2d');
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
+      console.log('📡 Fetching request data...');
+      console.log('🔗 API URL:', CONFIG.APPS_SCRIPT_URL);
       
-      canvas.addEventListener('mousedown', startDrawing);
-      canvas.addEventListener('mousemove', draw);
-      canvas.addEventListener('mouseup', stopDrawing);
-      canvas.addEventListener('mouseout', stopDrawing);
+      // Define callback function
+      window[callbackName] = function(result) {
+        console.log('📦 Server Response:', result);
+        
+        if (result && result.success) {
+          requestData = result.data;
+          displayRequestData();
+        } else {
+          const errorMsg = result && result.message ? result.message : 'ไม่สามารถโหลดข้อมูลได้';
+          console.error('❌ Error:', errorMsg);
+          showAlert('❌ ' + errorMsg, 'error');
+          document.getElementById('loadingDiv').style.display = 'none';
+        }
+        
+        // Cleanup
+        cleanup(callbackName);
+      };
       
-      canvas.addEventListener('touchstart', handleTouch);
-      canvas.addEventListener('touchmove', handleTouch);
-      canvas.addEventListener('touchend', stopDrawing);
+      // Create and inject script tag
+      const script = createJsonpScript(
+        callbackName,
+        CONFIG.APPS_SCRIPT_URL + 
+        '?action=getWorkflowRequest' +
+        '&requestNo=' + encodeURIComponent(requestNo) +
+        '&session=' + encodeURIComponent(sessionToken) +
+        '&callback=' + callbackName
+      );
+      
+      console.log('📡 JSONP Request URL:', script.src);
+      
+      script.onerror = function() {
+        console.error('❌ Network error - cannot connect to server');
+        showAlert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต', 'error');
+        document.getElementById('loadingDiv').style.display = 'none';
+        cleanup(callbackName);
+      };
+      
+      document.body.appendChild(script);
     }
     
-    function startDrawing(e) {
-      isDrawing = true;
-      const rect = canvas.getBoundingClientRect();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-      hasSignature = true;
-    }
-    
-    function draw(e) {
-      if (!isDrawing) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.stroke();
-    }
-    
-    function stopDrawing() {
-      isDrawing = false;
-    }
-    
-    function handleTouch(e) {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const type = e.type === 'touchstart' ? 'mousedown' : 
-                   e.type === 'touchmove' ? 'mousemove' : 'mouseup';
-      const mouseEvent = new MouseEvent(type, {
-        clientX: touch.clientX,
-        clientY: touch.clientY
-      });
-      canvas.dispatchEvent(mouseEvent);
-    }
-    
-    function clearSignature() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      hasSignature = false;
-    }
-    
-    // UI Actions
-    function showRejectReason() {
-      document.getElementById('rejectReasonDiv').style.display = 'block';
-      document.querySelector('.button-group').style.display = 'none';
-      document.getElementById('rejectButtons').style.display = 'flex';
-    }
-    
-    function cancelReject() {
-      document.getElementById('rejectReasonDiv').style.display = 'none';
-      document.getElementById('rejectReason').value = '';
-      document.querySelector('.button-group').style.display = 'flex';
-      document.getElementById('rejectButtons').style.display = 'none';
-    }
-    
-    // Submit Review
+    /**
+     * Submit review action (approve/reject)
+     */
     function submitReview(action) {
+      console.log('📝 Submitting review action:', action);
+      
+      // Validate signature
       if (!hasSignature) {
         showAlert('❌ กรุณาลงลายเซ็นก่อนดำเนินการ', 'error');
         return;
       }
       
+      // Validate reject reason
       const rejectReason = action === 'reject' ? document.getElementById('rejectReason').value.trim() : '';
-      
       if (action === 'reject' && !rejectReason) {
         showAlert('❌ กรุณาระบุเหตุผลในการไม่อนุมัติ', 'error');
         return;
       }
       
+      // Disable all buttons
       const buttons = document.querySelectorAll('button');
       buttons.forEach(btn => btn.disabled = true);
       
-      showAlert('⏳ กำลังบันทึกข้อมูล...', 'success');
+      showAlert('⏳ กำลังบันทึกข้อมูล...', 'warning');
       
+      // Get signature data
       const signatureData = canvas.toDataURL('image/png');
+      console.log('📸 Signature captured (length: ' + signatureData.length + ')');
       
-      google.script.run
-        .withSuccessHandler(function(result) {
-          console.log('Submit result:', result);
+      const callbackName = 'jsonpCallback_' + Date.now();
+      
+      // Define callback function
+      window[callbackName] = function(result) {
+        console.log('📦 Submit Result:', result);
+        
+        if (result && result.success) {
+          const message = action === 'approve' ? 
+            '✅ อนุมัติสำเร็จ! ระบบจะส่งต่อให้ผู้อนุมัติ' :
+            '✅ บันทึกสำเร็จ! ระบบจะแจ้งผู้แจ้งทราบ';
           
-          if (result.success) {
-            const message = action === 'approve' ? 
-              '✅ อนุมัติสำเร็จ! ระบบจะส่งต่อให้ผู้อนุมัติ' :
-              '✅ บันทึกสำเร็จ! ระบบจะแจ้งผู้แจ้งทราบ';
+          showAlert(message, 'success');
+          console.log('✅ Action completed successfully');
+          
+          // Close window after 3 seconds
+          setTimeout(() => {
+            console.log('🔚 Attempting to close window...');
+            window.close();
             
-            showAlert(message, 'success');
-            
+            // Fallback message if window doesn't close
             setTimeout(() => {
-              google.script.host.close();
-            }, 3000);
-          } else {
-            showAlert('❌ ' + (result.message || 'เกิดข้อผิดพลาด'), 'error');
-            buttons.forEach(btn => btn.disabled = false);
-          }
-        })
-        .withFailureHandler(function(error) {
-          console.error('Error:', error);
-          showAlert('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+              showAlert('✅ เสร็จสิ้น! คุณสามารถปิดหน้าต่างนี้ได้', 'success');
+            }, 500);
+          }, 3000);
+        } else {
+          const errorMsg = result && result.message ? result.message : 'เกิดข้อผิดพลาด';
+          console.error('❌ Submit failed:', errorMsg);
+          showAlert('❌ ' + errorMsg, 'error');
+          
+          // Re-enable buttons
           buttons.forEach(btn => btn.disabled = false);
-        })
-        .saveReviewAction(requestNo, sessionToken, action === 'approve' ? 'Approved' : 'Rejected', signatureData, rejectReason);
+        }
+        
+        // Cleanup
+        cleanup(callbackName);
+      };
+      
+      // Create and inject script tag
+      const actionValue = action === 'approve' ? 'Approved' : 'Rejected';
+      const script = createJsonpScript(
+        callbackName,
+        CONFIG.APPS_SCRIPT_URL + 
+        '?action=saveReviewAction' +
+        '&requestNo=' + encodeURIComponent(requestNo) +
+        '&session=' + encodeURIComponent(sessionToken) +
+        '&reviewAction=' + encodeURIComponent(actionValue) +
+        '&signature=' + encodeURIComponent(signatureData) +
+        '&comment=' + encodeURIComponent(rejectReason) +
+        '&callback=' + callbackName
+      );
+      
+      console.log('📡 Submitting via JSONP (URL length: ' + script.src.length + ')');
+      
+      script.onerror = function() {
+        console.error('❌ Network error during submit');
+        showAlert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
+        buttons.forEach(btn => btn.disabled = false);
+        cleanup(callbackName);
+      };
+      
+      document.body.appendChild(script);
     }
     
-    // Show Alert
+    // ============================================
+    // UI FUNCTIONS
+    // ============================================
+    
+    /**
+     * Display loaded request data
+     */
+    function displayRequestData() {
+      console.log('✅ Displaying request data:', requestData);
+      
+      document.getElementById('loadingDiv').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      
+      // Populate data
+      document.getElementById('requestNo').textContent = requestData.requestNo || requestNo;
+      document.getElementById('requesterName').textContent = requestData.requesterName || '-';
+      document.getElementById('requesterDept').textContent = requestData.requesterDept || '-';
+      
+      // Status badge
+      const statusElement = document.getElementById('requestStatus');
+      const status = requestData.status || 'Pending Review';
+      statusElement.textContent = status;
+      
+      // Apply status badge style
+      statusElement.className = 'status-badge';
+      if (status.includes('Pending')) {
+        statusElement.classList.add('status-pending');
+      } else if (status.includes('Approved')) {
+        statusElement.classList.add('status-approved');
+      } else if (status.includes('Rejected')) {
+        statusElement.classList.add('status-rejected');
+      }
+    }
+    
+    /**
+     * Show reject reason textarea
+     */
+    function showRejectReason() {
+      document.getElementById('rejectReasonDiv').style.display = 'block';
+      document.getElementById('mainButtons').style.display = 'none';
+      document.getElementById('rejectButtons').style.display = 'flex';
+      document.getElementById('rejectReason').focus();
+    }
+    
+    /**
+     * Cancel reject and return to main buttons
+     */
+    function cancelReject() {
+      document.getElementById('rejectReasonDiv').style.display = 'none';
+      document.getElementById('rejectReason').value = '';
+      document.getElementById('mainButtons').style.display = 'flex';
+      document.getElementById('rejectButtons').style.display = 'none';
+    }
+    
+    /**
+     * Show alert message
+     */
     function showAlert(message, type) {
       const alertDiv = document.getElementById('alertDiv');
       alertDiv.textContent = message;
       alertDiv.className = 'alert alert-' + type;
       alertDiv.style.display = 'block';
       
-      if (type !== 'success' || !message.includes('กำลัง')) {
+      console.log((type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅') + ' Alert:', message);
+      
+      // Auto-hide non-loading messages
+      if (type !== 'warning' || !message.includes('กำลัง')) {
         setTimeout(() => {
           alertDiv.style.display = 'none';
         }, 5000);
+      }
+    }
+    
+    // ============================================
+    // SIGNATURE CANVAS
+    // ============================================
+    
+    /**
+     * Setup signature canvas
+     */
+    function setupCanvas() {
+      canvas = document.getElementById('signatureCanvas');
+      ctx = canvas.getContext('2d');
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      
+      // Mouse events
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+      
+      // Touch events
+      canvas.addEventListener('touchstart', handleTouch);
+      canvas.addEventListener('touchmove', handleTouch);
+      canvas.addEventListener('touchend', stopDrawing);
+      
+      console.log('✅ Signature canvas initialized');
+    }
+    
+    /**
+     * Start drawing
+     */
+    function startDrawing(e) {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      hasSignature = true;
+    }
+    
+    /**
+     * Draw on canvas
+     */
+    function draw(e) {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+    
+    /**
+     * Stop drawing
+     */
+    function stopDrawing() {
+      isDrawing = false;
+    }
+    
+    /**
+     * Handle touch events
+     */
+    function handleTouch(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent(
+        e.type === 'touchstart' ? 'mousedown' : 
+        e.type === 'touchmove' ? 'mousemove' : 'mouseup',
+        {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        }
+      );
+      canvas.dispatchEvent(mouseEvent);
+    }
+    
+    /**
+     * Clear signature
+     */
+    function clearSignature() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasSignature = false;
+      console.log('🗑️ Signature cleared');
+      showAlert('✅ ล้างลายเซ็นแล้ว', 'success');
+    }
+    
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+    
+    /**
+     * Create JSONP script element
+     */
+    function createJsonpScript(callbackName, url) {
+      const script = document.createElement('script');
+      script.id = 'jsonpScript_' + callbackName;
+      script.src = url;
+      return script;
+    }
+    
+    /**
+     * Cleanup JSONP callback and script
+     */
+    function cleanup(callbackName) {
+      // Remove callback function
+      if (window[callbackName]) {
+        delete window[callbackName];
+      }
+      
+      // Remove script tag
+      const scriptTag = document.getElementById('jsonpScript_' + callbackName);
+      if (scriptTag && scriptTag.parentNode) {
+        scriptTag.parentNode.removeChild(scriptTag);
       }
     }
   </script>
