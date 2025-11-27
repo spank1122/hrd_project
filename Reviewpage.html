@@ -269,13 +269,6 @@
   </div>
   
   <script>
-    // ========================================
-    // CONFIG
-    // ========================================
-    const CONFIG = {
-      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyeXbgEQwowH8-hBwoepFwbCAttSnZBlhKx89n3rR-AoRvvlOBqqWeFnC_oAz1zAgunvQ/exec'
-    };
-
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const requestNo = urlParams.get('requestNo');
@@ -284,9 +277,7 @@
     let canvas, ctx, isDrawing = false, hasSignature = false;
     let requestData = {};
     
-    // ========================================
     // Initialize
-    // ========================================
     window.addEventListener('DOMContentLoaded', function() {
       if (!requestNo || !sessionToken) {
         showAlert('❌ ลิงก์ไม่ถูกต้อง กรุณาใช้ลิงก์จากอีเมล', 'error');
@@ -297,39 +288,26 @@
       setupCanvas();
     });
     
-    // ========================================
-    // Load request data from Google Sheets
-    // ========================================
+    // Load request data
     function loadRequestData() {
       document.getElementById('loadingDiv').style.display = 'block';
       
-      // Call Apps Script via POST
-      fetch(CONFIG.APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          action: 'getWorkflowRequest',
-          requestNo: requestNo,
-          sessionId: sessionToken
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log('Response:', result);
+          
+          if (result.success) {
+            requestData = result.data;
+            displayRequestData();
+          } else {
+            showAlert('❌ ' + (result.message || 'ไม่สามารถโหลดข้อมูลได้'), 'error');
+          }
         })
-      })
-      .then(response => response.json())
-      .then(result => {
-        console.log('Response:', result);
-        
-        if (result.success) {
-          requestData = result.data;
-          displayRequestData();
-        } else {
-          showAlert('❌ ' + (result.message || 'ไม่สามารถโหลดข้อมูลได้'), 'error');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        showAlert('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
-      });
+        .withFailureHandler(function(error) {
+          console.error('Error:', error);
+          showAlert('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+        })
+        .getWorkflowRequest(requestNo, sessionToken);
     }
     
     function displayRequestData() {
@@ -341,9 +319,7 @@
       document.getElementById('requesterDept').textContent = requestData.requesterDept || '-';
     }
     
-    // ========================================
     // Signature canvas setup
-    // ========================================
     function setupCanvas() {
       canvas = document.getElementById('signatureCanvas');
       ctx = canvas.getContext('2d');
@@ -397,9 +373,7 @@
       hasSignature = false;
     }
     
-    // ========================================
     // UI Actions
-    // ========================================
     function showRejectReason() {
       document.getElementById('rejectReasonDiv').style.display = 'block';
       document.querySelector('.button-group').style.display = 'none';
@@ -413,9 +387,7 @@
       document.getElementById('rejectButtons').style.display = 'none';
     }
     
-    // ========================================
     // Submit Review
-    // ========================================
     function submitReview(action) {
       if (!hasSignature) {
         showAlert('❌ กรุณาลงลายเซ็นก่อนดำเนินการ', 'error');
@@ -429,7 +401,6 @@
         return;
       }
       
-      // Disable buttons
       const buttons = document.querySelectorAll('button');
       buttons.forEach(btn => btn.disabled = true);
       
@@ -437,50 +408,34 @@
       
       const signatureData = canvas.toDataURL('image/png');
       
-      // Send to Apps Script
-      fetch(CONFIG.APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          action: 'saveReviewAction',
-          requestNo: requestNo,
-          sessionId: sessionToken,
-          reviewAction: action === 'approve' ? 'Approved' : 'Rejected',
-          signatureData: signatureData,
-          comment: rejectReason
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log('Submit result:', result);
+          
+          if (result.success) {
+            const message = action === 'approve' ? 
+              '✅ อนุมัติสำเร็จ! ระบบจะส่งต่อให้ผู้อนุมัติ' :
+              '✅ บันทึกสำเร็จ! ระบบจะแจ้งผู้แจ้งทราบ';
+            
+            showAlert(message, 'success');
+            
+            setTimeout(() => {
+              google.script.host.close();
+            }, 3000);
+          } else {
+            showAlert('❌ ' + (result.message || 'เกิดข้อผิดพลาด'), 'error');
+            buttons.forEach(btn => btn.disabled = false);
+          }
         })
-      })
-      .then(response => response.json())
-      .then(result => {
-        console.log('Submit result:', result);
-        
-        if (result.success) {
-          const message = action === 'approve' ? 
-            '✅ อนุมัติสำเร็จ! ระบบจะส่งต่อให้ผู้อนุมัติ' :
-            '✅ บันทึกสำเร็จ! ระบบจะแจ้งผู้แจ้งทราบ';
-          
-          showAlert(message, 'success');
-          
-          setTimeout(() => {
-            window.close();
-          }, 3000);
-        } else {
-          showAlert('❌ ' + (result.message || 'เกิดข้อผิดพลาด'), 'error');
+        .withFailureHandler(function(error) {
+          console.error('Error:', error);
+          showAlert('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
           buttons.forEach(btn => btn.disabled = false);
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        showAlert('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
-        buttons.forEach(btn => btn.disabled = false);
-      });
+        })
+        .saveReviewAction(requestNo, sessionToken, action === 'approve' ? 'Approved' : 'Rejected', signatureData, rejectReason);
     }
     
-    // ========================================
     // Show Alert
-    // ========================================
     function showAlert(message, type) {
       const alertDiv = document.getElementById('alertDiv');
       alertDiv.textContent = message;
