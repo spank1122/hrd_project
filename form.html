@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แบบฟอร์มขอเพิ่มเทคโนโลยีสารสนเทศ</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Sarabun', 'Roboto', Arial, sans-serif;
+      background-color: #f0ebf8;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 760px; margin: 0 auto; }
+
+    .form-header {
+      background: #673ab7;
+      color: white;
+      padding: 24px;
+      border-radius: 8px 8px 0 0;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .form-header h1 {
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+
+    .form-header p { font-size: 14px; opacity: 0.9; }
+
+    .doc-no-box {
+      text-align: right;
+      font-size: 14px;
+      min-width: 90px;
+    }
+
+    .doc-no-label { opacity: 0.9; }
+    .doc-no-value { font-weight: 600; margin-top: 4px; }
+
+    .question-card {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .question-label {
+      font-size: 16px;
+      color: #202124;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .required { color: #d93025; margin-left: 4px; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 13px 15px;
+      border: none;
+      border-bottom: 1px solid #dadce0;
+      font-size: 16px;
+      font-family: inherit;
+      background: transparent;
+      transition: border-color 0.2s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-bottom: 2px solid #673ab7;
+    }
+
+    input::placeholder,
+    textarea::placeholder { color: #80868b; }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23202124' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 32px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      padding: 13px 15px;
+    }
+
+    .options-group { margin-top: 16px; }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      min-height: 32px;
+    }
+
+    .option-item input[type="checkbox"],
+    .option-item input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .option-item label {
+      font-size: 14px;
+      color: #202124;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .option-item input[type="text"] {
+      width: 300px;
+      margin-left: 8px;
+      padding: 8px 12px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+    }
+
+    .signature-section {
+      background: #f8f9fa;
+      padding: 16px;
+      border-radius: 4px;
+      margin-top: 16px;
+    }
+
+    .signature-section h3 {
+      font-size: 16px;
+      color: #202124;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    canvas {
+      border: 2px dashed #dadce0;
+      border-radius: 4px;
+      cursor: crosshair;
+      touch-action: none;
+      display: block;
+      width: 100%;
+      background: white;
+      margin: 12px 0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    button {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-clear {
+      background: white;
+      color: #673ab7;
+      border: 1px solid #dadce0;
+    }
+
+    .btn-clear:hover { background: #f8f9fa; }
+
+    .btn-submit {
+      background: #673ab7;
+      color: white;
+      padding: 10px 32px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #5e35b1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    button:disabled {
+      background: #dadce0 !important;
+      color: #80868b !important;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 4px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #1e7e34;
+      border-left: 4px solid #2e7d32;
+    }
+
+    .error {
+      background: #fce4ec;
+      color: #c62828;
+      border-left: 4px solid #d32f2f;
+    }
+
+    .loading {
+      background: #fff3e0;
+      color: #e65100;
+      border-left: 4px solid #f57c00;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0,0,0,.1);
+      border-radius: 50%;
+      border-top-color: #673ab7;
+      animation: spin 0.8s ease-in-out infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .helper-text {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .form-header { flex-direction: column; align-items: flex-start; }
+      .form-header h1 { font-size: 24px; }
+      .question-card { padding: 16px; }
+      .option-item input[type="text"] {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 8px;
+      }
+      .button-group { flex-direction: column; width: 100%; }
+      button { width: 100%; }
+      .doc-no-box { align-self: flex-end; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-header">
+      <div>
+        <h1>แบบฟอร์มขอเพิ่มเทคโนโลยีสารสนเทศ</h1>
+        <p>กรุณากรอกข้อมูลให้ครบถ้วนและลงลายเซ็นด้านล่าง</p>
+      </div>
+      <div class="doc-no-box">
+        <div class="doc-no-label">No.</div>
+        <div class="doc-no-value" id="docNo">-</div>
+      </div>
+    </div>
+
+    <form id="itRequestForm">
+      <!-- ชื่อผู้แจ้ง -->
+      <div class="question-card">
+        <label class="question-label">
+          ชื่อผู้แจ้ง <span class="required">*</span>
+        </label>
+        <select id="name" name="ชื่อผู้แจ้ง" required>
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+
+      <!-- แผนกของผู้แจ้ง -->
+      <div class="question-card">
+        <label class="question-label">
+          แผนกของผู้แจ้ง <span class="required">*</span>
+        </label>
+        <input type="text" id="dept" name="แผนกของผู้แจ้ง"
+               placeholder="แผนกจะแสดงอัตโนมัติเมื่อเลือกชื่อ" readonly required>
+      </div>
+
+      <!-- ขอเพิ่มอุปกรณ์ -->
+      <div class="question-card">
+        <label class="question-label">ขอเพิ่มอุปกรณ์</label>
+        <div class="options-group">
+          <div class="option-item">
+            <input type="checkbox" name="equipment" value="Computer Note Book" id="equipNotebook">
+            <label for="equipNotebook">Computer Note Book</label>
+          </div>
+          <div class="option-item">
+            <input type="checkbox" name="equipment" value="Computer PC" id="equipPC">
+            <label for="equipPC">Computer PC</label>
+          </div>
+          <div class="option-item">
+            <input type="checkbox" name="equipment" value="Soft Ware" id="equipSoft">
+            <label for="equipSoft">Soft Ware</label>
+          </div>
+          <div class="option-item">
+            <input type="checkbox" name="equipment" value="Hard Ware" id="equipHard">
+            <label for="equipHard">Hard Ware</label>
+          </div>
+          <div class="option-item">
+            <input type="checkbox" id="equipOther">
+            <label for="equipOther">อื่นๆ:</label>
+            <input type="text" id="equipOtherText" placeholder="โปรดระบุ">
+          </div>
+        </div>
+      </div>
+
+      <!-- โปรแกรมที่ใช้งาน -->
+      <div class="question-card">
+        <label class="question-label">โปรแกรมที่ใช้งาน</label>
+        <div class="options-group">
+          <div class="option-item">
+            <input type="checkbox" name="software" value="Microsoft Office" id="softMS">
+            <label for="softMS">Microsoft Office</label>
+          </div>
+          <div class="option-item">
+            <input type="checkbox" name="software" value="Open Office" id="softOpen">
+            <label for="softOpen">Open Office</label>
+          </div>
+          <div class="option-item">
+            <input type="checkbox" id="softwareOther">
+            <label for="softwareOther">อื่นๆ:</label>
+            <input type="text" id="softwareOtherText" placeholder="โปรดระบุ">
+          </div>
+        </div>
+      </div>
+
+      <!-- นามบัตร -->
+      <div class="question-card">
+        <label class="question-label">นามบัตร</label>
+        <div class="options-group">
+          <div class="option-item">
+            <input type="radio" name="businessCard" value="นามบัตร Digital" id="cardDigital">
+            <label for="cardDigital">นามบัตร Digital</label>
+          </div>
+          <div class="option-item">
+            <input type="radio" name="businessCard" value="นามบัตรกระดาษ" id="cardPaper">
+            <label for="cardPaper">นามบัตรกระดาษ</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="question-card">
+        <label class="question-label">Email</label>
+        <input type="email" id="email" name="Email" placeholder="อีเมลสำหรับนามบัตร" readonly>
+        <p class="helper-text">
+          อีเมลจะถูกสร้างอัตโนมัติจากชื่อภาษาอังกฤษของผู้ผ่านสัมภาษณ์
+        </p>
+      </div>
+
+      <!-- เครื่องเขียน -->
+      <div class="question-card">
+        <label class="question-label">เครื่องเขียน</label>
+        <div class="options-group">
+          <div class="option-item">
+            <input type="radio" name="stationery" value="ต้องการ" id="stationeryYes">
+            <label for="stationeryYes">ต้องการ</label>
+          </div>
+          <div class="option-item">
+            <input type="radio" name="stationery" value="ไม่ต้องการ" id="stationeryNo">
+            <label for="stationeryNo">ไม่ต้องการ</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- โทรศัพท์มือถือ -->
+      <div class="question-card">
+        <label class="question-label">โทรศัพท์มือถือ</label>
+        <div class="options-group">
+          <div class="option-item">
+            <input type="radio" name="mobilePhone" value="ต้องการ" id="phoneYes">
+            <label for="phoneYes">ต้องการ</label>
+          </div>
+          <div class="option-item">
+            <input type="radio" name="mobilePhone" value="ไม่ต้องการ" id="phoneNo">
+            <label for="phoneNo">ไม่ต้องการ</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- เบอร์โทร -->
+      <div class="question-card">
+        <label class="question-label">กรณีต้องการโทรศัพท์มือถือ กรุณาระบุเบอร์</label>
+        <input type="text" id="phoneNumber" name="เบอร์โทรศัพท์" placeholder="เบอร์โทรศัพท์">
+      </div>
+
+      <!-- สำหรับใช้ในงาน -->
+      <div class="question-card">
+        <label class="question-label">
+          สำหรับใช้ในงาน (โปรดระบุ) <span class="required">*</span>
+        </label>
+        <textarea id="purpose" name="สำหรับใช้ในงาน (โปรดระบุ)"
+                  placeholder="โปรดระบุวัตถุประสงค์การใช้งาน" required></textarea>
+      </div>
+
+      <!-- เหตุผล -->
+      <div class="question-card">
+        <label class="question-label">
+          เหตุผลที่สั่งเพิ่ม <span class="required">*</span>
+        </label>
+        <textarea id="reason" name="เหตุผลที่สั่งเพิ่ม"
+                  placeholder="โปรดระบุเหตุผล" required></textarea>
+      </div>
+
+      <!-- Spec -->
+      <div class="question-card">
+        <label class="question-label">Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)</label>
+        <textarea id="specs" name="Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)"
+                  placeholder="ระบุรายละเอียดสเปค"></textarea>
+      </div>
+
+      <!-- งบประมาณ -->
+      <div class="question-card">
+        <label class="question-label">ราคา /งบประมาณที่ตั้งไว้ /งบประมาณที่ได้รับการอนุมัติ</label>
+        <input type="text" id="budget"
+               name="ราคา /งบประมาณที่ตั้งไว้ /งบประมาณที่ได้รับการอนุมัติ"
+               placeholder="ระบุงบประมาณ">
+      </div>
+
+      <!-- การตั้งงบประมาณ -->
+      <div class="question-card">
+        <label class="question-label">การตั้งงบประมาณ</label>
+        <div class="options-group">
+          <div class="option-item">
+            <input type="checkbox" name="budgetType"
+                   value="ตั้งงบประมาณเท่าแทนเครื่องเก่า" id="budgetReplace">
+            <label for="budgetReplace">ตั้งงบประมาณเท่าแทนเครื่องเก่า</label>
+          </div>
+          <div class="option-item">
+            <input type="checkbox" name="budgetType"
+                   value="ไม่ได้ตั้งงบประมาณ" id="budgetNone">
+            <label for="budgetNone">ไม่ได้ตั้งงบประมาณ</label>
+          </div>
+          <div class="option-item">
+            <input type="checkbox" id="budgetTypeOther">
+            <label for="budgetTypeOther">อื่นๆ:</label>
+            <input type="text" id="budgetTypeOtherText" placeholder="โปรดระบุ">
+          </div>
+        </div>
+      </div>
+
+      <!-- กำหนดส่งมอบ -->
+      <div class="question-card">
+        <label class="question-label">กำหนดส่งมอบ</label>
+        <input type="date" id="deliveryDate" name="กำหนดส่งมอบ">
+      </div>
+
+      <!-- ลายเซ็น -->
+      <div class="question-card">
+        <div class="signature-section">
+          <h3>✍️ ลายเซ็นผู้แจ้ง <span class="required">*</span></h3>
+          <canvas id="signatureCanvas" width="800" height="200"></canvas>
+          <button type="button" class="btn-clear" onclick="clearSignature()">
+            ล้างลายเซ็น
+          </button>
+        </div>
+      </div>
+
+      <!-- ปุ่มส่ง -->
+      <div class="question-card">
+        <div class="button-group">
+          <button type="submit" class="btn-submit" id="submitBtn">ส่งคำขอ</button>
+        </div>
+        <div id="status"></div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // ================================
+    // CONFIG
+    // ================================
+    const CONFIG = {
+      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby8mvClK8QLmiSVyu91y4M1qaRt1xpRBIRPkbSAsh1rRXJP_u3iF1Ic2j1k8WTkb0-e0g/exec'
+    };
+
+    // ================================
+    // Prefill จาก URL
+    // ================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefillData = {
+      name:        urlParams.get('name')        || '',
+      dept:        urlParams.get('dept')        || '',
+      email:       urlParams.get('email')       || '',
+      purpose:     urlParams.get('purpose')     || '',
+      candidateEn: urlParams.get('candidateEn') || ''
+    };
+    console.log('📥 Prefill Data:', prefillData);
+
+    // ================================
+    // Signature Canvas
+    // ================================
+    let canvas, ctx, isDrawing = false, hasSignature = false;
+
+    function initCanvas() {
+      canvas = document.getElementById('signatureCanvas');
+      ctx = canvas.getContext('2d');
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+      canvas.addEventListener('touchstart', handleTouch);
+      canvas.addEventListener('touchmove', handleTouch);
+      canvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function startDrawing(e) {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      hasSignature = true;
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.stroke();
+    }
+
+    function stopDrawing() { isDrawing = false; }
+
+    function handleTouch(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const type =
+        e.type === 'touchstart' ? 'mousedown' :
+        e.type === 'touchmove'  ? 'mousemove' : 'mouseup';
+      const mouseEvent = new MouseEvent(type, {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+    }
+
+    function clearSignature() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasSignature = false;
+    }
+
+    // ================================
+    // Status helper
+    // ================================
+    let hrMasterData = [];
+
+    function showStatus(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      statusDiv.textContent = message;
+      statusDiv.className = type;
+      statusDiv.style.display = 'block';
+      if (type === 'success' || type === 'error') {
+        setTimeout(() => statusDiv.style.display = 'none', 5000);
+      }
+    }
+
+    // ================================
+    // JSONP: HR Master Data
+    // ================================
+    function loadHRMasterData() {
+      showStatus('⏳ กำลังโหลดข้อมูลพนักงาน...', 'loading');
+
+      const callbackName = 'hrDataCallback_' + Date.now();
+      window[callbackName] = function(result) {
+        console.log('📊 HR Master Data:', result);
+
+        if (result.success && result.data) {
+          hrMasterData = result.data;
+          populateRequesterDropdown();
+          applyPrefillData();
+          showStatus('✅ โหลดข้อมูลสำเร็จ (' + hrMasterData.length + ' คน)', 'success');
+        } else {
+          showStatus('❌ ไม่สามารถโหลดข้อมูลได้: ' + (result.message || ''), 'error');
+        }
+
+        document.body.removeChild(script);
+        delete window[callbackName];
+      };
+
+      const script = document.createElement('script');
+      script.src = CONFIG.APPS_SCRIPT_URL +
+                   '?action=getHRMasterData' +
+                   '&callback=' + callbackName;
+
+      script.onerror = function() {
+        showStatus('❌ เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
+        delete window[callbackName];
+      };
+
+      document.body.appendChild(script);
+    }
+
+    // ================================
+    // JSONP: Next Doc No.
+    // ================================
+    function loadDocNo() {
+      const docNoEl = document.getElementById('docNo');
+      if (docNoEl) docNoEl.textContent = 'กำลังโหลด...';
+
+      const callbackName = 'docNoCallback_' + Date.now();
+      window[callbackName] = function(result) {
+        console.log('📄 Next Doc No:', result);
+        if (result && result.success && result.docNo && docNoEl) {
+          docNoEl.textContent = result.docNo;
+        } else if (docNoEl) {
+          docNoEl.textContent = '-';
+        }
+        document.body.removeChild(script);
+        delete window[callbackName];
+      };
+
+      const script = document.createElement('script');
+      script.src = CONFIG.APPS_SCRIPT_URL +
+                   '?action=getNextDocNo' +
+                   '&callback=' + callbackName;
+
+      script.onerror = function() {
+        console.error('❌ Error loading next doc no.');
+        if (docNoEl) docNoEl.textContent = '-';
+        delete window[callbackName];
+      };
+
+      document.body.appendChild(script);
+    }
+
+    // ================================
+    // Populate dropdown ชื่อผู้แจ้ง
+    // ================================
+    function populateRequesterDropdown() {
+      const select = document.getElementById('name');
+      select.innerHTML = '<option value="">-- เลือกชื่อผู้แจ้ง --</option>';
+      hrMasterData.forEach((person, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = person.name;
+        select.appendChild(option);
+      });
+    }
+
+    // ================================
+    // Apply Prefill
+    // ================================
+    function applyPrefillData() {
+      if (prefillData.name) {
+        const matchedIndex = hrMasterData.findIndex(
+          person => person.name === prefillData.name
+        );
+        if (matchedIndex !== -1) {
+          document.getElementById('name').value = matchedIndex;
+          document.getElementById('dept').value =
+            hrMasterData[matchedIndex].dept || '';
+          console.log('✅ Auto-selected requester:', hrMasterData[matchedIndex].name);
+        }
+      }
+
+      if (prefillData.purpose) {
+        document.getElementById('purpose').value = prefillData.purpose;
+      }
+
+      // ใช้ชื่ออังกฤษผู้ผ่านสัมภาษณ์สร้าง email
+      if (prefillData.candidateEn) {
+        const email = generateEmailFromName(prefillData.candidateEn);
+        document.getElementById('email').value = email;
+        console.log('✅ Candidate email:', prefillData.candidateEn, '→', email);
+      } else if (prefillData.email) {
+        // fallback ถ้ามี email ถูกส่งตรงมา
+        document.getElementById('email').value = prefillData.email;
+      }
+    }
+
+    // เมื่อเลือกชื่อผู้แจ้ง → เติมแผนก
+    document.getElementById('name').addEventListener('change', function() {
+      const index = parseInt(this.value);
+      if (isNaN(index) || index < 0) {
+        document.getElementById('dept').value = '';
+        return;
+      }
+      const person = hrMasterData[index];
+      document.getElementById('dept').value = person.dept || '';
+    });
+
+    // ================================
+    // Generate Email (ชื่อ EN + 2 ตัวนามสกุล)
+    // ================================
+    function generateEmailFromName(fullNameEN) {
+      if (!fullNameEN) return '';
+      const parts = fullNameEN.trim().split(/\s+/);
+      if (parts.length < 2)
+        return fullNameEN.toLowerCase() + '@carpetmaker.co.th';
+
+      const firstName = parts[0].toLowerCase();
+      const lastName  = parts[parts.length - 1].toLowerCase();
+      const lastPrefix = lastName.substring(0, 2);
+      return firstName + lastPrefix + '@carpetmaker.co.th';
+    }
+
+    // ================================
+    // Submit Form
+    // ================================
+    document.getElementById('itRequestForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      if (!hasSignature) {
+        showStatus('❌ กรุณาวาดลายเซ็นก่อนส่งฟอร์ม', 'error');
+        document.getElementById('signatureCanvas')
+                .scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>กำลังส่งข้อมูล...';
+      showStatus('⏳ กำลังบันทึกข้อมูล...', 'loading');
+
+      const formData = collectFormData();
+      console.log('📦 Form Data:', formData);
+
+      const params = new URLSearchParams();
+      for (const key in formData) params.append(key, formData[key]);
+
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: params,
+        redirect: 'follow'
+      })
+      .then(r => r.text())
+      .then(text => {
+        console.log('📥 Raw Response:', text);
+        try {
+          const result = JSON.parse(text);
+          console.log('✅ Submit Result:', result);
+          if (result.success) {
+            showStatus('✅ บันทึกสำเร็จ! เลขที่คำขอ: ' + result.requestNo, 'success');
+            setTimeout(() => {
+              document.getElementById('itRequestForm').reset();
+              clearSignature();
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = 'ส่งคำขอ';
+              loadHRMasterData();
+              loadDocNo();
+            }, 2000);
+          } else {
+            showStatus('❌ เกิดข้อผิดพลาด: ' + result.message, 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'ส่งคำขอ';
+          }
+        } catch (err) {
+          console.error('❌ Error parsing response:', err);
+          if (text.includes('success') || text.includes('requestNo')) {
+            showStatus('✅ ส่งคำขอสำเร็จแล้ว', 'success');
+            setTimeout(() => {
+              document.getElementById('itRequestForm').reset();
+              clearSignature();
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = 'ส่งคำขอ';
+              loadHRMasterData();
+              loadDocNo();
+            }, 2000);
+          } else {
+            showStatus('❌ เกิดข้อผิดพลาด: ไม่สามารถอ่าน response ได้', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'ส่งคำขอ';
+          }
+        }
+      })
+      .catch(err => {
+        console.error('❌ Submit Error:', err);
+        showStatus('❌ เกิดข้อผิดพลาด: ' + err.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'ส่งคำขอ';
+      });
+    });
+
+    // ================================
+    // Collect Form Data
+    // ================================
+    function collectFormData() {
+      const formData = {};
+      const nameSelect = document.getElementById('name');
+      const selectedIndex = parseInt(nameSelect.value);
+
+      if (!isNaN(selectedIndex) && selectedIndex >= 0) {
+        formData['ชื่อผู้แจ้ง'] = hrMasterData[selectedIndex].name;
+      }
+
+      formData['Email'] = document.getElementById('email').value || '';
+      formData['แผนกของผู้แจ้ง'] = document.getElementById('dept').value;
+      formData['สำหรับใช้ในงาน (โปรดระบุ)'] =
+        document.getElementById('purpose').value;
+
+      const equipment = [];
+      document.querySelectorAll('input[name="equipment"]:checked')
+        .forEach(cb => equipment.push(cb.value));
+      if (document.getElementById('equipOther').checked) {
+        const t = document.getElementById('equipOtherText').value;
+        if (t) equipment.push(t);
+      }
+      formData['ขอเพิ่มอุปกรณ์'] = equipment.join(', ');
+
+      const software = [];
+      document.querySelectorAll('input[name="software"]:checked')
+        .forEach(cb => software.push(cb.value));
+      if (document.getElementById('softwareOther').checked) {
+        const t = document.getElementById('softwareOtherText').value;
+        if (t) software.push(t);
+      }
+      formData['โปรแกรมที่ใช้งาน'] = software.join(', ');
+
+      const businessCard = document.querySelector('input[name="businessCard"]:checked');
+      formData['นามบัตร'] = businessCard ? businessCard.value : '';
+
+      const stationery = document.querySelector('input[name="stationery"]:checked');
+      formData['เครื่องเขียน'] = stationery ? stationery.value : '';
+
+      const mobilePhone = document.querySelector('input[name="mobilePhone"]:checked');
+      formData['โทรศัพท์มือถือ'] = mobilePhone ? mobilePhone.value : '';
+      formData['เบอร์โทรศัพท์'] = document.getElementById('phoneNumber').value;
+
+      formData['เหตุผลที่สั่งเพิ่ม'] = document.getElementById('reason').value;
+      formData['Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)'] =
+        document.getElementById('specs').value;
+      formData['ราคา /งบประมาณที่ตั้งไว้ /งบประมาณที่ได้รับการอนุมัติ'] =
+        document.getElementById('budget').value;
+
+      const budgetTypes = [];
+      document.querySelectorAll('input[name="budgetType"]:checked')
+        .forEach(cb => budgetTypes.push(cb.value));
+      if (document.getElementById('budgetTypeOther').checked) {
+        const t = document.getElementById('budgetTypeOtherText').value;
+        if (t) budgetTypes.push(t);
+      }
+      formData['การตั้งงบประมาณ'] = budgetTypes.join(', ');
+
+      formData['กำหนดส่งมอบ'] = document.getElementById('deliveryDate').value;
+      formData['requesterSignature'] = canvas.toDataURL('image/png');
+      formData['Time'] = new Date().toISOString();
+      formData['No.'] = document.getElementById('docNo')?.textContent || '';
+
+      return formData;
+    }
+
+    // ================================
+    // Init
+    // ================================
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 Initializing IT Request Form...');
+      initCanvas();
+      loadHRMasterData();
+      loadDocNo();
+    });
+  </script>
+</body>
+</html>
