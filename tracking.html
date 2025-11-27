@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ติดตามสถานะ - The Carpetmaker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --pink-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --text-dark: #2d3748;
+      --text-light: #718096;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --border: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .btn-back {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateX(-2px);
+    }
+
+    .header-title {
+      color: white;
+      font-size: 36px;
+      font-weight: 700;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      margin-bottom: 8px;
+    }
+
+    .header-subtitle {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 16px;
+      font-weight: 300;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Filter Section */
+    .filter-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .filter-input {
+      position: relative;
+    }
+
+    .filter-input input,
+    .filter-input select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .filter-input input:focus,
+    .filter-input select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-input label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Documents List */
+    .documents-section {
+      animation: fadeInUp 0.8s ease-out 0.1s both;
+    }
+
+    .document-item {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #667eea;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .document-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .document-item.pink {
+      border-left-color: #f5576c;
+    }
+
+    .document-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .document-title {
+      font-weight: 700;
+      color: var(--text-dark);
+      font-size: 16px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-badge.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-badge.completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .document-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--text-dark);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Timeline Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: color 0.3s ease;
+    }
+
+    .modal-close:hover {
+      color: var(--text-dark);
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -30px;
+      top: 3px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #667eea;
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px #667eea;
+    }
+
+    .timeline-item.completed::before {
+      background: var(--success);
+      box-shadow: 0 0 0 2px var(--success);
+    }
+
+    .timeline-time {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .timeline-text {
+      color: var(--text-dark);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .timeline-detail {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+
+    .empty-text {
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-title {
+        font-size: 28px;
+      }
+
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .document-info {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goBack()">← ย้อนกลับ</button>
+        <div></div>
+      </div>
+      <h1 class="header-title">ติดตามสถานะ</h1>
+      <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-grid">
+        <div class="filter-input">
+          <label>ค้นหา</label>
+          <input type="text" placeholder="ค้นหาจากชื่อหรือรหัส..." id="searchInput">
+        </div>
+        <div class="filter-input">
+          <label>สถานะ</label>
+          <select id="statusFilter">
+            <option value="">-- ทั้งหมด --</option>
+            <option value="draft">ร่าง</option>
+            <option value="pending">รอการอนุมัติ</option>
+            <option value="completed">สำเร็จแล้ว</option>
+          </select>
+        </div>
+        <div class="filter-input">
+          <label>ประเภท</label>
+          <select id="typeFilter">
+            <option value="">-- ทั้งหมด --</option>
+            <option value="recruitment">ขอจ้างพนักงาน</option>
+            <option value="promotion">ขอเลื่อนตำแหน่ง</option>
+            <option value="salary">ขอปรับเงินเดือน</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents List -->
+    <div class="documents-section" id="documentsList"></div>
+  </div>
+
+  <!-- Timeline Modal -->
+  <div class="modal" id="timelineModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">รายละเอียดขั้นตอน</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="timeline" id="timelineContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // Mock Data
+    const documents = [
+      {
+        id: 'DOC-001',
+        employee: 'สมชาย สมการ',
+        type: 'recruitment',
+        status: 'completed',
+        createdDate: '2025-11-20',
+        steps: [
+          { role: 'ผู้เสนอ', date: '2025-11-20', time: '10:00', status: 'completed', signer: 'สมชาย สมการ' },
+          { role: 'ผู้ทบทวน', date: '2025-11-21', time: '14:30', status: 'completed', signer: 'วิไล วิศวะ' },
+          { role: 'ผู้อนุมัติ', date: '2025-11-22', time: '09:00', status: 'completed', signer: 'สมหญิง สมดี' },
+          { role: 'พนักงาน', date: '2025-11-22', time: '15:00', status: 'completed', signer: 'สมชาย สมการ' }
+        ]
+      },
+      {
+        id: 'DOC-002',
+        employee: 'วิไล วิศวะ',
+        type: 'promotion',
+        status: 'pending',
+        createdDate: '2025-11-23',
+        steps: [
+          { role: 'ผู้เสนอ', date: '2025-11-23', time: '11:00', status: 'completed', signer: 'วิไล วิศวะ' },
+          { role: 'ผู้ทบทวน', date: '2025-11-24', time: '10:30', status: 'pending', signer: '-' },
+          { role: 'ผู้อนุมัติ', date: '-', time: '-', status: 'pending', signer: '-' },
+          { role: 'พนักงาน', date: '-', time: '-', status: 'pending', signer: '-' }
+        ]
+      }
+    ];
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      displayDocuments(documents);
+      setupFilters();
+    });
+
+    function displayDocuments(docs) {
+      const list = document.getElementById('documentsList');
+      
+      if (docs.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div class="empty-title">ไม่พบเอกสาร</div>
+            <div class="empty-text">ลองปรับเงื่อนไขการค้นหาใหม่</div>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = docs.map(doc => `
+        <div class="document-item ${doc.status === 'pending' ? 'pink' : ''}" onclick="showTimeline('${doc.id}')">
+          <div class="document-header">
+            <div class="document-title">${doc.id} - ${doc.employee}</div>
+            <span class="status-badge ${doc.status === 'pending' ? 'pending' : 'completed'}">
+              ${doc.status === 'pending' ? '⏳ รอการอนุมัติ' : '✓ สำเร็จแล้ว'}
+            </span>
+          </div>
+          <div class="document-info">
+            <div class="info-item">
+              <span class="info-label">ประเภท</span>
+              <span>${getTypeLabel(doc.type)}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">วันที่สร้าง</span>
+              <span>${new Date(doc.createdDate).toLocaleDateString('th-TH')}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">ขั้นตอน</span>
+              <span>${doc.steps.filter(s => s.status === 'completed').length}/${doc.steps.length}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setupFilters() {
+      document.getElementById('searchInput').addEventListener('input', applyFilters);
+      document.getElementById('statusFilter').addEventListener('change', applyFilters);
+      document.getElementById('typeFilter').addEventListener('change', applyFilters);
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const type = document.getElementById('typeFilter').value;
+
+      const filtered = documents.filter(doc => {
+        return (doc.id.toLowerCase().includes(search) || doc.employee.toLowerCase().includes(search)) &&
+               (!status || doc.status === status) &&
+               (!type || doc.type === type);
+      });
+
+      displayDocuments(filtered);
+    }
+
+    function getTypeLabel(type) {
+      const labels = {
+        'recruitment': 'ขอจ้างพนักงาน',
+        'promotion': 'ขอเลื่อนตำแหน่ง',
+        'salary': 'ขอปรับเงินเดือน'
+      };
+      return labels[type] || type;
+    }
+
+    function showTimeline(docId) {
+      const doc = documents.find(d => d.id === docId);
+      if (!doc) return;
+
+      const timeline = doc.steps.map(step => `
+        <div class="timeline-item ${step.status === 'completed' ? 'completed' : ''}">
+          <div class="timeline-time">${step.role}</div>
+          <div class="timeline-text">${step.signer}</div>
+          <div class="timeline-detail">${step.date} เวลา ${step.time}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('timelineContent').innerHTML = timeline;
+      document.getElementById('timelineModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('timelineModal').classList.remove('show');
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+
+    // Close modal on background click
+    document.getElementById('timelineModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('timelineModal')) {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
