@@ -233,14 +233,6 @@
             <div class="info-label">แผนก:</div>
             <div class="info-value" id="requesterDept">-</div>
           </div>
-          <div class="info-row">
-            <div class="info-label">อีเมล:</div>
-            <div class="info-value" id="requesterEmail">-</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">วัตถุประสงค์:</div>
-            <div class="info-value" id="purpose">-</div>
-          </div>
         </div>
         
         <div class="signature-section">
@@ -347,8 +339,6 @@
       document.getElementById('requestNo').textContent = requestData.requestNo || requestNo;
       document.getElementById('requesterName').textContent = requestData.requesterName || '-';
       document.getElementById('requesterDept').textContent = requestData.requesterDept || '-';
-      document.getElementById('requesterEmail').textContent = requestData.requesterEmail || '-';
-      document.getElementById('purpose').textContent = requestData.purpose || '-';
     }
     
     // ========================================
