@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แบบฟอร์มขอเพิ่มเทคโนโลยีสารสนเทศ</title>
+  <title>ระบบจัดการเอกสาร HR - The Carpetmaker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -11,911 +14,568 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --pink-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --text-dark: #2d3748;
+      --text-light: #718096;
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+      --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+      --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
     body {
-      font-family: 'Sarabun', 'Roboto', Arial, sans-serif;
-      background-color: #f0ebf8;
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
     }
 
     .container {
-      max-width: 760px;
-      margin: 0 auto;
+      max-width: 1200px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
     }
 
-    .form-header {
-      background: #673ab7;
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .header-title {
       color: white;
-      padding: 24px;
-      border-radius: 8px 8px 0 0;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .form-header h1 {
-      font-size: 32px;
-      font-weight: 400;
+      font-size: 42px;
+      font-weight: 700;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       margin-bottom: 8px;
+      letter-spacing: -0.5px;
     }
 
-    .form-header p {
-      font-size: 14px;
-      opacity: 0.9;
+    .header-subtitle {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 18px;
+      font-weight: 300;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
-    .doc-no-box {
-      text-align: right;
-      font-size: 14px;
-      min-width: 90px;
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .doc-no-label {
-      opacity: 0.9;
+    /* Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      margin-bottom: 40px;
     }
 
-    .doc-no-value {
+    /* Card */
+    .system-card {
+      background: white;
+      border-radius: 32px;
+      padding: 48px 40px;
+      box-shadow: var(--shadow-xl);
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .system-card:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .system-card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .system-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: var(--purple-gradient);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .system-card.pink::before {
+      background: var(--pink-gradient);
+    }
+
+    .system-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(102, 126, 234, 0.1);
+    }
+
+    .system-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Icon */
+    .card-icon {
+      width: 100px;
+      height: 100px;
+      background: var(--purple-gradient);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+      margin: 0 auto 24px;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease;
+    }
+
+    .system-card.pink .card-icon {
+      background: var(--pink-gradient);
+    }
+
+    .system-card:hover .card-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
       font-weight: 600;
-      margin-top: 4px;
+      margin-bottom: 16px;
     }
 
-    .question-card {
-      background: white;
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    .status-badge.active {
+      background: #d1fae5;
+      color: #065f46;
     }
 
-    .question-label {
-      font-size: 16px;
-      color: #202124;
-      margin-bottom: 8px;
-      display: block;
+    .status-badge.coming-soon {
+      background: #fef3c7;
+      color: #92400e;
     }
 
-    .required {
-      color: #d93025;
-      margin-left: 4px;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="date"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 13px 15px;
-      border: none;
-      border-bottom: 1px solid #dadce0;
-      font-size: 16px;
-      font-family: inherit;
-      background: transparent;
-      transition: border-color 0.2s;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      outline: none;
-      border-bottom: 2px solid #673ab7;
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-      color: #80868b;
-    }
-
-    select {
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23202124' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 8px center;
-      padding-right: 32px;
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-      border: 1px solid #dadce0;
-      border-radius: 4px;
-      padding: 13px 15px;
-    }
-
-    .options-group {
-      margin-top: 16px;
-    }
-
-    .option-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 12px;
-      min-height: 32px;
-    }
-
-    .option-item input[type="checkbox"],
-    .option-item input[type="radio"] {
-      width: 20px;
-      height: 20px;
-      margin-right: 12px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .option-item label {
-      font-size: 14px;
-      color: #202124;
-      cursor: pointer;
-      flex: 1;
-    }
-
-    .option-item input[type="text"] {
-      width: 300px;
-      margin-left: 8px;
-      padding: 8px 12px;
-      border: 1px solid #dadce0;
-      border-radius: 4px;
-    }
-
-    .signature-section {
-      background: #f8f9fa;
-      padding: 16px;
-      border-radius: 4px;
-      margin-top: 16px;
-    }
-
-    .signature-section h3 {
-      font-size: 16px;
-      color: #202124;
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-
-    canvas {
-      border: 2px dashed #dadce0;
-      border-radius: 4px;
-      cursor: crosshair;
-      touch-action: none;
-      display: block;
-      width: 100%;
-      background: white;
-      margin: 12px 0;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    button {
-      padding: 10px 24px;
-      border: none;
-      border-radius: 4px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-
-    .btn-clear {
-      background: white;
-      color: #673ab7;
-      border: 1px solid #dadce0;
-    }
-
-    .btn-clear:hover {
-      background: #f8f9fa;
-    }
-
-    .btn-submit {
-      background: #673ab7;
-      color: white;
-      padding: 10px 32px;
-    }
-
-    .btn-submit:hover:not(:disabled) {
-      background: #5e35b1;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    }
-
-    button:disabled {
-      background: #dadce0 !important;
-      color: #80868b !important;
-      cursor: not-allowed;
-    }
-
-    #status {
-      margin-top: 16px;
-      padding: 16px;
-      border-radius: 4px;
-      display: none;
-      font-size: 14px;
-    }
-
-    .success {
-      background: #e8f5e9;
-      color: #1e7e34;
-      border-left: 4px solid #2e7d32;
-    }
-
-    .error {
-      background: #fce4ec;
-      color: #c62828;
-      border-left: 4px solid #d32f2f;
-    }
-
-    .loading {
-      background: #fff3e0;
-      color: #e65100;
-      border-left: 4px solid #f57c00;
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(0,0,0,.1);
+    .status-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      border-top-color: #673ab7;
-      animation: spin 0.8s ease-in-out infinite;
-      margin-right: 8px;
+      background: currentColor;
+      animation: blink 2s ease-in-out infinite;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
 
-    .helper-text {
-      font-size: 12px;
-      color: #5f6368;
-      margin-top: 8px;
+    /* Title */
+    .card-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .card-description {
+      font-size: 15px;
+      color: var(--text-light);
+      margin-bottom: 32px;
+      line-height: 1.6;
+      min-height: 72px;
+    }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 18px 32px;
+      border: none;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: var(--purple-gradient);
+      color: white;
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: var(--pink-gradient);
+      color: white;
+      box-shadow: 0 4px 16px rgba(240, 147, 251, 0.4);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(240, 147, 251, 0.5);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(0);
+    }
+
+    .btn-disabled {
+      background: #e2e8f0;
+      color: #a0aec0;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:not(.btn-disabled):hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      animation: fadeIn 1s ease-out 0.5s both;
+    }
+
+    .footer-content {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      color: white;
+      font-size: 14px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      background: #10b981;
+      color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      z-index: 9999;
+      font-size: 15px;
+      font-weight: 600;
+      max-width: 400px;
+      display: none;
+    }
+
+    .notification.show {
+      display: block;
+      animation: slideInRight 0.3s ease-out;
+    }
+
+    .notification.hide {
+      animation: slideOutRight 0.3s ease-out forwards;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .header-title {
+        font-size: 36px;
+      }
+
+      .header-subtitle {
+        font-size: 16px;
+      }
     }
 
     @media (max-width: 768px) {
-      .form-header {
-        flex-direction: column;
-        align-items: flex-start;
+      body {
+        padding: 24px 16px;
       }
 
-      .form-header h1 {
-        font-size: 24px;
-      }
-      
-      .question-card {
-        padding: 16px;
+      .header {
+        margin-bottom: 32px;
       }
 
-      .option-item input[type="text"] {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 8px;
+      .header-title {
+        font-size: 32px;
       }
 
-      .button-group {
-        flex-direction: column;
-        width: 100%;
+      .system-card {
+        padding: 36px 28px;
       }
 
-      button {
-        width: 100%;
+      .card-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 42px;
+        border-radius: 20px;
       }
 
-      .doc-no-box {
-        align-self: flex-end;
+      .card-title {
+        font-size: 22px;
+      }
+
+      .card-description {
+        font-size: 14px;
+        min-height: auto;
+      }
+
+      .btn {
+        font-size: 16px;
+        padding: 16px 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 28px;
+      }
+
+      .header-subtitle {
+        font-size: 14px;
+      }
+
+      .system-card {
+        padding: 28px 24px;
+      }
+
+      .card-icon {
+        width: 72px;
+        height: 72px;
+        font-size: 36px;
+      }
+
+      .card-title {
+        font-size: 20px;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="form-header">
-      <div>
-        <h1>แบบฟอร์มขอเพิ่มเทคโนโลยีสารสนเทศ</h1>
-        <p>กรุณากรอกข้อมูลให้ครบถ้วนและลงลายเซ็นด้านล่าง</p>
+    <!-- Header -->
+    <div class="header">
+      <h1 class="header-title">ระบบจัดการเอกสาร HR</h1>
+      <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="cards-grid">
+      <!-- Card 1: IT Request -->
+      <div class="system-card">
+        <span class="status-badge active">ใช้งานได้</span>
+        
+        <div class="card-icon">💻</div>
+        
+        <h2 class="card-title">แบบฟอร์มขอเพิ่มเทคโนโลยีสารสนเทศ</h2>
+        
+        <p class="card-description">
+          ระบบขออุปกรณ์ IT สำหรับพนักงานใหม่ ครบถ้วนด้วยระบบอนุมัติ 3 ขั้นตอน
+        </p>
+
+        <button class="btn btn-primary" onclick="openITRequest()">
+          <span class="btn-text">🖊️ เปิดฟอร์มขอเพิ่ม IT</span>
+        </button>
       </div>
-      <div class="doc-no-box">
-        <div class="doc-no-label">No.</div>
-        <div class="doc-no-value" id="docNo">-</div>
+
+      <!-- Card 2: Action Form -->
+      <div class="system-card pink">
+        <span class="status-badge coming-soon">Coming Soon</span>
+        
+        <div class="card-icon">📝</div>
+        
+        <h2 class="card-title">ใบดำเนินการ</h2>
+        
+        <p class="card-description">
+          ระบบจัดการเอกสารดำเนินการต่างๆ สำหรับแผนก HR พร้อมระบบติดตามงาน
+        </p>
+
+        <button class="btn btn-disabled" disabled>
+          <span class="btn-text">📝 กำลังพัฒนา</span>
+        </button>
       </div>
     </div>
 
-    <form id="itRequestForm">
-      
-      <div class="question-card">
-        <label class="question-label">
-          ชื่อผู้แจ้ง
-          <span class="required">*</span>
-        </label>
-        <select id="name" name="ชื่อผู้แจ้ง" required>
-          <option value="">กำลังโหลด...</option>
-        </select>
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-content">
+        Powered by Google Apps Script & GitHub Pages
       </div>
-
-      <div class="question-card">
-        <label class="question-label">
-          แผนกของผู้แจ้ง
-          <span class="required">*</span>
-        </label>
-        <input type="text" id="dept" name="แผนกของผู้แจ้ง" placeholder="แผนกจะแสดงอัตโนมัติเมื่อเลือกชื่อ" readonly required>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">ขอเพิ่มอุปกรณ์</label>
-        <div class="options-group">
-          <div class="option-item">
-            <input type="checkbox" name="equipment" value="Computer Note Book" id="equipNotebook">
-            <label for="equipNotebook">Computer Note Book</label>
-          </div>
-          <div class="option-item">
-            <input type="checkbox" name="equipment" value="Computer PC" id="equipPC">
-            <label for="equipPC">Computer PC</label>
-          </div>
-          <div class="option-item">
-            <input type="checkbox" name="equipment" value="Soft Ware" id="equipSoft">
-            <label for="equipSoft">Soft Ware</label>
-          </div>
-          <div class="option-item">
-            <input type="checkbox" name="equipment" value="Hard Ware" id="equipHard">
-            <label for="equipHard">Hard Ware</label>
-          </div>
-          <div class="option-item">
-            <input type="checkbox" id="equipOther">
-            <label for="equipOther">อื่นๆ:</label>
-            <input type="text" id="equipOtherText" placeholder="โปรดระบุ">
-          </div>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">โปรแกรมที่ใช้งาน</label>
-        <div class="options-group">
-          <div class="option-item">
-            <input type="checkbox" name="software" value="Microsoft Office" id="softMS">
-            <label for="softMS">Microsoft Office</label>
-          </div>
-          <div class="option-item">
-            <input type="checkbox" name="software" value="Open Office" id="softOpen">
-            <label for="softOpen">Open Office</label>
-          </div>
-          <div class="option-item">
-            <input type="checkbox" id="softwareOther">
-            <label for="softwareOther">อื่นๆ:</label>
-            <input type="text" id="softwareOtherText" placeholder="โปรดระบุ">
-          </div>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">นามบัตร</label>
-        <div class="options-group">
-          <div class="option-item">
-            <input type="radio" name="businessCard" value="นามบัตร Digital" id="cardDigital">
-            <label for="cardDigital">นามบัตร Digital</label>
-          </div>
-          <div class="option-item">
-            <input type="radio" name="businessCard" value="นามบัตรกระดาษ" id="cardPaper">
-            <label for="cardPaper">นามบัตรกระดาษ</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">Email</label>
-        <input type="email" id="email" name="Email" placeholder="อีเมลสำหรับนามบัตร" readonly>
-        <p class="helper-text">อีเมลจะถูกสร้างอัตโนมัติจากชื่อภาษาอังกฤษของผู้ผ่านสัมภาษณ์</p>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">เครื่องเขียน</label>
-        <div class="options-group">
-          <div class="option-item">
-            <input type="radio" name="stationery" value="ต้องการ" id="stationeryYes">
-            <label for="stationeryYes">ต้องการ</label>
-          </div>
-          <div class="option-item">
-            <input type="radio" name="stationery" value="ไม่ต้องการ" id="stationeryNo">
-            <label for="stationeryNo">ไม่ต้องการ</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">โทรศัพท์มือถือ</label>
-        <div class="options-group">
-          <div class="option-item">
-            <input type="radio" name="mobilePhone" value="ต้องการ" id="phoneYes">
-            <label for="phoneYes">ต้องการ</label>
-          </div>
-          <div class="option-item">
-            <input type="radio" name="mobilePhone" value="ไม่ต้องการ" id="phoneNo">
-            <label for="phoneNo">ไม่ต้องการ</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">กรณีต้องการโทรศัพท์มือถือ กรุณาระบุเบอร์</label>
-        <input type="text" id="phoneNumber" name="เบอร์โทรศัพท์" placeholder="เบอร์โทรศัพท์">
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">
-          สำหรับใช้ในงาน (โปรดระบุ)
-          <span class="required">*</span>
-        </label>
-        <textarea id="purpose" name="สำหรับใช้ในงาน (โปรดระบุ)" placeholder="โปรดระบุวัตถุประสงค์การใช้งาน" required></textarea>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">
-          เหตุผลที่สั่งเพิ่ม
-          <span class="required">*</span>
-        </label>
-        <textarea id="reason" name="เหตุผลที่สั่งเพิ่ม" placeholder="โปรดระบุเหตุผล" required></textarea>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)</label>
-        <textarea id="specs" name="Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)" placeholder="ระบุรายละเอียดสเปค"></textarea>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">ราคา /งบประมาณที่ตั้งไว้ /งบประมาณที่ได้รับการอนุมัติ</label>
-        <input type="text" id="budget" name="ราคา /งบประมาณที่ตั้งไว้ /งบประมาณที่ได้รับการอนุมัติ" placeholder="ระบุงบประมาณ">
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">การตั้งงบประมาณ</label>
-        <div class="options-group">
-          <div class="option-item">
-            <input type="checkbox" name="budgetType" value="ตั้งงบประมาณเท่าแทนเครื่องเก่า" id="budgetReplace">
-            <label for="budgetReplace">ตั้งงบประมาณเท่าแทนเครื่องเก่า</label>
-          </div>
-          <div class="option-item">
-            <input type="checkbox" name="budgetType" value="ไม่ได้ตั้งงบประมาณ" id="budgetNone">
-            <label for="budgetNone">ไม่ได้ตั้งงบประมาณ</label>
-          </div>
-          <div class="option-item">
-            <input type="checkbox" id="budgetTypeOther">
-            <label for="budgetTypeOther">อื่นๆ:</label>
-            <input type="text" id="budgetTypeOtherText" placeholder="โปรดระบุ">
-          </div>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <label class="question-label">กำหนดส่งมอบ</label>
-        <input type="date" id="deliveryDate" name="กำหนดส่งมอบ">
-      </div>
-
-      <div class="question-card">
-        <div class="signature-section">
-          <h3>✍️ ลายเซ็นผู้แจ้ง <span class="required">*</span></h3>
-          <canvas id="signatureCanvas" width="800" height="200"></canvas>
-          <button type="button" class="btn-clear" onclick="clearSignature()">
-            ล้างลายเซ็น
-          </button>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <div class="button-group">
-          <button type="submit" class="btn-submit" id="submitBtn">
-            ส่งคำขอ
-          </button>
-        </div>
-        <div id="status"></div>
-      </div>
-
-    </form>
+    </div>
   </div>
+
+  <!-- Notification -->
+  <div id="notification" class="notification"></div>
 
   <script>
     // ========================================
     // 🔧 Configuration
     // ========================================
     const CONFIG = {
-      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby8mvClK8QLmiSVyu91y4M1qaRt1xpRBIRPkbSAsh1rRXJP_u3iF1Ic2j1k8WTkb0-e0g/exec'
+      IT_REQUEST_URL: 'https://spank1122.github.io/hrd_project/',
+      ACTION_FORM_URL: '#'  // Coming Soon
     };
 
     // ========================================
-    // 🔧 รับค่า Prefill จาก URL Parameters
-    // candidateEn = ชื่ออังกฤษผู้ผ่านสัมภาษณ์
+    // 🎯 Open IT Request
     // ========================================
-    const urlParams = new URLSearchParams(window.location.search);
-    const prefillData = {
-      name:        urlParams.get('name')        || '',
-      dept:        urlParams.get('dept')        || '',
-      email:       urlParams.get('email')       || '',
-      purpose:     urlParams.get('purpose')     || '',
-      candidateEn: urlParams.get('candidateEn') || ''
-    };
-
-    console.log('📥 Prefill Data:', prefillData);
-
-    // ========================================
-    // 🎨 Signature Canvas Setup
-    // ========================================
-    let canvas, ctx, isDrawing = false, hasSignature = false;
-
-    function initCanvas() {
-      canvas = document.getElementById('signatureCanvas');
-      ctx = canvas.getContext('2d');
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-
-      canvas.addEventListener('mousedown', startDrawing);
-      canvas.addEventListener('mousemove', draw);
-      canvas.addEventListener('mouseup', stopDrawing);
-      canvas.addEventListener('mouseout', stopDrawing);
-      canvas.addEventListener('touchstart', handleTouch);
-      canvas.addEventListener('touchmove', handleTouch);
-      canvas.addEventListener('touchend', stopDrawing);
-    }
-
-    function startDrawing(e) {
-      isDrawing = true;
-      const rect = canvas.getBoundingClientRect();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-      hasSignature = true;
-    }
-
-    function draw(e) {
-      if (!isDrawing) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.stroke();
-    }
-
-    function stopDrawing() {
-      isDrawing = false;
-    }
-
-    function handleTouch(e) {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const mouseEvent = new MouseEvent(
-        e.type === 'touchstart' ? 'mousedown' : e.type === 'touchmove' ? 'mousemove' : 'mouseup',
-        { clientX: touch.clientX, clientY: touch.clientY }
-      );
-      canvas.dispatchEvent(mouseEvent);
-    }
-
-    function clearSignature() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      hasSignature = false;
+    function openITRequest() {
+      window.open(CONFIG.IT_REQUEST_URL, '_blank');
+      showNotification('เปิดระบบขอเพิ่ม IT ในแท็บใหม่แล้ว');
     }
 
     // ========================================
-    // 📋 HR Master Data & Form Logic
+    // 💬 Show Notification
     // ========================================
-    let hrMasterData = [];
-
-    function showStatus(message, type = 'info') {
-      const statusDiv = document.getElementById('status');
-      statusDiv.textContent = message;
-      statusDiv.className = type;
-      statusDiv.style.display = 'block';
-
-      if (type === 'success' || type === 'error') {
-        setTimeout(() => statusDiv.style.display = 'none', 5000);
-      }
-    }
-
-    // ========================================
-    // ✅ JSONP: โหลดข้อมูล HR Master Data
-    // ========================================
-    function loadHRMasterData() {
-      showStatus('⏳ กำลังโหลดข้อมูลพนักงาน...', 'loading');
-
-      const callbackName = 'hrDataCallback_' + Date.now();
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
       
-      window[callbackName] = function(result) {
-        console.log('📊 HR Master Data:', result);
-        
-        if (result.success && result.data) {
-          hrMasterData = result.data;
-          populateRequesterDropdown();
-          applyPrefillData();
-          showStatus('✅ โหลดข้อมูลสำเร็จ (' + hrMasterData.length + ' คน)', 'success');
-        } else {
-          showStatus('❌ ไม่สามารถโหลดข้อมูลได้: ' + (result.message || ''), 'error');
-        }
-        
-        document.body.removeChild(script);
-        delete window[callbackName];
-      };
-
-      const script = document.createElement('script');
-      script.src = CONFIG.APPS_SCRIPT_URL + 
-                   '?action=getHRMasterData' +
-                   '&callback=' + callbackName;
-      
-      script.onerror = function() {
-        showStatus('❌ เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
-        delete window[callbackName];
-      };
-      
-      document.body.appendChild(script);
-    }
-
-    // ========================================
-    // 🔢 JSONP: โหลดเลขเอกสารถัดไป
-    // ========================================
-    function loadDocNo() {
-      const docNoEl = document.getElementById('docNo');
-      if (docNoEl) {
-        docNoEl.textContent = 'กำลังโหลด...';
-      }
-
-      const callbackName = 'docNoCallback_' + Date.now();
-
-      window[callbackName] = function(result) {
-        console.log('📄 Next Doc No:', result);
-
-        if (result && result.success && result.docNo && docNoEl) {
-          docNoEl.textContent = result.docNo;
-        } else if (docNoEl) {
-          docNoEl.textContent = '-';
-        }
-
-        document.body.removeChild(script);
-        delete window[callbackName];
-      };
-
-      const script = document.createElement('script');
-      script.src = CONFIG.APPS_SCRIPT_URL +
-                   '?action=getNextDocNo' +
-                   '&callback=' + callbackName;
-
-      script.onerror = function() {
-        console.error('❌ Error loading next doc no.');
-        if (docNoEl) docNoEl.textContent = '-';
-        delete window[callbackName];
-      };
-
-      document.body.appendChild(script);
-    }
-
-    // ========================================
-    // 📋 Populate Dropdown
-    // ========================================
-    function populateRequesterDropdown() {
-      const select = document.getElementById('name');
-      select.innerHTML = '<option value="">-- เลือกชื่อผู้แจ้ง --</option>';
-      
-      hrMasterData.forEach((person, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = person.name;
-        select.appendChild(option);
-      });
-    }
-
-    // ========================================
-    // 🔄 Prefill Data
-    // ========================================
-    function applyPrefillData() {
-      // ถ้ามีชื่อผู้แจ้งจาก URL → พยายาม match กับ HR master
-      if (prefillData.name) {
-        const matchedIndex = hrMasterData.findIndex(person => person.name === prefillData.name);
-        if (matchedIndex !== -1) {
-          document.getElementById('name').value = matchedIndex;
-          document.getElementById('dept').value = hrMasterData[matchedIndex].dept || '';
-          console.log('✅ Auto-selected requester:', hrMasterData[matchedIndex].name);
-        }
+      if (type === 'success') {
+        notification.style.background = '#10b981';
+      } else if (type === 'info') {
+        notification.style.background = '#3b82f6';
       }
       
-      if (prefillData.purpose) {
-        document.getElementById('purpose').value = prefillData.purpose;
-        console.log('✅ Prefilled purpose:', prefillData.purpose);
-      }
-
-      // ใช้ชื่ออังกฤษผู้ผ่านสัมภาษณ์สร้าง email
-      if (prefillData.candidateEn) {
-        const email = generateEmailFromName(prefillData.candidateEn);
-        document.getElementById('email').value = email;
-        console.log('✅ Candidate email:', prefillData.candidateEn, '→', email);
-      }
+      notification.classList.add('show');
+      notification.classList.remove('hide');
+      
+      setTimeout(() => {
+        notification.classList.add('hide');
+        notification.classList.remove('show');
+        setTimeout(() => notification.classList.remove('hide'), 300);
+      }, 3000);
     }
 
     // ========================================
-    // 👤 Name Change Handler (ไม่ยุ่งกับ email แล้ว)
+    // 🚀 Initialize
     // ========================================
-    document.getElementById('name').addEventListener('change', function() {
-      const index = parseInt(this.value);
-      
-      if (isNaN(index) || index < 0) {
-        document.getElementById('dept').value = '';
-        return;
-      }
-
-      const person = hrMasterData[index];
-      document.getElementById('dept').value = person.dept || '';
-    });
-
-    // ========================================
-    // 📧 Generate Email จากชื่ออังกฤษผู้ผ่านสัมภาษณ์
-    // (first name + 2 ตัวแรกของ last name)
-    // ========================================
-    function generateEmailFromName(fullNameEN) {
-      if (!fullNameEN) return '';
-      const parts = fullNameEN.trim().split(/\s+/);
-      if (parts.length < 2) return fullNameEN.toLowerCase() + '@carpetmaker.co.th';
-      
-      const firstName = parts[0].toLowerCase();
-      const lastName = parts[parts.length - 1].toLowerCase();
-      const lastNamePrefix = lastName.substring(0, 2);
-      
-      return firstName + lastNamePrefix + '@carpetmaker.co.th';
-    }
-
-    // ========================================
-    // 📤 Form Submission (ใช้ fetch POST)
-    // ========================================
-    document.getElementById('itRequestForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      if (!hasSignature) {
-        showStatus('❌ กรุณาวาดลายเซ็นก่อนส่งฟอร์ม', 'error');
-        document.getElementById('signatureCanvas').scrollIntoView({ behavior: 'smooth' });
-        return;
-      }
-
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="spinner"></span>กำลังส่งข้อมูล...';
-
-      showStatus('⏳ กำลังบันทึกข้อมูล...', 'loading');
-
-      const formData = collectFormData();
-      console.log('📦 Form Data:', formData);
-
-      const params = new URLSearchParams();
-      for (const key in formData) {
-        params.append(key, formData[key]);
-      }
-
-      fetch(CONFIG.APPS_SCRIPT_URL, {
-        method: 'POST',
-        body: params,
-        redirect: 'follow'
-      })
-        .then(response => response.text())
-        .then(text => {
-          console.log('📥 Raw Response:', text);
-          
-          try {
-            const result = JSON.parse(text);
-            console.log('✅ Submit Result:', result);
-            
-            if (result.success) {
-              showStatus('✅ บันทึกสำเร็จ! เลขที่คำขอ: ' + result.requestNo, 'success');
-              
-              setTimeout(() => {
-                document.getElementById('itRequestForm').reset();
-                clearSignature();
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'ส่งคำขอ';
-                loadHRMasterData();
-                loadDocNo(); // โหลดเลขใหม่สำหรับคำขอรอบต่อไป
-              }, 2000);
-            } else {
-              showStatus('❌ เกิดข้อผิดพลาด: ' + result.message, 'error');
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = 'ส่งคำขอ';
-            }
-          } catch (error) {
-            console.error('❌ Error parsing response:', error);
-            console.error('Response text:', text);
-            
-            if (text.includes('success') || text.includes('requestNo')) {
-              showStatus('✅ ส่งคำขอสำเร็จแล้ว', 'success');
-              setTimeout(() => {
-                document.getElementById('itRequestForm').reset();
-                clearSignature();
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'ส่งคำขอ';
-                loadHRMasterData();
-                loadDocNo();
-              }, 2000);
-            } else {
-              showStatus('❌ เกิดข้อผิดพลาด: ไม่สามารถอ่าน response ได้', 'error');
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = 'ส่งคำขอ';
-            }
-          }
-        })
-        .catch(error => {
-          console.error('❌ Submit Error:', error);
-          showStatus('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = 'ส่งคำขอ';
-        });
-    });
-
-    // ========================================
-    // 📦 Collect Form Data
-    // ========================================
-    function collectFormData() {
-      const formData = {};
-      const nameSelect = document.getElementById('name');
-      const selectedIndex = parseInt(nameSelect.value);
-
-      if (!isNaN(selectedIndex) && selectedIndex >= 0) {
-        formData['ชื่อผู้แจ้ง'] = hrMasterData[selectedIndex].name;
-      }
-
-      // อีเมลของผู้ผ่านสัมภาษณ์ (จาก input Email)
-      formData['Email'] = document.getElementById('email').value || '';
-
-      formData['แผนกของผู้แจ้ง'] = document.getElementById('dept').value;
-      formData['สำหรับใช้ในงาน (โปรดระบุ)'] = document.getElementById('purpose').value;
-
-      const equipment = [];
-      document.querySelectorAll('input[name="equipment"]:checked').forEach(cb => equipment.push(cb.value));
-      if (document.getElementById('equipOther').checked) {
-        const text = document.getElementById('equipOtherText').value;
-        if (text) equipment.push(text);
-      }
-      formData['ขอเพิ่มอุปกรณ์'] = equipment.join(', ');
-
-      const software = [];
-      document.querySelectorAll('input[name="software"]:checked').forEach(cb => software.push(cb.value));
-      if (document.getElementById('softwareOther').checked) {
-        const text = document.getElementById('softwareOtherText').value;
-        if (text) software.push(text);
-      }
-      formData['โปรแกรมที่ใช้งาน'] = software.join(', ');
-
-      const businessCard = document.querySelector('input[name="businessCard"]:checked');
-      formData['นามบัตร'] = businessCard ? businessCard.value : '';
-
-      const stationery = document.querySelector('input[name="stationery"]:checked');
-      formData['เครื่องเขียน'] = stationery ? stationery.value : '';
-
-      const mobilePhone = document.querySelector('input[name="mobilePhone"]:checked');
-      formData['โทรศัพท์มือถือ'] = mobilePhone ? mobilePhone.value : '';
-      formData['เบอร์โทรศัพท์'] = document.getElementById('phoneNumber').value;
-
-      formData['เหตุผลที่สั่งเพิ่ม'] = document.getElementById('reason').value;
-      formData['Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)'] = document.getElementById('specs').value;
-      formData['ราคา /งบประมาณที่ตั้งไว้ /งบประมาณที่ได้รับการอนุมัติ'] = document.getElementById('budget').value;
-
-      const budgetTypes = [];
-      document.querySelectorAll('input[name="budgetType"]:checked').forEach(cb => budgetTypes.push(cb.value));
-      if (document.getElementById('budgetTypeOther').checked) {
-        const text = document.getElementById('budgetTypeOtherText').value;
-        if (text) budgetTypes.push(text);
-      }
-      formData['การตั้งงบประมาณ'] = budgetTypes.join(', ');
-
-      formData['กำหนดส่งมอบ'] = document.getElementById('deliveryDate').value;
-      formData['requesterSignature'] = canvas.toDataURL('image/png');
-      formData['Time'] = new Date().toISOString();
-
-      // ส่งเลขเอกสารไปด้วย
-      formData['No.'] = document.getElementById('docNo')?.textContent || '';
-
-      return formData;
-    }
-
-    // ========================================
-    // 🚀 Initialize on Load
-    // ========================================
-    window.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Initializing IT Request Form...');
-      initCanvas();
-      loadHRMasterData();
-      loadDocNo();
+    console.log('🎯 HR Document Management System Loaded');
+    console.log('📋 Systems:', {
+      'IT Request': '✅ Active',
+      'Action Form': '🔄 Coming Soon'
     });
   </script>
 </body>
