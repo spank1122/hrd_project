@@ -123,7 +123,7 @@
     // ========================================
     const CONFIG = {
       WEB_APP_URL: "https://script.google.com/macros/s/AKfycby8mvClK8QLmiSVyu91y4M1qaRt1xpRBIRPkbSAsh1rRXJP_u3iF1Ic2j1k8WTkb0-e0g/exec",
-      FORM_URL: "https://spank1122.github.io/hrd_project/form.html"
+      FORM_URL: "https://spank1122.github.io/hrd_project/form.html/"
     };
 
     let allCandidates = [];
@@ -254,13 +254,14 @@ function renderList(data) {
     // ========================================
     function openITRequestForm(email, purpose, fullname, dept, candidateEn) {
   const params = new URLSearchParams();
-  if (email) params.append('email', email);          // อีเมลที่ generate จาก Apps Script
-  if (fullname) params.append('name', fullname);     // ชื่อไทย (ไว้ใช้อนาคตได้)
-  if (dept) params.append('dept', dept);             // แผนก
-  if (purpose) params.append('purpose', purpose);    // ตำแหน่ง /คำนำหน้า ชื่อไทย /ชื่อ EN
-  if (candidateEn) params.append('candidateEn', candidateEn); // ชื่ออังกฤษดิบ
+  if (email)      params.append('email', email);
+  if (fullname)   params.append('name', fullname);
+  if (dept)       params.append('dept', dept);
+  if (purpose)    params.append('purpose', purpose);
+  if (candidateEn)params.append('candidateEn', candidateEn);
 
   const url = `${CONFIG.FORM_URL}?${params.toString()}`;
+  console.log('IT Form URL =', url);  // 👈 ใส่บรรทัดนี้ช่วย debug
   window.open(url, '_blank');
 }
 
