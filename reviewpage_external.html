@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <title>ทบทวนคำขอ IT Request</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        font-family: "Sarabun", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f4f4fb;
+        margin: 0;
+        padding: 24px;
+      }
+      .page {
+        max-width: 880px;
+        margin: 0 auto;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        padding: 20px 24px;
+        margin-bottom: 16px;
+      }
+      .header {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .sub {
+        font-size: 13px;
+        color: #666;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        margin: 4px 0;
+        font-size: 14px;
+      }
+      .row-label {
+        width: 140px;
+        color: #555;
+      }
+      .row-value {
+        flex: 1;
+        font-weight: 500;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .badge-pending {
+        background: #e0f2fe;
+        color: #1d4ed8;
+      }
+      .badge-approved {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .badge-rejected {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+      canvas {
+        border: 2px dashed #d4d4d8;
+        border-radius: 8px;
+        width: 100%;
+        background: #fff;
+        margin: 10px 0 8px;
+      }
+      .btn {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg,#6366f1,#7c3aed);
+        color: #fff;
+      }
+      .btn-primary:disabled {
+        background: #c4c4d8;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background: #fff;
+        border: 1px solid #d4d4d8;
+        color: #4b5563;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 80px;
+        border-radius: 8px;
+        border: 1px solid #d4d4d8;
+        padding: 8px 10px;
+        font-family: inherit;
+        font-size: 13px;
+      }
+      .status {
+        margin-top: 10px;
+        font-size: 13px;
+        padding: 10px;
+        border-radius: 8px;
+        display: none;
+      }
+      .status-info    { background:#eff6ff; color:#1d4ed8; }
+      .status-success { background:#dcfce7; color:#166534; }
+      .status-error   { background:#fee2e2; color:#b91c1c; }
+      .radio-group {
+        display: flex;
+        gap: 16px;
+        margin-top: 4px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- หัวข้อ -->
+      <div class="card">
+        <div class="header">📝 ทบทวนคำขอเพิ่ม IT</div>
+        <div class="sub" id="subtitle">กำลังโหลดรายละเอียดคำขอ...</div>
+      </div>
+
+      <!-- รายละเอียดคำขอ -->
+      <div class="card" id="requestCard" style="display:none;">
+        <div class="row">
+          <div class="row-label">เลขที่คำขอ</div>
+          <div class="row-value" id="reqNo"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">ผู้แจ้ง</div>
+          <div class="row-value" id="reqName"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">แผนก</div>
+          <div class="row-value" id="reqDept"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">สถานะปัจจุบัน</div>
+          <div class="row-value" id="reqStatus"></div>
+        </div>
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <div class="row">
+          <div class="row-label">สำหรับใช้ในงาน</div>
+          <div class="row-value" id="forWork"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">เหตุผลที่สั่งเพิ่ม</div>
+          <div class="row-value" id="reason"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">อุปกรณ์</div>
+          <div class="row-value" id="items"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">โปรแกรม</div>
+          <div class="row-value" id="programs"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">งบประมาณ</div>
+          <div class="row-value" id="budget"></div>
+        </div>
+      </div>
+
+      <!-- โซนการตัดสินใจ + ลายเซ็น -->
+      <div class="card" id="reviewCard" style="display:none;">
+        <div class="header" style="font-size:16px;">การทบทวนและลงลายเซ็น</div>
+        <div class="radio-group">
+          <label><input type="radio" name="reviewAction" value="Approved" checked> อนุมัติ</label>
+          <label><input type="radio" name="reviewAction" value="Rejected"> ไม่อนุมัติ</label>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div style="font-size:14px; margin-bottom:4px;">ความคิดเห็นเพิ่มเติม</div>
+          <textarea id="comment" placeholder="ระบุหมายเหตุถ้ามี"></textarea>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
+          <canvas id="signCanvas" width="800" height="200"></canvas>
+          <button class="btn btn-secondary" type="button" id="clearSignBtn">ล้างลายเซ็น</button>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="button" id="submitBtn">บันทึกผลการทบทวน</button>
+        </div>
+
+        <div id="statusBox" class="status"></div>
+      </div>
+    </div>
+
+    <script>
+      // 🔗 ใส่ URL Web App ของ UnifiedWebApp.gs ตรงนี้
+      const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+
+      let requestNo = '';
+      let sessionId = '';
+      let canvas, ctx, isDrawing = false, hasSignature = false;
+
+      // ---------- helper: query param ----------
+      function getQueryParam(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name) || '';
+      }
+
+      // ---------- helper status ----------
+      function setStatus(msg, type) {
+        const box = document.getElementById('statusBox');
+        box.textContent = msg;
+        box.style.display = 'block';
+        box.className = 'status status-' + type;
+      }
+
+      // ---------- canvas ----------
+      function initCanvas() {
+        canvas = document.getElementById('signCanvas');
+        ctx = canvas.getContext('2d');
+        ctx.strokeStyle = '#111827';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
+
+        canvas.addEventListener('touchstart', handleTouch);
+        canvas.addEventListener('touchmove', handleTouch);
+        canvas.addEventListener('touchend', stopDraw);
+      }
+
+      function startDraw(e) {
+        isDrawing = true;
+        hasSignature = true;
+        const r = canvas.getBoundingClientRect();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - r.left, e.clientY - r.top);
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        const r = canvas.getBoundingClientRect();
+        ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+        ctx.stroke();
+      }
+
+      function stopDraw() {
+        isDrawing = false;
+      }
+
+      function handleTouch(e) {
+        e.preventDefault();
+        const t = e.touches[0];
+        const type =
+          e.type === 'touchstart' ? 'mousedown' :
+          e.type === 'touchmove'  ? 'mousemove' : 'mouseup';
+        const ev = new MouseEvent(type, {
+          clientX: t.clientX,
+          clientY: t.clientY
+        });
+        canvas.dispatchEvent(ev);
+      }
+
+      function clearSignature() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasSignature = false;
+      }
+
+      // ---------- generic JSONP helper ----------
+      function jsonpCall(params, callback) {
+        const callbackName = 'WF_JSONP_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+        params = params || {};
+        params.callback = callbackName;
+
+        // ประกอบ URL
+        const query = Object.keys(params)
+          .map(k => k + '=' + encodeURIComponent(params[k]))
+          .join('&');
+
+        const url = WEB_APP_URL + '?' + query;
+
+        const script = document.createElement('script');
+        script.src = url;
+
+        window[callbackName] = function(res) {
+          try {
+            callback(res);
+          } finally {
+            // cleanup
+            delete window[callbackName];
+            if (script.parentNode) {
+              script.parentNode.removeChild(script);
+            }
+          }
+        };
+
+        script.onerror = function() {
+          callback({
+            success: false,
+            message: 'โหลด JSONP ไม่สำเร็จ'
+          });
+          delete window[callbackName];
+          if (script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+        };
+
+        document.body.appendChild(script);
+      }
+
+      // ---------- load data from server (JSONP) ----------
+      function loadRequest() {
+        document.getElementById('subtitle').textContent =
+          'กำลังโหลดรายละเอียดคำขอ #' + requestNo + ' ...';
+
+        jsonpCall(
+          {
+            action: 'getWorkflowRequest',
+            requestNo: requestNo,
+            session: sessionId
+          },
+          function(res) {
+            console.log('JSONP getWorkflowRequest result:', res);
+
+            if (!res || !res.success) {
+              const msg = (res && res.message)
+                ? res.message
+                : ('res = ' + JSON.stringify(res));
+              document.getElementById('subtitle').textContent =
+                'ไม่สามารถโหลดข้อมูลได้: ' + msg;
+              return;
+            }
+
+            const d = res.data || {};
+
+            document.getElementById('requestCard').style.display = 'block';
+            document.getElementById('reviewCard').style.display = 'block';
+
+            document.getElementById('reqNo').textContent   = d.requestNo || '';
+            document.getElementById('reqName').textContent = d.requesterName || '-';
+            document.getElementById('reqDept').textContent = d.requesterDept || '-';
+
+            const statusEl = document.getElementById('reqStatus');
+            const st = (d.status || 'Pending Review');
+            let cls = 'badge badge-pending';
+            if (st === 'Approved') cls = 'badge badge-approved';
+            else if (st.indexOf('Rejected') === 0) cls = 'badge badge-rejected';
+            statusEl.innerHTML = '<span class="'+cls+'">'+st+'</span>';
+
+            document.getElementById('forWork').textContent  = d.forWork   || '-';
+            document.getElementById('reason').textContent   = d.reason    || '-';
+            document.getElementById('items').textContent    = d.itemRequest || '-';
+            document.getElementById('programs').textContent = d.programUse  || '-';
+            document.getElementById('budget').textContent   = d.budget     || '-';
+
+            document.getElementById('subtitle').textContent =
+              'โปรดตรวจสอบรายละเอียดด้านล่าง และทบทวนคำขอ';
+          }
+        );
+      }
+
+      // ---------- submit review (JSONP) ----------
+      function submitReview() {
+        if (!hasSignature) {
+          setStatus('กรุณาวาดลายเซ็นก่อนบันทึก', 'error');
+          canvas.scrollIntoView({behavior: 'smooth', block: 'center'});
+          return;
+        }
+
+        const actionEl = document.querySelector('input[name="reviewAction"]:checked');
+        const action = actionEl ? actionEl.value : 'Approved';
+        const comment = document.getElementById('comment').value || '';
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        setStatus('กำลังบันทึกผลการทบทวน...', 'info');
+
+        const signatureData = canvas.toDataURL('image/png');
+
+        jsonpCall(
+          {
+            action: 'saveReviewAction',
+            requestNo: requestNo,
+            session: sessionId,
+            reviewAction: action,
+            signature: signatureData,
+            comment: comment
+          },
+          function(res) {
+            console.log('JSONP saveReviewAction result:', res);
+            if (!res || !res.success) {
+              const msg = (res && res.message)
+                ? res.message
+                : ('res = ' + JSON.stringify(res));
+              setStatus('บันทึกไม่สำเร็จ: ' + msg, 'error');
+              btn.disabled = false;
+              return;
+            }
+            setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
+          }
+        );
+      }
+
+      // ---------- init ----------
+      window.addEventListener('DOMContentLoaded', function() {
+        console.log('Review page (external JSONP) DOMContentLoaded');
+
+        initCanvas();
+        document.getElementById('clearSignBtn').addEventListener('click', clearSignature);
+        document.getElementById('submitBtn').addEventListener('click', submitReview);
+
+        // อ่าน requestNo & session จาก query string
+        requestNo = getQueryParam('requestNo');
+        sessionId = getQueryParam('session');
+
+        console.log('query requestNo:', requestNo, 'session:', sessionId);
+
+        if (!requestNo || !sessionId) {
+          document.getElementById('subtitle').textContent =
+            'ลิงก์ไม่ถูกต้อง (ขาด requestNo หรือ session)';
+          return;
+        }
+
+        loadRequest();
+      });
+    </script>
+  </body>
+</html>
