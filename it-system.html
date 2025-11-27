@@ -123,7 +123,7 @@
     // ========================================
     const CONFIG = {
       WEB_APP_URL: "https://script.google.com/macros/s/AKfycby8mvClK8QLmiSVyu91y4M1qaRt1xpRBIRPkbSAsh1rRXJP_u3iF1Ic2j1k8WTkb0-e0g/exec",
-      FORM_URL: "https://spank1122.github.io/hrd_project/form.html/"
+      FORM_URL: "https://spank1122.github.io/hrd_project/form.html"
     };
 
     let allCandidates = [];
@@ -183,56 +183,56 @@
     // ========================================
     // RENDER LIST
     // ========================================
-function renderList(data) {
-  const listContainer = document.getElementById('candidatesList');
-  let html = '';
+    function renderList(data) {
+      const listContainer = document.getElementById('candidatesList');
+      let html = '';
 
-  if (!data || data.length === 0) {
-    listContainer.innerHTML =
-      '<div style="text-align:center; padding:20px; color:#666;">❌ ไม่พบข้อมูลผู้ผ่านการสัมภาษณ์</div>';
-    return;
-  }
+      if (!data || data.length === 0) {
+        listContainer.innerHTML =
+          '<div style="text-align:center; padding:20px; color:#666;">❌ ไม่พบข้อมูลผู้ผ่านการสัมภาษณ์</div>';
+        return;
+      }
 
-  data.forEach(item => {
-    html += `
-      <div class="candidate-card">
-        <div class="info-row">
-          <div class="info-label">👤 ชื่อ-สกุล (TH):</div>
-          <div class="info-value"><strong>${item.name || '-'}</strong></div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">🔤 ชื่อ-สกุล (EN):</div>
-          <div class="info-value">${item.nameEN || '-'}</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">💼 ตำแหน่ง:</div>
-          <div class="info-value">${item.position || '-'}</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">🏢 ส่วนงาน:</div>
-          <div class="info-value">${item.dept || '-'}</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">📱 เบอร์โทร:</div>
-          <div class="info-value">${item.phone || '-'}</div>
-        </div>
-        
-        <button class="btn btn-primary"
-          onclick="openITRequestForm(
-            '${item.email || ''}',
-            '${item.purpose || ''}',
-            '${item.name || ''}',
-            '${item.dept || ''}',
-            '${item.nameEN || ''}'
-          )">
-          🖊️ เปิดฟอร์มขอเพิ่ม IT
-        </button>
-      </div>
-    `;
-  });
+      data.forEach(item => {
+        html += `
+          <div class="candidate-card">
+            <div class="info-row">
+              <div class="info-label">👤 ชื่อ-สกุล (TH):</div>
+              <div class="info-value"><strong>${item.name || '-'}</strong></div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">🔤 ชื่อ-สกุล (EN):</div>
+              <div class="info-value">${item.nameEN || '-'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">💼 ตำแหน่ง:</div>
+              <div class="info-value">${item.position || '-'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">🏢 ส่วนงาน:</div>
+              <div class="info-value">${item.dept || '-'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">📱 เบอร์โทร:</div>
+              <div class="info-value">${item.phone || '-'}</div>
+            </div>
+            
+            <button class="btn btn-primary"
+              onclick="openITRequestForm(
+                '${item.email || ''}',
+                '${item.purpose || ''}',
+                '${item.name || ''}',
+                '${item.dept || ''}',
+                '${item.nameEN || ''}'
+              )">
+              🖊️ เปิดฟอร์มขอเพิ่ม IT
+            </button>
+          </div>
+        `;
+      });
 
-  listContainer.innerHTML = html;
-}
+      listContainer.innerHTML = html;
+    }
 
     // ========================================
     // SEARCH
@@ -253,17 +253,24 @@ function renderList(data) {
     // OPEN IT FORM (GitHub)
     // ========================================
     function openITRequestForm(email, purpose, fullname, dept, candidateEn) {
-  const params = new URLSearchParams();
-  if (email)      params.append('email', email);
-  if (fullname)   params.append('name', fullname);
-  if (dept)       params.append('dept', dept);
-  if (purpose)    params.append('purpose', purpose);
-  if (candidateEn)params.append('candidateEn', candidateEn);
+      const params = new URLSearchParams();
+      if (email)      params.append('email', email);
+      if (fullname)   params.append('name', fullname);
+      if (dept)       params.append('dept', dept);
+      if (purpose)    params.append('purpose', purpose);
+      if (candidateEn)params.append('candidateEn', candidateEn);
 
-  const url = `${CONFIG.FORM_URL}?${params.toString()}`;
-  console.log('IT Form URL =', url);  // 👈 ใส่บรรทัดนี้ช่วย debug
-  window.open(url, '_blank');
-}
+      const url = `${CONFIG.FORM_URL}?${params.toString()}`;
+      console.log('IT Form URL =', url);
+      window.open(url, '_blank');
+    }
+
+    // ========================================
+    // INIT
+    // ========================================
+    window.onload = () => {
+      loadCandidatesFromSheet();
+    };
 
   </script>
 </body>
