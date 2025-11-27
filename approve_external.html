@@ -235,6 +235,7 @@
         script.src = WEB_APP_URL + '?' + buildQuery(params);
 
         let timeoutId;
+        const timeoutMs = (action === 'saveApproveAction') ? 60000 : 15000;
 
         window[cbName] = function(res) {
           console.log('JSONP', action, 'result:', res);
@@ -254,14 +255,14 @@
           delete window[cbName];
         }
 
-        timeoutId = setTimeout(function() {
-          console.error('JSONP', action, 'timeout');
-          cleanup();
-          callback && callback({ success: false, message: 'timeout' });
-        }, 15000);
+         timeoutId = setTimeout(function() {
+    console.error('JSONP', action, 'timeout');
+    cleanup();
+    callback && callback({ success: false, message: 'timeout' });
+  }, timeoutMs);
 
-        document.body.appendChild(script);
-      }
+  document.body.appendChild(script);
+}
 
       // ---------- canvas ----------
       function initCanvas() {
