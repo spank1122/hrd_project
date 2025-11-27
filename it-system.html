@@ -102,8 +102,7 @@
         <div id="loader" class="loader"></div>
         <div id="errorMessage" style="color: red; text-align: center; display: none;"></div>
 
-        <div id="candidatesList">
-          </div>
+        <div id="candidatesList"></div>
       </div>
 
       <div id="menu2" class="menu-content">
@@ -123,8 +122,8 @@
     // 🔧 Configuration
     // ========================================
     const CONFIG = {
-      // URL ของ Web App นี้ หรือ URL ปลายทางของฟอร์ม
-      FORM_URL: 'https://spank1122.github.io/hrd_project/' 
+      WEB_APP_URL: 'https://script.google.com/macros/s/AKfycby8mvClK8QLmiSVyu91y4M1qaRt1xpRBIRPkbSAsh1rRXJP_u3iF1Ic2j1k8WTkb0-e0g/exec',
+      FORM_URL: 'https://spank1122.github.io/hrd_project/'
     };
 
     // ตัวแปรเก็บข้อมูลดิบเพื่อใช้ในการค้นหา (Client-side search)
@@ -141,49 +140,61 @@
     }
 
     // ========================================
-    // 📥 Server Communication
+    // 📥 Server Communication (JSONP)
     // ========================================
-    
-    // เรียกฟังก์ชันนี้ทันทีเมื่อโหลดหน้าเว็บ
     function loadCandidatesFromSheet() {
-      // แสดง Loader
       document.getElementById('loader').style.display = 'block';
       document.getElementById('candidatesList').innerHTML = '';
       document.getElementById('errorMessage').style.display = 'none';
 
-      // เรียก Function ฝั่ง Server: getITCandidatesFromHRD()
-      google.script.run
-        .withSuccessHandler(displayCandidates)
-        .withFailureHandler(onFailure)
-        .getITCandidatesFromHRD();
+      // สร้าง URL สำหรับ JSONP
+      const callbackName = 'onCandidatesLoaded';
+      const url = CONFIG.WEB_APP_URL +
+                  '?action=getCandidates' +
+                  '&callback=' + callbackName +
+                  '&_=' + Date.now(); // กัน cache
+
+      const script = document.createElement('script');
+      script.src = url;
+      script.onerror = function() {
+        document.getElementById('loader').style.display = 'none';
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.style.display = 'block';
+        errorDiv.innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อ (โหลดสคริปต์ JSONP ไม่สำเร็จ)';
+      };
+      document.body.appendChild(script);
     }
 
-    // ฟังก์ชันแสดงผลเมื่อได้ข้อมูลกลับมา
-    function displayCandidates(data) {
-      // ซ่อน Loader
+    // callback ที่ Apps Script จะเรียกผ่าน JSONP
+    function onCandidatesLoaded(result) {
       document.getElementById('loader').style.display = 'none';
-      const listContainer = document.getElementById('candidatesList');
-      
-      // เก็บข้อมูลลงตัวแปร Global เพื่อใช้ค้นหา
-      allCandidates = data;
 
-      if (!data || data.length === 0) {
-        listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">❌ ไม่พบข้อมูลผู้ผ่านการสัมภาษณ์</div>';
+      if (!result || !result.success) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.style.display = 'block';
+        errorDiv.innerText =
+          'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + (result && result.message ? result.message : 'ข้อมูลว่างเปล่า');
         return;
       }
 
-      renderList(data);
+      allCandidates = result.data || [];
+      if (allCandidates.length === 0) {
+        document.getElementById('candidatesList').innerHTML =
+          '<div style="text-align:center; padding:20px; color:#666;">❌ ไม่พบข้อมูลผู้ผ่านการสัมภาษณ์</div>';
+        return;
+      }
+
+      renderList(allCandidates);
     }
 
-    // ฟังก์ชันวาด HTML (แยกออกมาเพื่อให้ Re-render ตอนค้นหาได้)
+    // ========================================
+    // ฟังก์ชันวาด HTML รายชื่อ
+    // ========================================
     function renderList(data) {
       const listContainer = document.getElementById('candidatesList');
       let html = '';
 
       data.forEach(item => {
-        // สร้าง Email จำลองจากชื่อภาษาอังกฤษ (เนื่องจากในชีตไม่มี Email)
-        // สูตร: ชื่อภาษาอังกฤษ(ตัดช่องว่าง)(ตัวเล็ก) + @carpetmaker.co.th
-        // หากไม่มีชื่ออังกฤษ ให้เป็นค่าว่าง
         let generatedEmail = '';
         if (item.nameEN) {
           generatedEmail = item.nameEN.replace(/\s+/g, '').toLowerCase() + '@carpetmaker.co.th';
@@ -212,7 +223,8 @@
               <div class="info-value">${item.phone || '-'}</div>
             </div>
             
-            <button class="btn btn-primary" onclick="openITRequestForm('${generatedEmail}', '${item.position}', '${item.name}', '${item.dept}')">
+            <button class="btn btn-primary"
+              onclick="openITRequestForm('${generatedEmail}', '${item.position || ''}', '${item.name || ''}', '${item.dept || ''}')">
               🖊️ เปิดฟอร์มขอเพิ่ม IT
             </button>
           </div>
@@ -220,14 +232,6 @@
       });
 
       listContainer.innerHTML = html;
-    }
-
-    // จัดการกรณี Error
-    function onFailure(error) {
-      document.getElementById('loader').style.display = 'none';
-      const errorDiv = document.getElementById('errorMessage');
-      errorDiv.style.display = 'block';
-      errorDiv.innerHTML = 'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + error.message;
     }
 
     // ========================================
@@ -250,19 +254,15 @@
     // 📝 Open IT Request Form
     // ========================================
     function openITRequestForm(email, position, fullname, dept) {
-      // สร้าง URL Query Params
-      // หมายเหตุ: purpose ในที่นี้ผมเอา ชื่อ + ตำแหน่งไปใส่รวมกัน
       const purposeVal = `${position} / ${fullname}`;
       
       const params = new URLSearchParams();
-      if(email) params.append('email', email);
-      if(fullname) params.append('name', fullname); // ส่งชื่อไปด้วยเผื่อฟอร์มใช้
-      if(dept) params.append('dept', dept);         // ส่งแผนกไปด้วย
+      if (email)    params.append('email', email);
+      if (fullname) params.append('name', fullname);
+      if (dept)     params.append('dept', dept);
       params.append('purpose', purposeVal);
 
       const url = `${CONFIG.FORM_URL}?${params.toString()}`;
-      
-      // เปิดแท็บใหม่
       window.open(url, '_blank');
       console.log('Opening:', url);
     }
@@ -272,9 +272,8 @@
     // ========================================
     window.onload = function() {
       console.log('🚀 System Loaded');
-      loadCandidatesFromSheet(); // เริ่มดึงข้อมูลทันทีเมื่อเปิดเว็บ
+      loadCandidatesFromSheet();
     };
-
   </script>
 </body>
 </html>
