@@ -89,6 +89,7 @@
       }
       .actions {
         display: flex;
+        justify-content: flex-start;
         gap: 8px;
         margin-top: 12px;
       }
@@ -186,11 +187,12 @@
           <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
           <!-- ขนาดจริงของ canvas (พิกเซล) ต้องตรงกับ CSS -->
           <canvas id="signCanvas" width="300" height="120"></canvas>
-          <button class="btn btn-secondary" type="button" id="clearSignBtn">ล้างลายเซ็น</button>
+          
         </div>
 
         <div class="actions">
           <button class="btn btn-primary" type="button" id="submitBtn">บันทึกผลการทบทวน</button>
+          <button class="btn btn-secondary" type="button" id="clearSignBtn">ล้างลายเซ็น</button>
         </div>
 
         <div id="statusBox" class="status"></div>
