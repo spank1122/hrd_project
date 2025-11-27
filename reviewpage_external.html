@@ -55,12 +55,15 @@
       .badge-approved { background: #dcfce7; color: #166534; }
       .badge-rejected { background: #fee2e2; color: #b91c1c; }
 
+      /* ❗ ปรับตรงนี้: ใช้ขนาดคงที่ให้ตรงกับ width/height ของ canvas */
       canvas {
         border: 2px dashed #d4d4d8;
         border-radius: 8px;
-        width: 100%;           /* ยืดเต็มความกว้างการ์ด */
+        width: 300px;   /* ตรงกับ attribute width */
+        height: 120px;  /* ตรงกับ attribute height */
         background: #fff;
         margin: 10px 0 8px;
+        touch-action: none; /* กัน browser scroll ตอนลากนิ้ว */
       }
 
       .btn {
@@ -181,7 +184,7 @@
 
         <div style="margin-top:16px;">
           <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
-          <!-- ขนาดจริงของ canvas (พิกเซล) -->
+          <!-- ขนาดจริงของ canvas (พิกเซล) ต้องตรงกับ CSS -->
           <canvas id="signCanvas" width="300" height="120"></canvas>
           <button class="btn btn-secondary" type="button" id="clearSignBtn">ล้างลายเซ็น</button>
         </div>
@@ -211,7 +214,7 @@
         box.className = 'status status-' + type;
       }
 
-      // ---------- JSONP helper (ใช้ทั้ง get & save) ----------
+      // ---------- JSONP helper ----------
       function buildQuery(params) {
         return Object.keys(params)
           .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
@@ -249,7 +252,6 @@
           delete window[cbName];
         }
 
-        // กันเผื่อ script ไม่ตอบเลย
         timeoutId = setTimeout(function() {
           console.error('JSONP', action, 'timeout');
           cleanup();
@@ -272,37 +274,28 @@
         canvas.addEventListener('mouseup', stopDraw);
         canvas.addEventListener('mouseleave', stopDraw);
 
-        canvas.addEventListener('touchstart', handleTouch);
-        canvas.addEventListener('touchmove', handleTouch);
-        canvas.addEventListener('touchend', stopDraw);
+        canvas.addEventListener('touchstart', startDrawTouch, { passive: false });
+        canvas.addEventListener('touchmove', drawTouch, { passive: false });
+        canvas.addEventListener('touchend', stopDrawTouch, { passive: false });
       }
 
-      // ✅ แปลงตำแหน่งเมาส์/นิ้ว → พิกัดจริงบน canvas (คำนึงถึงการ scale width:100%)
-      function getCanvasPos(e) {
-        const rect   = canvas.getBoundingClientRect();
-        const scaleX = canvas.width  / rect.width;
-        const scaleY = canvas.height / rect.height;
-
-        return {
-          x: (e.clientX - rect.left) * scaleX,
-          y: (e.clientY - rect.top)  * scaleY
-        };
-      }
-
+      // เมาส์: ใช้ offsetX / offsetY ให้ตรงเป๊ะ
       function startDraw(e) {
         e.preventDefault();
         isDrawing = true;
         hasSignature = true;
-        const p = getCanvasPos(e);
+        const x = e.offsetX;
+        const y = e.offsetY;
         ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
+        ctx.moveTo(x, y);
       }
 
       function draw(e) {
         if (!isDrawing) return;
         e.preventDefault();
-        const p = getCanvasPos(e);
-        ctx.lineTo(p.x, p.y);
+        const x = e.offsetX;
+        const y = e.offsetY;
+        ctx.lineTo(x, y);
         ctx.stroke();
       }
 
@@ -311,23 +304,39 @@
         isDrawing = false;
       }
 
-      function handleTouch(e) {
+      // ทัช: แปลงจาก clientX/clientY → พิกัดบน canvas (แบบไม่ scale)
+      function getTouchPos(touch) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top
+        };
+      }
+
+      function startDrawTouch(e) {
         e.preventDefault();
         const t = e.touches[0] || e.changedTouches[0];
         if (!t) return;
+        const pos = getTouchPos(t);
+        isDrawing = true;
+        hasSignature = true;
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
 
-        const fakeEvent = {
-          clientX: t.clientX,
-          clientY: t.clientY
-        };
+      function drawTouch(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const t = e.touches[0] || e.changedTouches[0];
+        if (!t) return;
+        const pos = getTouchPos(t);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      }
 
-        if (e.type === 'touchstart') {
-          startDraw(fakeEvent);
-        } else if (e.type === 'touchmove') {
-          draw(fakeEvent);
-        } else if (e.type === 'touchend') {
-          stopDraw(fakeEvent);
-        }
+      function stopDrawTouch(e) {
+        e.preventDefault();
+        isDrawing = false;
       }
 
       function clearSignature() {
@@ -398,9 +407,8 @@
         btn.disabled = true;
         setStatus('กำลังบันทึกผลการทบทวน...', 'info');
 
-        // ใช้ JPEG + quality 0.4 เพื่อลดขนาด
         const dataUrl = canvas.toDataURL('image/jpeg', 0.4);
-        const base64  = dataUrl.split(',')[1] || dataUrl;   // ส่งเฉพาะ base64
+        const base64  = dataUrl.split(',')[1] || dataUrl;
         console.log('signature dataUrl length =', dataUrl.length);
         console.log('signature base64 length  =', base64.length);
 
@@ -408,7 +416,7 @@
           requestNo: requestNo,
           session:   sessionId,
           reviewAction: action,
-          signature: base64,   // ส่งเฉพาะ base64
+          signature: base64,
           comment:   comment
         };
 
@@ -430,7 +438,6 @@
         document.getElementById('clearSignBtn').addEventListener('click', clearSignature);
         document.getElementById('submitBtn').addEventListener('click', submitReview);
 
-        // อ่าน query string ด้วย window.location
         const params = new URLSearchParams(window.location.search);
         requestNo = params.get('requestNo') || '';
         sessionId = params.get('session') || '';
@@ -447,4 +454,3 @@
     </script>
   </body>
 </html>
-
