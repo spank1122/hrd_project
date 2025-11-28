@@ -708,61 +708,279 @@
   </div>
 
   <script>
-    // ===== ฟอร์ม submit (ตัวอย่าง) =====
+    // ========= CONFIG เชื่อม Apps Script =========
+    const WEB_APP_URL =
+      'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+
+    // เก็บข้อมูลพนักงานที่โหลดมาจาก Apps Script
+    let employeeList = [];
+
+    // ===== ฟอร์ม submit =====
     document
       .getElementById('hrDocForm')
       .addEventListener('submit', handleSubmit);
 
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
       e.preventDefault();
+
+      const form = e.target;
+      const submitBtn = form.querySelector('.btn-primary');
+
+      if (!WEB_APP_URL) {
+        alert('ยังไม่ได้ตั้งค่า WEB_APP_URL');
+        return;
+      }
 
       // ก่อนส่ง เก็บลายเซ็นจาก canvas ลง hidden input
       saveSignatureToInput();
 
-      const form = e.target;
+      const empSelect = document.getElementById('employeeName');
+      const selectedValue = empSelect.value;
+      if (!selectedValue) {
+        alert('กรุณาเลือกพนักงาน');
+        return;
+      }
+
+      const selectedOption = empSelect.options[empSelect.selectedIndex];
+
       const data = new FormData(form);
       const json = Object.fromEntries(data.entries());
 
-      console.log('HR Document payload:', json);
-      alert('ยังไม่ได้เชื่อมต่อ Apps Script\nดู payload (รวมลายเซ็น) ได้ใน Console ของ Browser');
+      // สร้างข้อมูล actionType / actionLabel / actionDetail จาก radio + ช่อง From/To
+      const actionInfo = buildActionInfo(json);
+      if (!actionInfo) {
+        alert('กรุณาเลือกประเภทการดำเนินการอย่างน้อย 1 รายการ');
+        return;
+      }
 
-      // ตัวอย่างตอนเชื่อมจริง:
-      // fetch(WEB_APP_URL, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ action: 'createDocument', data: json })
-      // })
-      //   .then(r => r.json())
-      //   .then(res => { ... });
+      // ดึงข้อมูลพนักงานจาก data-* ของ option
+      const payload = {
+        empCode: selectedOption.dataset.code || '',
+        empName: selectedOption.dataset.name || json.empName || '',
+        empPosition: selectedOption.dataset.position || '',
+        empDepartment: selectedOption.dataset.department || '',
+        empDivision: selectedOption.dataset.division || '',
+        company: selectedOption.dataset.company || '',
+        employmentType: selectedOption.dataset.employmentType || '',
+        empEmail: selectedOption.dataset.email || '',
+        effectiveDate: json.effectiveDate || '',
+        details: json.details || '',
+        actionType: actionInfo.actionType,
+        actionLabel: actionInfo.actionLabel,
+        actionDetail: actionInfo.actionDetail,
+        proposerSignature: json.proposerSignature || ''
+      };
+
+      console.log('ส่ง payload ไป Apps Script:', payload);
+
+      // ส่งไป Apps Script
+      submitBtn.disabled = true;
+      const oldText = submitBtn.textContent;
+      submitBtn.textContent = 'กำลังบันทึก...';
+
+      try {
+        const res = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'createDocument',
+            data: payload
+          })
+        });
+
+        const result = await res.json();
+        console.log('response จาก Apps Script:', result);
+
+        if (result.success) {
+          alert('บันทึกใบดำเนินการเรียบร้อย\nเลขที่เอกสาร: ' + result.docNumber);
+          // ถ้าอยากล้างฟอร์มให้เริ่มใหม่
+          // form.reset();
+          // clearSignature();
+        } else {
+          alert('บันทึกไม่สำเร็จ: ' + (result.message || 'Unknown error'));
+        }
+      } catch (err) {
+        console.error(err);
+        alert('เกิดข้อผิดพลาดขณะเชื่อมต่อ Apps Script: ' + err);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = oldText;
+      }
     }
 
-    // ===== Mock รายชื่อพนักงาน (เอาไว้เทสหน้าฟรอนต์) =====
-    (function mockEmployees() {
-      const sel = document.getElementById('employeeName');
-      sel.innerHTML = `
-        <option value="">-- เลือกพนักงาน --</option>
-        <option value="EMP001|นิดหน่อย ต่อยใช้หนี้|Engineer|ส่วนตัว|พัฒนาบุคลากรฯ|รายเดือน|2024-01-15">
-          นิดหน่อย ต่อยใช้หนี้ (Engineer)
-        </option>
-      `;
+    // แปลงค่าจาก radio + ช่องกรอก เป็น actionType/actionLabel/actionDetail
+    function buildActionInfo(json) {
+      const type = json.proceedType || '';
+      if (!type) return null;
 
-      sel.addEventListener('change', () => {
-        const v = sel.value;
-        if (!v) {
-          document.getElementById('empCodePosition').value = '- / -';
-          document.getElementById('deptDivision').value = '- / -';
-          document.getElementById('empTypeStart').value = '- / -';
+      switch (type) {
+        case 'appoint':
+          return {
+            actionType: 'appoint',
+            actionLabel: 'แต่งตั้ง',
+            actionDetail: 'แต่งตั้งเป็น ' + (json.appoint_to || '')
+          };
+        case 'transfer':
+          return {
+            actionType: 'transfer',
+            actionLabel: 'โอนย้าย',
+            actionDetail:
+              'โอนย้ายจากเดิม ' +
+              (json.transfer_from || '') +
+              ' เป็น ' +
+              (json.transfer_to || '')
+          };
+        case 'change_condition':
+          return {
+            actionType: 'change_condition',
+            actionLabel: 'เปลี่ยนสภาพการจ้างงาน',
+            actionDetail:
+              'เปลี่ยนสภาพการจ้างงานจากเดิม ' +
+              (json.change_from || '') +
+              ' เป็น ' +
+              (json.change_to || '')
+          };
+        case 'promote':
+          return {
+            actionType: 'promote',
+            actionLabel: 'เลื่อนตำแหน่ง',
+            actionDetail:
+              'เลื่อนตำแหน่งจากเดิม ' +
+              (json.promote_from || '') +
+              ' เป็น ' +
+              (json.promote_to || '')
+          };
+        case 'pass_probation':
+          return {
+            actionType: 'pass_probation',
+            actionLabel: 'ผ่านทดลองงาน',
+            actionDetail: json.pass_detail || ''
+          };
+        case 'resign':
+          return {
+            actionType: 'resign',
+            actionLabel: 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก',
+            actionDetail: json.resign_detail || ''
+          };
+        case 'increase':
+          return {
+            actionType: 'increase',
+            actionLabel: 'ขึ้นค่าจ้าง / เงินเดือน',
+            actionDetail:
+              'จากเดิม ' +
+              (json.increase_from || '') +
+              ' เป็น ' +
+              (json.increase_to || '')
+          };
+        case 'cut':
+          return {
+            actionType: 'cut',
+            actionLabel: 'ตัดค่าจ้าง / เงินเดือน',
+            actionDetail:
+              'จากเดิม ' +
+              (json.cut_from || '') +
+              ' เป็น ' +
+              (json.cut_to || '')
+          };
+        case 'other':
+          return {
+            actionType: 'other',
+            actionLabel: 'อื่น ๆ',
+            actionDetail: json.other_detail || ''
+          };
+        default:
+          return null;
+      }
+    }
+
+    // ===== โหลดรายชื่อพนักงานจาก Apps Script =====
+    async function loadEmployees() {
+      const sel = document.getElementById('employeeName');
+      sel.innerHTML = '<option value="">กำลังโหลด...</option>';
+
+      if (!WEB_APP_URL) {
+        sel.innerHTML =
+          '<option value="">กรุณาตั้งค่า WEB_APP_URL ให้ถูกต้อง</option>';
+        return;
+      }
+
+      try {
+        const res = await fetch(WEB_APP_URL + '?action=getEmployees');
+        const data = await res.json();
+        console.log('employees จาก Apps Script:', data);
+
+        if (!data.success || !Array.isArray(data.employees)) {
+          sel.innerHTML =
+            '<option value="">โหลดรายชื่อพนักงานไม่สำเร็จ</option>';
           return;
         }
 
-        const [code, name, pos, section, dept, empType, startDate] = v.split('|');
+        employeeList = data.employees;
 
-        document.getElementById('empCodePosition').value = `${code} / ${pos}`;
-        document.getElementById('deptDivision').value = `${dept} / ${section}`;
-        document.getElementById('empTypeStart').value =
-          `${empType || '-'} / ${startDate || '-'}`;
+        sel.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
+
+        employeeList.forEach((emp, idx) => {
+          const opt = document.createElement('option');
+          const id = emp.id || emp.code || String(idx + 1);
+
+          opt.value = id;
+          opt.textContent = `${emp.name || '-'}${
+            emp.position ? ' (' + emp.position + ')' : ''
+          }`;
+
+          opt.dataset.code = emp.code || '';
+          opt.dataset.name = emp.name || '';
+          opt.dataset.position = emp.position || '';
+          opt.dataset.section = emp.section || '';
+          opt.dataset.department = emp.department || '';
+          opt.dataset.division = emp.division || '';
+          opt.dataset.company = emp.company || '';
+          opt.dataset.employmentType = emp.employmentType || '';
+          opt.dataset.startDate = emp.startDate || '';
+          opt.dataset.email = emp.email || '';
+
+          sel.appendChild(opt);
+        });
+      } catch (err) {
+        console.error(err);
+        sel.innerHTML =
+          '<option value="">เกิดข้อผิดพลาดในการโหลดรายชื่อพนักงาน</option>';
+      }
+    }
+
+    // เมื่อเปลี่ยนพนักงาน -> อัปเดต field ด้านข้าง
+    document
+      .getElementById('employeeName')
+      .addEventListener('change', () => {
+        const sel = document.getElementById('employeeName');
+        const v = sel.value;
+        const codePos = document.getElementById('empCodePosition');
+        const deptDivision = document.getElementById('deptDivision');
+        const empTypeStart = document.getElementById('empTypeStart');
+
+        if (!v) {
+          codePos.value = '- / -';
+          deptDivision.value = '- / -';
+          empTypeStart.value = '- / -';
+          return;
+        }
+
+        const opt = sel.options[sel.selectedIndex];
+
+        const code = opt.dataset.code || '-';
+        const position = opt.dataset.position || '-';
+        const dept = opt.dataset.department || '-';
+        const division = opt.dataset.division || opt.dataset.section || '-';
+        const empType = opt.dataset.employmentType || '-';
+        const startDate = opt.dataset.startDate || '-';
+
+        codePos.value = `${code} / ${position}`;
+        deptDivision.value = `${dept} / ${division}`;
+        empTypeStart.value = `${empType} / ${startDate}`;
       });
-    })();
+
+    // เรียกโหลดพนักงานทันทีเมื่อหน้าโหลดเสร็จ
+    document.addEventListener('DOMContentLoaded', loadEmployees);
 
     // ===== e-Signature (Canvas) =====
     const canvas = document.getElementById('signatureCanvas');
