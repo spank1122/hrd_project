@@ -1,154 +1,171 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>สร้างใบดำเนินการ - The Carpetmaker</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>ข้อมูลใบดำเนินการ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --text-dark: #1f2933;
-      --text-light: #6b7280;
-      --border: #e2e8f0;
-      --danger: #ef4444;
-      --success: #10b981;
-      --bg-soft: #f9fafb;
     }
 
     body {
-      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--purple-gradient);
+      font-family: "Sarabun", "Segoe UI", Tahoma, sans-serif;
+      background: radial-gradient(circle at top left, #a855f7 0, #4f46e5 40%, #111827 100%);
       min-height: 100vh;
-      padding: 32px 12px;
-      position: relative;
+      padding: 24px;
+      color: #111827;
     }
 
-    body::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.12) 0, transparent 55%),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 0, transparent 60%);
-      pointer-events: none;
-      animation: float 18s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-18px); }
-    }
-
-    .container {
-      max-width: 980px;
+    .page-container {
+      max-width: 1200px;
       margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .card {
-      background: #ffffff;
+      background: #f9fafb;
       border-radius: 18px;
-      padding: 28px 28px 32px;
-      box-shadow: 0 20px 60px rgba(15,23,42,0.35);
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
-    .card-header {
+    .page-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(90deg, #4f46e5, #6366f1);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .page-header-title {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding-bottom: 18px;
-      margin-bottom: 24px;
-      border-bottom: 2px solid #e5e7eb;
     }
 
-    .card-header-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: #fbbf24;
+    .page-header-title span.emoji {
+      font-size: 26px;
+    }
+
+    .page-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .page-header small {
+      display: block;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .page-header-right {
+      font-size: 12px;
+      text-align: right;
+      opacity: 0.95;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 3.2fr) minmax(260px, 1.8fr);
+      gap: 0;
+    }
+
+    .left-pane {
+      padding: 20px 24px 24px;
+      border-right: 1px solid #e5e7eb;
+      background: white;
+    }
+
+    .right-pane {
+      padding: 20px 20px 24px;
+      background: #f3f4ff;
+    }
+
+    .section-title-main {
+      font-size: 16px;
+      font-weight: 600;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 18px;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: #111827;
     }
 
-    .card-title {
+    .section-title-main .emoji {
       font-size: 22px;
-      font-weight: 700;
-      color: var(--text-dark);
     }
 
-    .card-subtitle {
-      font-size: 13px;
-      color: var(--text-light);
-    }
-
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .subtitle {
+      font-size: 12px;
+      color: #6b7280;
       margin-bottom: 18px;
     }
 
-    .btn-back {
-      background: rgba(255,255,255,0.2);
-      color: #f9fafb;
-      border-radius: 999px;
-      padding: 8px 16px;
-      border: 1px solid rgba(255,255,255,0.5);
-      font-size: 13px;
+    .card {
+      background: #f9fafb;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 14px;
       font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
+      color: #111827;
+      display: flex;
       align-items: center;
       gap: 6px;
-      transition: all .2s ease;
     }
 
-    .btn-back:hover {
-      transform: translateX(-2px);
-      background: rgba(255,255,255,0.32);
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 14px;
+      border-radius: 999px;
+      background: #4f46e5;
     }
 
-    /* Form layout */
-    .form-grid {
+    .section-sub {
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .field-row {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px 20px;
-      margin-bottom: 24px;
+      gap: 10px 14px;
+      margin-bottom: 10px;
     }
 
-    .form-group {
+    .field {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group.full {
-      grid-column: 1 / -1;
+      gap: 4px;
+      font-size: 13px;
     }
 
     label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-dark);
+      font-size: 12px;
+      color: #374151;
     }
 
-    .required::after {
-      content: ' *';
-      color: var(--danger);
+    label span.required {
+      color: #ef4444;
+      margin-left: 2px;
     }
 
     input[type="text"],
@@ -156,762 +173,746 @@
     select,
     textarea {
       width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      font-family: inherit;
-      font-size: 14px;
-      transition: all .18s ease;
-      background: #ffffff;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    textarea {
+      border-radius: 12px;
+      resize: vertical;
     }
 
     input:focus,
     select:focus,
     textarea:focus {
-      outline: none;
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99,102,241,0.18);
-    }
-
-    textarea {
-      min-height: 80px;
-      resize: vertical;
-    }
-
-    select:disabled {
-      background: #f3f4f6;
-      color: #9ca3af;
-      cursor: wait;
-    }
-
-    .muted {
-      font-size: 12px;
-      color: var(--text-light);
-    }
-
-    /* Action section */
-    .section-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: var(--text-dark);
-    }
-
-    .action-wrapper {
-      border-radius: 14px;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      padding: 16px 18px 18px;
-      margin-bottom: 22px;
-    }
-
-    .action-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
-      column-gap: 16px;
-      row-gap: 8px;
-    }
-
-    .action-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--text-dark);
-    }
-
-    .action-left span {
-      white-space: nowrap;
-    }
-
-    .action-detail-input {
-      width: 100%;
-      padding: 8px 10px;
-      font-size: 13px;
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.2);
       background: #ffffff;
     }
 
-    .action-detail-input:disabled {
-      background: #e5e7eb;
-      cursor: not-allowed;
+    input[readonly] {
+      background: #f3f4f6;
+      cursor: default;
     }
 
-    .action-note {
+    .employee-source-note {
       font-size: 11px;
-      color: var(--text-light);
-      margin-top: 4px;
+      color: #6b7280;
+      margin-top: 2px;
     }
 
-    /* Signature */
-    .signature-section {
-      margin-top: 8px;
-    }
-
-    .signature-box {
-      border-radius: 12px;
-      border: 1px dashed #cbd5f5;
-      background: #f3f4ff;
-      padding: 10px 10px 6px;
-    }
-
-    .signature-header {
+    .radio-list {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+    }
+
+    .radio-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .radio-item input[type="radio"] {
+      margin-top: 3px;
+    }
+
+    .radio-item label {
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #4f46e5, #6366f1);
+      color: white;
+      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.45);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    /* ===== RIGHT PREVIEW ===== */
+    .preview-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: #111827;
+    }
+
+    .preview-title .emoji {
+      font-size: 20px;
+    }
+
+    .preview-card {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+
+    .preview-row {
+      margin-bottom: 6px;
+    }
+
+    .preview-label {
+      color: #6b7280;
+      margin-bottom: 2px;
+    }
+
+    .preview-value {
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .preview-divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 8px 0;
+    }
+
+    .preview-empty {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    /* ===== FROM / TO layout ===== */
+    .fromto-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+      column-gap: 10px;
+      row-gap: 6px;
       align-items: center;
       margin-bottom: 8px;
     }
 
-    .signature-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #4c1d95;
+    .single-to-row {
+      grid-template-columns: auto minmax(0, 1fr);
     }
 
-    canvas#signaturePad {
+    .fromto-label {
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .fromto-label.to {
+      text-align: right;
+    }
+
+    .fromto-input {
       width: 100%;
-      height: 160px;
-      border-radius: 10px;
-      background: #ffffff;
-      border: 1px solid #d1d5f0;
-      display: block;
-    }
-
-    .btn-ghost {
+      padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid #c4b5fd;
-      background: rgba(255,255,255,0.85);
-      font-size: 12px;
-      padding: 4px 10px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: #4c1d95;
-    }
-
-    .btn-ghost:hover {
-      background: #ede9fe;
-    }
-
-    /* Submit button */
-    .actions-footer {
-      margin-top: 22px;
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .btn-primary {
-      padding: 11px 24px;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg,#6366f1,#ec4899);
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 10px 25px rgba(79,70,229,0.45);
-      transition: all .2s ease;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 35px rgba(79,70,229,0.55);
-    }
-
-    .btn-primary:disabled {
-      opacity: .6;
-      cursor: wait;
-      box-shadow: none;
-      transform: none;
-    }
-
-    /* Notification */
-    .notification {
-      position: fixed;
-      top: 18px;
-      right: 18px;
-      padding: 14px 20px;
-      border-radius: 999px;
-      background: var(--success);
-      color: #ffffff;
+      border: 1px solid #e5e7eb;
+      background-color: #f9fafb;
       font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 14px 40px rgba(16,185,129,0.45);
-      display: none;
-      z-index: 9999;
-    }
-    .notification.error {
-      background: #ef4444;
-      box-shadow: 0 14px 40px rgba(239,68,68,0.45);
-    }
-    .notification.show {
-      display: block;
-      animation: slideIn .3s ease-out;
+      outline: none;
     }
 
-    @keyframes slideIn {
-      from { transform: translateX(260px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+    .fromto-input:focus,
+    .fromto-textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.15);
+      background: #ffffff;
     }
 
-    @media (max-width: 768px) {
-      body { padding: 20px 10px; }
-      .card { padding: 20px 16px 22px; }
-      .form-grid { grid-template-columns: 1fr; }
-      .action-grid { grid-template-columns: minmax(0,1fr); }
+    .fromto-textarea {
+      width: 100%;
+      margin-top: 4px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      background-color: #f9fafb;
+      resize: vertical;
+      font-size: 13px;
+    }
+
+    .other-detail-block {
+      margin-top: 12px;
+    }
+
+    .small-note {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .left-pane {
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header-top">
-      <button class="btn-back" type="button" onclick="goBack()">
-        <span>←</span> ย้อนกลับ
-      </button>
-      <div style="color:#e5e7eb;font-size:13px;">The Carpetmaker (Thailand) Co., Ltd.</div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div class="card-header-icon">📄</div>
+  <div class="page-container">
+    <header class="page-header">
+      <div class="page-header-title">
+        <span class="emoji">📝</span>
         <div>
-          <div class="card-title">ข้อมูลใบดำเนินการ</div>
-          <div class="card-subtitle">ระบุข้อมูลพนักงานและการดำเนินการที่ต้องการ</div>
+          <h1>ข้อมูลใบดำเนินการ (HR Document)</h1>
+          <small>ระบบสร้างใบดำเนินการจาก HRD demo และ ผู้ผ่านการสัมภาษณ์</small>
+        </div>
+      </div>
+      <div class="page-header-right">
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span id="statusText">รอกรอกข้อมูล</span>
+        </div>
+        <div style="margin-top:4px;">ไฟล์: HRD demo</div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- ============ LEFT FORM ============ -->
+      <div class="left-pane">
+        <div class="section-title-main">
+          <span class="emoji">📄</span>
+          <span>ข้อมูลใบดำเนินการ</span>
+        </div>
+        <p class="subtitle">
+          เลือกพนักงานจากชีต <strong>"ผู้ผ่านการสัมภาษณ์"</strong> แล้วระบบจะดึงข้อมูลมาพรีฟิลให้ เช่น รหัสพนักงาน ตำแหน่ง แผนก ฝ่าย วันเริ่มงาน ฯลฯ
+        </p>
+
+        <!-- เลือกพนักงาน -->
+        <div class="card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">ข้อมูลพนักงาน</div>
+              <div class="section-sub">เลือกจากชีต "ผู้ผ่านการสัมภาษณ์"</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="employeeSelect">ชื่อพนักงาน <span class="required">*</span></label>
+            <select id="employeeSelect">
+              <option value="">กำลังโหลดรายชื่อพนักงาน...</option>
+            </select>
+            <div class="employee-source-note">
+              ดึงจากชีต "ผู้ผ่านการสัมภาษณ์" ใน HRD demo (คอลัมน์ ชื่อ-นามสกุล)
+            </div>
+          </div>
+        </div>
+
+        <!-- ข้อมูลพื้นฐาน -->
+        <div class="card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">ข้อมูลใบดำเนินการ</div>
+              <div class="section-sub">ข้อมูลหลักของพนักงานที่จะใช้ในใบดำเนินการ</div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="empCode">รหัสพนักงาน <span class="required">*</span></label>
+              <input type="text" id="empCode" readonly />
+            </div>
+            <div class="field">
+              <label for="startDate">วันที่เริ่มงาน <span class="required">*</span></label>
+              <input type="date" id="startDate" />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="position">ตำแหน่งปัจจุบัน <span class="required">*</span></label>
+              <input type="text" id="position" />
+            </div>
+            <div class="field">
+              <label for="dept">แผนก <span class="required">*</span></label>
+              <input type="text" id="dept" />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="division">ฝ่าย <span class="required">*</span></label>
+              <input type="text" id="division" />
+            </div>
+            <div class="field">
+              <label for="employmentType">สภาพจ้างงาน <span class="required">*</span></label>
+              <input type="text" id="employmentType" />
+              <div class="small-note">มาจากชีต "ข้อมูลผู้สมัคร" หรือ "ผู้ผ่านการสัมภาษณ์" แล้วแต่ฝั่ง Server ใช้ map</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ประเภทการดำเนินการ -->
+        <div class="card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">การดำเนินการ</div>
+              <div class="section-sub">เลือกประเภทการดำเนินการให้ตรงกับใบฟอร์ม</div>
+            </div>
+          </div>
+
+          <div class="radio-list" id="actionTypeGroup">
+            <div class="radio-item">
+              <input type="radio" name="actionType" id="act_appoint" value="appoint" />
+              <label for="act_appoint">แต่งตั้ง</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" name="actionType" id="act_transfer" value="transfer" />
+              <label for="act_transfer">โอนย้าย</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" name="actionType" id="act_change" value="change" />
+              <label for="act_change">เปลี่ยนสภาพการจ้างงาน</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" name="actionType" id="act_promote" value="promote" />
+              <label for="act_promote">เลื่อนตำแหน่ง</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" name="actionType" id="act_passProb" value="pass_probation" />
+              <label for="act_passProb">ผ่านทดลองงาน</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" name="actionType" id="act_terminate" value="terminate" />
+              <label for="act_terminate">ให้ออกจากงานโดยไม่สมัครใจ / ลาออก</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" name="actionType" id="act_increase" value="increase" />
+              <label for="act_increase">ขึ้นค่าจ้าง / เงินเดือน</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" name="actionType" id="act_cut" value="cut" />
+              <label for="act_cut">ตัดค่าจ้าง / เงินเดือน</label>
+            </div>
+            <div class="radio-item">
+              <input type="radio" name="actionType" id="act_other" value="other" />
+              <label for="act_other">อื่น ๆ</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- รายละเอียด From / To -->
+        <div class="card section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">รายละเอียดการดำเนินการ</div>
+              <div class="section-sub">รูปแบบเดียวกับฟอร์มกระดาษ: จากเดิม (From) → เป็น (To)</div>
+            </div>
+          </div>
+
+          <div id="action-detail-wrapper">
+            <!-- บรรทัดบนสุด : เป็น (To) -->
+            <div class="fromto-row single-to-row">
+              <label class="fromto-label">เป็น (To)</label>
+              <input type="text" id="action_to_main" name="action_to_main" class="fromto-input" />
+            </div>
+
+            <!-- แถว 1 -->
+            <div class="fromto-row">
+              <label class="fromto-label">จากเดิม (From)</label>
+              <input type="text" id="action_from_1" name="action_from_1" class="fromto-input" />
+              <label class="fromto-label to">เป็น (To)</label>
+              <input type="text" id="action_to_1" name="action_to_1" class="fromto-input" />
+            </div>
+
+            <!-- แถว 2 -->
+            <div class="fromto-row">
+              <label class="fromto-label">จากเดิม (From)</label>
+              <input type="text" id="action_from_2" name="action_from_2" class="fromto-input" />
+              <label class="fromto-label to">เป็น (To)</label>
+              <input type="text" id="action_to_2" name="action_to_2" class="fromto-input" />
+            </div>
+
+            <!-- แถว 3 -->
+            <div class="fromto-row">
+              <label class="fromto-label">จากเดิม (From)</label>
+              <input type="text" id="action_from_3" name="action_from_3" class="fromto-input" />
+              <label class="fromto-label to">เป็น (To)</label>
+              <input type="text" id="action_to_3" name="action_to_3" class="fromto-input" />
+            </div>
+
+            <!-- ข้อความเพิ่มเติม -->
+            <div class="other-detail-block">
+              <label for="action_other_detail" class="fromto-label">
+                รายละเอียดเพิ่มเติม / ข้อความที่ต้องการให้แสดง
+              </label>
+              <textarea
+                id="action_other_detail"
+                name="action_other_detail"
+                rows="3"
+                class="fromto-textarea"
+                placeholder="เช่น ผ่านทดลองงานเรียบร้อยแล้ว, เหตุผลการสิ้นสุดสัญญาจ้าง, รายละเอียดอื่น ๆ"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ปุ่ม -->
+        <div class="actions-row">
+          <button type="button" class="btn btn-secondary" onclick="window.location.reload()">ล้างค่า</button>
+          <button type="button" class="btn btn-primary" id="submitBtn" onclick="handleSubmit()">
+            ✅ บันทึกใบดำเนินการ
+          </button>
         </div>
       </div>
 
-      <form id="actionForm">
-        <!-- Employee info -->
-        <div class="form-grid">
-          <div class="form-group full">
-            <label for="employeeSelect" class="required">ชื่อพนักงาน</label>
-            <select id="employeeSelect" required disabled>
-              <option value="">กำลังโหลดรายชื่อพนักงาน...</option>
-            </select>
-            <div class="muted">ดึงจากชีต "ผู้ผ่านการสัมภาษณ์" ใน HRD demo</div>
-          </div>
-
-          <div class="form-group">
-            <label for="empCode" class="required">รหัสพนักงาน</label>
-            <input type="text" id="empCode" required>
-          </div>
-
-          <div class="form-group">
-            <label for="startDate" class="required">วันที่เริ่มงาน</label>
-            <input type="date" id="startDate" required>
-          </div>
-
-          <div class="form-group">
-            <label for="currentPosition" class="required">ตำแหน่งปัจจุบัน</label>
-            <input type="text" id="currentPosition" required>
-          </div>
-
-          <div class="form-group">
-            <label for="dept" class="required">แผนก</label>
-            <input type="text" id="dept" required>
-          </div>
-
-          <div class="form-group">
-            <label for="division" class="required">ฝ่าย</label>
-            <input type="text" id="division" required>
-          </div>
-
-          <div class="form-group">
-            <label for="employmentType" class="required">สภาพจ้างงาน</label>
-            <input type="text" id="employmentType" required>
-          </div>
+      <!-- ============ RIGHT PREVIEW ============ -->
+      <div class="right-pane">
+        <div class="preview-title">
+          <span class="emoji">👁️</span>
+          <span>ตัวอย่างใบดำเนินการ</span>
         </div>
 
-        <!-- Actions -->
-        <div style="margin-top:8px;margin-bottom:6px;">
-          <div class="section-title">การดำเนินการ <span style="color:#ef4444;">*</span></div>
-        </div>
-
-        <div class="action-wrapper">
-          <div class="action-grid">
-            <!-- แต่งตั้ง -->
-            <label class="action-left">
-              <input type="radio" name="actionType" value="appoint" data-label="แต่งตั้ง" required>
-              <span>แต่งตั้ง</span>
-            </label>
-            <div>
-              <input
-                type="text"
-                id="detail-appoint"
-                class="action-detail-input"
-                placeholder="รายละเอียด เช่น แต่งตั้งเป็นตำแหน่งใด"
-                disabled
-              >
-            </div>
-
-            <!-- โอนย้าย -->
-            <label class="action-left">
-              <input type="radio" name="actionType" value="transfer" data-label="โอนย้าย">
-              <span>โอนย้าย</span>
-            </label>
-            <div>
-              <input
-                type="text"
-                id="detail-transfer"
-                class="action-detail-input"
-                placeholder="โอนจาก/ไป แผนกหรือฝ่ายใด"
-                disabled
-              >
-            </div>
-
-            <!-- เปลี่ยนสภาพ -->
-            <label class="action-left">
-              <input type="radio" name="actionType" value="changeCondition" data-label="เปลี่ยนสภาพ">
-              <span>เปลี่ยนสภาพ</span>
-            </label>
-            <div>
-              <input
-                type="text"
-                id="detail-changeCondition"
-                class="action-detail-input"
-                placeholder="เปลี่ยนจาก / เป็นอะไร"
-                disabled
-              >
-            </div>
-
-            <!-- เลื่อนตำแหน่ง -->
-            <label class="action-left">
-              <input type="radio" name="actionType" value="promote" data-label="เลื่อนตำแหน่ง">
-              <span>เลื่อนตำแหน่ง</span>
-            </label>
-            <div>
-              <input
-                type="text"
-                id="detail-promote"
-                class="action-detail-input"
-                placeholder="เลื่อนจาก / ไปตำแหน่งใด"
-                disabled
-              >
-            </div>
-
-            <!-- ผ่านทดลองงาน -->
-            <label class="action-left">
-              <input type="radio" name="actionType" value="passProbation" data-label="ผ่านทดลองงาน">
-              <span>ผ่านทดลองงาน</span>
-            </label>
-            <div>
-              <input
-                type="text"
-                id="detail-passProbation"
-                class="action-detail-input"
-                placeholder="ระบุคำที่ต้องการให้แสดง เช่น ผ่านทดลองงานเรียบร้อยแล้ว"
-                disabled
-              >
-            </div>
-
-            <!-- ให้ออกจากงานโดยไม่สมัครใจ/ลาออก -->
-            <label class="action-left">
-              <input type="radio" name="actionType" value="terminate" data-label="ให้ออกจากงานโดยไม่สมัครใจ/ลาออก">
-              <span>ให้ออกจากงานโดยไม่สมัครใจ/ลาออก</span>
-            </label>
-            <div>
-              <input
-                type="text"
-                id="detail-terminate"
-                class="action-detail-input"
-                placeholder="เหตุผล หรือรูปแบบการสิ้นสุดสัญญาจ้าง"
-                disabled
-              >
-            </div>
-
-            <!-- ขึ้นค่าจ้าง / เงินเดือน -->
-            <label class="action-left">
-              <input type="radio" name="actionType" value="increaseSalary" data-label="ขึ้นค่าจ้าง / เงินเดือน">
-              <span>ขึ้นค่าจ้าง / เงินเดือน</span>
-            </label>
-            <div>
-              <input
-                type="text"
-                id="detail-increaseSalary"
-                class="action-detail-input"
-                placeholder="ระบุจำนวน/สัดส่วนที่ปรับเพิ่ม"
-                disabled
-              >
-            </div>
-
-            <!-- ตัดค่าจ้าง / เงินเดือน -->
-            <label class="action-left">
-              <input type="radio" name="actionType" value="decreaseSalary" data-label="ตัดค่าจ้าง / เงินเดือน">
-              <span>ตัดค่าจ้าง / เงินเดือน</span>
-            </label>
-            <div>
-              <input
-                type="text"
-                id="detail-decreaseSalary"
-                class="action-detail-input"
-                placeholder="ระบุจำนวน/สัดส่วนที่ลด/ตัด"
-                disabled
-              >
-            </div>
-
-            <!-- อื่นๆ -->
-            <label class="action-left">
-              <input type="radio" name="actionType" value="other" data-label="อื่นๆ">
-              <span>อื่นๆ</span>
-            </label>
-            <div>
-              <input
-                type="text"
-                id="detail-other"
-                class="action-detail-input"
-                placeholder="ระบุการดำเนินการอื่นๆ"
-                disabled
-              >
-            </div>
+        <div class="preview-card">
+          <div class="preview-row">
+            <div class="preview-label">พนักงาน</div>
+            <div class="preview-value" id="pvEmpName">ยังไม่ได้เลือก</div>
+          </div>
+          <div class="preview-row">
+            <div class="preview-label">รหัสพนักงาน / ตำแหน่ง</div>
+            <div class="preview-value" id="pvEmpCodePos">-</div>
+          </div>
+          <div class="preview-row">
+            <div class="preview-label">แผนก / ฝ่าย</div>
+            <div class="preview-value" id="pvDeptDiv">-</div>
+          </div>
+          <div class="preview-row">
+            <div class="preview-label">สภาพจ้างงาน / วันเริ่มงาน</div>
+            <div class="preview-value" id="pvEmpTypeStart">-</div>
           </div>
 
-          <div class="action-note">
-            เลือกได้เพียง 1 การดำเนินการในแต่ละครั้ง และกรอกรายละเอียดด้านขวาให้ครบถ้วน
-          </div>
-        </div>
+          <div class="preview-divider"></div>
 
-        <!-- Extra detail & effective date -->
-        <div class="form-grid">
-          <div class="form-group full">
-            <label for="extraDetail">รายละเอียดเพิ่มเติม</label>
-            <textarea id="extraDetail" placeholder="ระบุรายละเอียดอื่นๆ เพิ่มเติม (ถ้ามี)"></textarea>
+          <div class="preview-row">
+            <div class="preview-label">การดำเนินการ</div>
+            <div class="preview-value" id="pvActionType">-</div>
           </div>
-
-          <div class="form-group">
-            <label for="effectiveDate" class="required">มีผลบังคับตั้งแต่วันที่</label>
-            <input type="date" id="effectiveDate" required>
-          </div>
-        </div>
-
-        <!-- Signature -->
-        <div class="signature-section">
-          <label class="required">ลายเซ็นผู้เสนอ (HR)</label>
-          <div class="signature-box">
-            <div class="signature-header">
-              <div class="signature-title">เซ็นชื่อในกรอบด้านล่าง</div>
-              <button class="btn-ghost" type="button" onclick="clearSignature()">
-                ✕ ลบลายเซ็น
-              </button>
+          <div class="preview-row">
+            <div class="preview-label">รายละเอียด From / To</div>
+            <div class="preview-value" id="pvActionDetail">
+              <span class="preview-empty">ยังไม่มีรายละเอียด</span>
             </div>
-            <canvas id="signaturePad"></canvas>
+          </div>
+          <div class="preview-row">
+            <div class="preview-label">รายละเอียดเพิ่มเติม</div>
+            <div class="preview-value" id="pvOtherDetail">
+              <span class="preview-empty">-</span>
+            </div>
           </div>
         </div>
-
-        <div class="actions-footer">
-          <button type="submit" class="btn-primary" id="submitBtn">
-            ✓ ส่งใบดำเนินการ
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 
-  <div id="notification" class="notification"></div>
-
   <script>
-    // =========================
-    // CONFIG
-    // =========================
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxyIpBQpwNtif7AJA08A4c6yG_IAIRcd3emPM_OCmqrrKBIc1bYjfWffAw2PTphsoxu/exec';
+    // 👉 แก้เป็น URL Web App ตัวจริงของ UnifiedWebApp.gs
+    const WEB_APP_URL = 'https://script.google.com/macros/s/PUT_YOUR_DEPLOYMENT_ID_HERE/exec';
 
-    let EMPLOYEES = [];
-    let EMP_MAP = {};
+    let EMP_LIST = []; // เก็บข้อมูลพนักงานจาก Server
 
-    let sigCanvas, sigCtx, sigDrawing = false, sigHasDrawn = false;
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
+    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initSignaturePad();
-      fetchEmployees();
-      setupListeners();
-    });
+    // โหลดรายชื่อพนักงาน (JSONP)
+    function loadEmployees() {
+      const script = document.createElement('script');
+      const cbName = 'onEmployeesLoaded';
+      const url = WEB_APP_URL + '?action=getEmployees&callback=' + cbName;
+      script.src = url;
+      document.body.appendChild(script);
+    }
 
-    // =========================
-    // Employees
-    // =========================
-    async function fetchEmployees() {
+    // callback จาก JSONP
+    function onEmployeesLoaded(res) {
       const select = document.getElementById('employeeSelect');
-      try {
-        const res = await fetch(`${GAS_URL}?action=getEmployees`);
-        const json = await res.json();
+      select.innerHTML = '';
 
-        if (!json.success) throw new Error(json.message || 'โหลดข้อมูลพนักงานไม่สำเร็จ');
-
-        EMPLOYEES = json.data || [];
-        EMP_MAP = {};
-        select.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
-
-        EMPLOYEES.forEach(emp => {
-          EMP_MAP[emp.id] = emp;
-          const opt = document.createElement('option');
-          opt.value = emp.id;
-          opt.textContent = emp.name;
-          select.appendChild(opt);
-        });
-
-        select.disabled = false;
-      } catch (err) {
-        console.error(err);
-        select.innerHTML = '<option value="">โหลดรายชื่อไม่สำเร็จ</option>';
-        showNotification('โหลดรายชื่อพนักงานไม่สำเร็จ: ' + err.message, true);
-      }
-    }
-
-    function toDateInputValue(value) {
-      if (!value) return '';
-      try {
-        const d = (value instanceof Date) ? value : new Date(value);
-        if (isNaN(d.getTime())) return '';
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-      } catch (e) {
-        return '';
-      }
-    }
-
-    function handleEmployeeChange() {
-      const id = document.getElementById('employeeSelect').value;
-      const emp = EMP_MAP[id];
-
-      const empCodeInput   = document.getElementById('empCode');
-      const startDateInput = document.getElementById('startDate');
-      const positionInput  = document.getElementById('currentPosition');
-      const deptInput      = document.getElementById('dept');
-      const divisionInput  = document.getElementById('division');
-      const empTypeInput   = document.getElementById('employmentType');
-
-      if (!emp) {
-        empCodeInput.value   = '';
-        startDateInput.value = '';
-        positionInput.value  = '';
-        deptInput.value      = '';
-        divisionInput.value  = '';
-        empTypeInput.value   = '';
+      if (!res || !res.success || !Array.isArray(res.data) || res.data.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'ไม่พบรายชื่อจากชีต "ผู้ผ่านการสัมภาษณ์"';
+        select.appendChild(opt);
+        select.disabled = true;
         return;
       }
 
-      empCodeInput.value   = emp.code || '';
-      startDateInput.value = toDateInputValue(emp.startDate);
-      positionInput.value  = emp.position || '';
-      deptInput.value      = emp.department || '';
-      divisionInput.value  = emp.division || '';
-      empTypeInput.value   = emp.employmentType || '';
-    }
+      EMP_LIST = res.data;
 
-    // =========================
-    // Signature pad
-    // =========================
-    function initSignaturePad() {
-      sigCanvas = document.getElementById('signaturePad');
-      resizeSignatureCanvas();
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'เลือกพนักงาน...';
+      select.appendChild(placeholder);
 
-      sigCtx = sigCanvas.getContext('2d');
-      sigCtx.strokeStyle = '#111827';
-      sigCtx.lineWidth = 1.6;
-      sigCtx.lineCap = 'round';
-
-      sigCanvas.addEventListener('mousedown', startDraw);
-      sigCanvas.addEventListener('mousemove', draw);
-      window.addEventListener('mouseup', endDraw);
-
-      sigCanvas.addEventListener('touchstart', startDraw, { passive: false });
-      sigCanvas.addEventListener('touchmove', draw, { passive: false });
-      window.addEventListener('touchend', endDraw);
-      window.addEventListener('resize', () => {
-        // ถ้า resize จะเคลียร์ลายเซ็น (ปลอดภัยสุด)
-        resizeSignatureCanvas();
-        sigHasDrawn = false;
-      });
-    }
-
-    function resizeSignatureCanvas() {
-      const rect = sigCanvas.getBoundingClientRect();
-      sigCanvas.width = rect.width * window.devicePixelRatio;
-      sigCanvas.height = 160 * window.devicePixelRatio;
-      const ctx = sigCanvas.getContext('2d');
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, rect.width, 160);
-    }
-
-    function getPointerPos(e) {
-      const rect = sigCanvas.getBoundingClientRect();
-      let clientX, clientY;
-      if (e.touches && e.touches.length > 0) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-      return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-      };
-    }
-
-    function startDraw(e) {
-      e.preventDefault();
-      sigDrawing = true;
-      sigHasDrawn = true;
-      const p = getPointerPos(e);
-      sigCtx.beginPath();
-      sigCtx.moveTo(p.x, p.y);
-    }
-
-    function draw(e) {
-      if (!sigDrawing) return;
-      e.preventDefault();
-      const p = getPointerPos(e);
-      sigCtx.lineTo(p.x, p.y);
-      sigCtx.stroke();
-    }
-
-    function endDraw() {
-      if (!sigDrawing) return;
-      sigDrawing = false;
-    }
-
-    function clearSignature() {
-      if (!sigCanvas || !sigCtx) return;
-      const rect = sigCanvas.getBoundingClientRect();
-      sigCtx.clearRect(0, 0, rect.width, 160);
-      sigCtx.fillStyle = '#ffffff';
-      sigCtx.fillRect(0, 0, rect.width, 160);
-      sigHasDrawn = false;
-    }
-
-    function getSignatureData() {
-      if (!sigHasDrawn) return '';
-      return sigCanvas.toDataURL('image/png');
-    }
-
-    // =========================
-    // Actions / details
-    // =========================
-    function handleActionChange(e) {
-      const selected = e.target;
-      if (selected.name !== 'actionType') return;
-
-      const detailInputs = document.querySelectorAll('.action-detail-input');
-      detailInputs.forEach(inp => {
-        inp.disabled = true;
+      EMP_LIST.forEach(emp => {
+        const opt = document.createElement('option');
+        opt.value = emp.id;
+        opt.textContent = emp.name;
+        opt.dataset.code = emp.code || '';
+        select.appendChild(opt);
       });
 
-      const detailId = 'detail-' + selected.value;
-      const target = document.getElementById(detailId);
-      if (target) {
-        target.disabled = false;
-        target.focus();
+      // ถ้ามี query ?name=... → เลือกให้เลย
+      const qName = getQueryParam('name');
+      if (qName) {
+        const found = EMP_LIST.find(e => (e.name || '').trim() === qName.trim());
+        if (found) {
+          select.value = found.id;
+          fillEmployee(found);
+        }
       }
     }
 
-    // =========================
-    // Submit
-    // =========================
-    async function handleSubmit(e) {
-      e.preventDefault();
+    function fillEmployee(emp) {
+      document.getElementById('empCode').value = emp.code || '';
+      document.getElementById('position').value = emp.position || '';
+      document.getElementById('dept').value = emp.department || '';
+      document.getElementById('division').value = emp.division || '';
+      document.getElementById('employmentType').value = emp.employmentType || '';
 
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-
-      try {
-        const empId = document.getElementById('employeeSelect').value;
-        const emp   = EMP_MAP[empId] || {};
-
-        if (!empId) {
-          throw new Error('กรุณาเลือกพนักงาน');
+      if (emp.startDate) {
+        const d = new Date(emp.startDate);
+        if (!isNaN(d.getTime())) {
+          const iso = d.toISOString().slice(0, 10);
+          document.getElementById('startDate').value = iso;
         }
+      }
 
-        const actionRadio = document.querySelector('input[name="actionType"]:checked');
-        if (!actionRadio) {
-          throw new Error('กรุณาเลือกการดำเนินการ');
-        }
+      updatePreview();
+    }
 
-        const actionType  = actionRadio.value;
-        const actionLabel = actionRadio.dataset.label || actionType;
-        const detailInput = document.getElementById('detail-' + actionType);
-        const actionDetail = detailInput ? detailInput.value.trim() : '';
+    function onEmployeeChange() {
+      const select = document.getElementById('employeeSelect');
+      const id = select.value;
+      const emp = EMP_LIST.find(e => String(e.id) === String(id));
+      if (!emp) {
+        return;
+      }
+      fillEmployee(emp);
+    }
 
-        const formData = {
-          empCode:        document.getElementById('empCode').value.trim(),
-          empName:        emp.name || '',
-          empPosition:    document.getElementById('currentPosition').value.trim(),
-          empDepartment:  document.getElementById('dept').value.trim(),
-          empDivision:    document.getElementById('division').value.trim(),
-          company:        emp.company || '',
-          employmentType: document.getElementById('employmentType').value.trim(),
-          empEmail:       emp.email || '',
-          startDate:      document.getElementById('startDate').value || '',
-          effectiveDate:  document.getElementById('effectiveDate').value || '',
-          details:        document.getElementById('extraDetail').value.trim(),
-          actionType:     actionType,
-          actionLabel:    actionLabel,
-          actionDetail:   actionDetail,
-          proposerSignature: getSignatureData()
+    function onActionTypeChange() {
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const empSelect = document.getElementById('employeeSelect');
+      const empName = empSelect.options[empSelect.selectedIndex]?.text || 'ยังไม่ได้เลือก';
+      const empCode = document.getElementById('empCode').value || '-';
+      const position = document.getElementById('position').value || '-';
+      const dept = document.getElementById('dept').value || '-';
+      const division = document.getElementById('division').value || '-';
+      const empType = document.getElementById('employmentType').value || '-';
+      const startDate = document.getElementById('startDate').value || '-';
+
+      document.getElementById('pvEmpName').textContent = empName;
+      document.getElementById('pvEmpCodePos').textContent = empCode + ' / ' + position;
+      document.getElementById('pvDeptDiv').textContent = dept + ' / ' + division;
+      document.getElementById('pvEmpTypeStart').textContent = empType + ' / ' + startDate;
+
+      // action type text
+      const act = document.querySelector('input[name="actionType"]:checked');
+      let actText = '-';
+      if (act) {
+        const map = {
+          appoint: 'แต่งตั้ง',
+          transfer: 'โอนย้าย',
+          change: 'เปลี่ยนสภาพการจ้างงาน',
+          promote: 'เลื่อนตำแหน่ง',
+          pass_probation: 'ผ่านทดลองงาน',
+          terminate: 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก',
+          increase: 'ขึ้นค่าจ้าง / เงินเดือน',
+          cut: 'ตัดค่าจ้าง / เงินเดือน',
+          other: 'อื่น ๆ'
         };
+        actText = map[act.value] || act.value;
+      }
+      document.getElementById('pvActionType').textContent = actText;
 
-        const res = await fetch(GAS_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'createDocument',
-            formData: formData
-          })
-        });
+      // from/to detail
+      const lines = [];
+      const mainTo = document.getElementById('action_to_main').value.trim();
+      if (mainTo) lines.push('เป็น (To): ' + mainTo);
 
-        const json = await res.json();
-
-        if (!json.success) {
-          throw new Error(json.message || 'สร้างใบดำเนินการไม่สำเร็จ');
+      for (let i = 1; i <= 3; i++) {
+        const from = document.getElementById('action_from_' + i).value.trim();
+        const to = document.getElementById('action_to_' + i).value.trim();
+        if (from || to) {
+          lines.push(`จากเดิม (From): ${from || '-'} → เป็น (To): ${to || '-'}`);
         }
-
-        showNotification(`สร้างใบดำเนินการเรียบร้อย เลขที่เอกสาร ${json.docNumber || ''}`, false);
-
-        // ล้างฟอร์มแบบเบา ๆ (ยังคงรายชื่อพนักงาน)
-        document.getElementById('extraDetail').value = '';
-        document.getElementById('effectiveDate').value = '';
-        clearSignature();
-      } catch (err) {
-        console.error(err);
-        showNotification(err.message || 'เกิดข้อผิดพลาด', true);
-      } finally {
-        submitBtn.disabled = false;
       }
-    }
 
-    // =========================
-    // Utils / listeners
-    // =========================
-    function setupListeners() {
-      document.getElementById('employeeSelect').addEventListener('change', handleEmployeeChange);
-      document.getElementById('actionForm').addEventListener('submit', handleSubmit);
-      document.addEventListener('change', handleActionChange);
-    }
-
-    function showNotification(message, isError) {
-      const el = document.getElementById('notification');
-      el.textContent = message;
-      el.classList.toggle('error', !!isError);
-      el.classList.add('show');
-      setTimeout(() => {
-        el.classList.remove('show');
-      }, 3500);
-    }
-
-    function goBack() {
-      if (document.referrer) {
-        window.history.back();
+      const pvDetail = document.getElementById('pvActionDetail');
+      pvDetail.innerHTML = '';
+      if (lines.length === 0) {
+        pvDetail.innerHTML = '<span class="preview-empty">ยังไม่มีรายละเอียด</span>';
       } else {
-        window.location.href = 'index.html';
+        lines.forEach(l => {
+          const div = document.createElement('div');
+          div.textContent = l;
+          pvDetail.appendChild(div);
+        });
+      }
+
+      const other = document.getElementById('action_other_detail').value.trim();
+      const pvOther = document.getElementById('pvOtherDetail');
+      if (!other) {
+        pvOther.innerHTML = '<span class="preview-empty">-</span>';
+      } else {
+        pvOther.textContent = other;
+      }
+
+      const statusText = document.getElementById('statusText');
+      if (empSelect.value) {
+        statusText.textContent = 'กำลังจัดทำใบดำเนินการ';
+      } else {
+        statusText.textContent = 'รอกรอกข้อมูล';
       }
     }
+
+    // ส่งข้อมูลไป Apps Script (ตอนนี้ยังเป็น log + template)
+    function handleSubmit() {
+      updatePreview();
+
+      const empSelect = document.getElementById('employeeSelect');
+      if (!empSelect.value) {
+        alert('กรุณาเลือกพนักงานก่อน');
+        return;
+      }
+
+      const act = document.querySelector('input[name="actionType"]:checked');
+      if (!act) {
+        alert('กรุณาเลือกประเภทการดำเนินการ');
+        return;
+      }
+
+      const payload = {
+        action: 'createDocument', // ให้ฝั่ง Apps Script HRDocumentSystem รับ action นี้
+        empId: empSelect.value,
+        empName: empSelect.options[empSelect.selectedIndex].text,
+        empCode: document.getElementById('empCode').value,
+        position: document.getElementById('position').value,
+        dept: document.getElementById('dept').value,
+        division: document.getElementById('division').value,
+        employmentType: document.getElementById('employmentType').value,
+        startDate: document.getElementById('startDate').value,
+        actionType: act.value,
+        action_to_main: document.getElementById('action_to_main').value,
+        action_from_1: document.getElementById('action_from_1').value,
+        action_to_1: document.getElementById('action_to_1').value,
+        action_from_2: document.getElementById('action_from_2').value,
+        action_to_2: document.getElementById('action_to_2').value,
+        action_from_3: document.getElementById('action_from_3').value,
+        action_to_3: document.getElementById('action_to_3').value,
+        otherDetail: document.getElementById('action_other_detail').value
+      };
+
+      console.log('Submit payload:', payload);
+
+      // ถ้า Apps Script รองรับ doPost JSON แล้ว ค่อยเปิดส่วนนี้
+      /*
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'กำลังบันทึก...';
+
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log('Server result', data);
+          alert('บันทึกใบดำเนินการเรียบร้อย เลขที่เอกสาร: ' + (data.docNumber || '-'));
+        })
+        .catch(err => {
+          console.error(err);
+          alert('เกิดข้อผิดพลาดในการบันทึก');
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btn.textContent = '✅ บันทึกใบดำเนินการ';
+        });
+      */
+      alert('ตอนนี้ยังเป็นโหมดทดสอบ - payload ถูก log ใน Console แล้ว');
+    }
+
+    // event listeners
+    document.getElementById('employeeSelect').addEventListener('change', onEmployeeChange);
+    document.getElementById('startDate').addEventListener('change', updatePreview);
+    document.getElementById('position').addEventListener('input', updatePreview);
+    document.getElementById('dept').addEventListener('input', updatePreview);
+    document.getElementById('division').addEventListener('input', updatePreview);
+    document.getElementById('employmentType').addEventListener('input', updatePreview);
+
+    document.querySelectorAll('input[name="actionType"]').forEach(el => {
+      el.addEventListener('change', onActionTypeChange);
+    });
+
+    ['action_to_main', 'action_from_1', 'action_to_1', 'action_from_2', 'action_to_2', 'action_from_3', 'action_to_3', 'action_other_detail']
+      .forEach(id => {
+        document.getElementById(id).addEventListener('input', updatePreview);
+      });
+
+    // init
+    loadEmployees();
   </script>
 </body>
 </html>
