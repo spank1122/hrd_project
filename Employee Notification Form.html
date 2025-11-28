@@ -203,22 +203,77 @@
       margin-top: 10px;
     }
 
-    .signature-row {
+    .signature-section {
       margin-top: 18px;
       display: flex;
-      justify-content: flex-end;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .signature-area {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .signature-label {
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #374151;
     }
 
     .signature-box {
-      text-align: center;
-      min-width: 220px;
-      font-size: 13px;
-      color: #111827;
+      border-radius: 10px;
+      border: 1px dashed #9ca3af;
+      background: #f9fafb;
+      padding: 8px;
     }
 
-    .signature-line {
-      border-bottom: 1px solid #9ca3af;
-      margin: 30px 0 4px;
+    #signatureCanvas {
+      width: 100%;
+      height: 180px;
+      border-radius: 6px;
+      background: #ffffff;
+      display: block;
+    }
+
+    .signature-hint {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .signature-buttons {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .signature-buttons button {
+      font-family: inherit;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-clear-sign {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .btn-use-sign {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .signature-caption {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 10px;
+      text-align: center;
     }
 
     .btn-row {
@@ -260,10 +315,6 @@
       .proceed-label {
         min-width: 110px;
       }
-
-      .signature-row {
-        justify-content: center;
-      }
     }
   </style>
 </head>
@@ -273,8 +324,9 @@
     <h1 class="page-title">ใบดำเนินการ</h1>
     <p class="page-subtitle">ไฟล์: HRD demo</p>
 
-    <!-- ================= ข้อมูลพนักงาน ================= -->
+    <!-- ================= ฟอร์มหลัก ================= -->
     <form id="hrDocForm">
+      <!-- ---------- ข้อมูลพนักงาน ---------- -->
       <div class="card">
         <div class="card-title">ข้อมูลใบดำเนินการ</div>
 
@@ -311,7 +363,7 @@
         </div>
       </div>
 
-      <!-- ================= การดำเนินการ ================= -->
+      <!-- ---------- การดำเนินการ ---------- -->
       <div class="card">
         <div class="card-title">การดำเนินการ</div>
         <small style="font-size: 12px; color: #6b7280;">
@@ -602,7 +654,7 @@
         </div>
       </div>
 
-      <!-- ================= รายละเอียด / มีผลบังคับ / ลายเซ็น ================= -->
+      <!-- ---------- รายละเอียด / มีผลบังคับ / e-sign ---------- -->
       <div class="card">
         <div class="card-title">รายละเอียดเพิ่มเติม &amp; ลายเซ็น</div>
 
@@ -620,19 +672,32 @@
           <input type="date" name="effectiveDate" />
         </div>
 
-        <div class="signature-row">
-          <div class="signature-box">
-            <div class="signature-line"></div>
-            <div>ผู้เสนอคำขอ</div>
-            <div style="font-size: 12px; color: #6b7280;">
-              (ลงชื่อในแบบฟอร์มกระดาษ)
+        <div class="signature-section">
+          <div class="signature-area">
+            <div class="signature-label">ลายเซ็นผู้เสนอคำขอ (e-Signature)</div>
+            <div class="signature-box">
+              <canvas id="signatureCanvas"></canvas>
+              <div class="signature-hint">
+                วาดลายเซ็นด้วยเมาส์ หรือใช้นิ้ว/ปากกาบนหน้าจอสัมผัส
+              </div>
+              <div class="signature-buttons">
+                <button type="button" class="btn-clear-sign" id="btnClearSign">
+                  ล้างลายเซ็น
+                </button>
+              </div>
+            </div>
+            <div class="signature-caption">
+              ระบบจะบันทึกลายเซ็นส่งไปพร้อมข้อมูลใบดำเนินการ
             </div>
           </div>
         </div>
+
+        <!-- ช่องเก็บ Base64 ลายเซ็น -->
+        <input type="hidden" name="proposerSignature" id="signatureDataInput" />
       </div>
 
       <div class="btn-row">
-        <button type="button" class="btn-secondary" onclick="hrDocForm.reset()">
+        <button type="button" class="btn-secondary" onclick="hrDocForm.reset(); clearSignature();">
           ล้างฟอร์ม
         </button>
         <button type="submit" class="btn-primary">
@@ -643,10 +708,7 @@
   </div>
 
   <script>
-    // NOTE:
-    // ส่วน JS นี้เป็นแค่ตัวอย่างให้ฟอร์มส่งค่าเฉย ๆ
-    // ตอนต่อกับ Apps Script สามารถเปลี่ยนในฟังก์ชัน handleSubmit() ได้เลย
-
+    // ===== ฟอร์ม submit (ตัวอย่าง) =====
     document
       .getElementById('hrDocForm')
       .addEventListener('submit', handleSubmit);
@@ -654,14 +716,17 @@
     function handleSubmit(e) {
       e.preventDefault();
 
+      // ก่อนส่ง เก็บลายเซ็นจาก canvas ลง hidden input
+      saveSignatureToInput();
+
       const form = e.target;
       const data = new FormData(form);
       const json = Object.fromEntries(data.entries());
 
       console.log('HR Document payload:', json);
-      alert('ยังไม่ได้เชื่อมต่อ Apps Script\nดู payload ได้ใน Console ของ Browser');
+      alert('ยังไม่ได้เชื่อมต่อ Apps Script\nดู payload (รวมลายเซ็น) ได้ใน Console ของ Browser');
 
-      // ตัวอย่างเวลาเชื่อมจริง:
+      // ตัวอย่างตอนเชื่อมจริง:
       // fetch(WEB_APP_URL, {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
@@ -671,8 +736,7 @@
       //   .then(res => { ... });
     }
 
-    // TODO: ส่วนโหลดรายชื่อพนักงานจาก Web App (JSONP / fetch)
-    // ตอนนี้ใส่ option mock ไว้ให้ก่อน
+    // ===== Mock รายชื่อพนักงาน (เอาไว้เทสหน้าฟรอนต์) =====
     (function mockEmployees() {
       const sel = document.getElementById('employeeName');
       sel.innerHTML = `
@@ -699,6 +763,110 @@
           `${empType || '-'} / ${startDate || '-'}`;
       });
     })();
+
+    // ===== e-Signature (Canvas) =====
+    const canvas = document.getElementById('signatureCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let hasSignature = false;
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const imgData = canvas.toDataURL(); // เก็บไว้กันหาย
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+
+      // ลอง restore ถ้ามีภาพเดิม (แบบง่าย ๆ)
+      if (imgData && hasSignature) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        img.src = imgData;
+      }
+    }
+
+    // ตั้งขนาดเริ่มต้น
+    setTimeout(resizeCanvas, 0);
+    window.addEventListener('resize', () => {
+      // ไม่ resize ระหว่างกำลังวาด
+      if (!isDrawing) resizeCanvas();
+    });
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      if (e.touches && e.touches[0]) {
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      } else {
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      isDrawing = true;
+      hasSignature = true;
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+
+    function endDraw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      isDrawing = false;
+      ctx.closePath();
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', endDraw);
+    canvas.addEventListener('mouseleave', endDraw);
+
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', endDraw, { passive: false });
+    canvas.addEventListener('touchcancel', endDraw, { passive: false });
+
+    document.getElementById('btnClearSign').addEventListener('click', () => {
+      clearSignature();
+    });
+
+    function clearSignature() {
+      const rect = canvas.getBoundingClientRect();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+      hasSignature = false;
+      document.getElementById('signatureDataInput').value = '';
+    }
+
+    function saveSignatureToInput() {
+      if (!hasSignature) {
+        document.getElementById('signatureDataInput').value = '';
+        return;
+      }
+      const dataUrl = canvas.toDataURL('image/png');
+      document.getElementById('signatureDataInput').value = dataUrl;
+    }
   </script>
 </body>
 </html>
