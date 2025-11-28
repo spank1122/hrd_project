@@ -37,7 +37,7 @@
         font-size: 14px;
       }
       .row-label {
-        width: 140px;
+        width: 180px;
         color: #555;
       }
       .row-value {
@@ -55,13 +55,14 @@
       .badge-approved { background: #dcfce7; color: #166534; }
       .badge-rejected { background: #fee2e2; color: #b91c1c; }
 
+      /* canvas ลายเซ็น: กว้างเต็ม card แล้วใช้ scale map ไปยัง width/height จริง */
       canvas {
         border: 2px dashed #d4d4d8;
         border-radius: 8px;
-        /* ให้กว้างเต็มแต่คำนวนตำแหน่งด้วย scale */
         width: 100%;
         background: #fff;
         margin: 10px 0 8px;
+        touch-action: none; /* กัน scroll ตอนเซ็นด้วยนิ้ว */
       }
 
       .btn {
@@ -126,7 +127,7 @@
         <div class="sub" id="subtitle">กำลังโหลดรายละเอียดคำขอ...</div>
       </div>
 
-      <!-- รายละเอียดคำขอ -->
+      <!-- รายละเอียดคำขอหลัก -->
       <div class="card" id="requestCard" style="display:none;">
         <div class="row">
           <div class="row-label">เลขที่คำขอ</div>
@@ -169,6 +170,12 @@
           <div class="row-label">งบประมาณ</div>
           <div class="row-value" id="budget"></div>
         </div>
+      </div>
+
+      <!-- รายละเอียดคำตอบจากฟอร์มทั้งหมด -->
+      <div class="card" id="allFormCard" style="display:none;">
+        <div class="header" style="font-size:16px;">รายละเอียดคำตอบจากฟอร์ม (ทั้งหมด)</div>
+        <div id="allFormFields"></div>
       </div>
 
       <!-- โซนการตัดสินใจ + ลายเซ็น -->
@@ -259,40 +266,41 @@
           delete window[cbName];
         }
 
-         timeoutId = setTimeout(function() {
-    console.error('JSONP', action, 'timeout');
-    cleanup();
-    callback && callback({ success: false, message: 'timeout' });
-  }, timeoutMs);
+        timeoutId = setTimeout(function() {
+          console.error('JSONP', action, 'timeout');
+          cleanup();
+          callback && callback({ success: false, message: 'timeout' });
+        }, timeoutMs);
 
-  document.body.appendChild(script);
-}
+        document.body.appendChild(script);
+      }
 
       // ---------- canvas ----------
       function initCanvas() {
-  canvas = document.getElementById('signCanvas');
-  ctx = canvas.getContext('2d');
+        canvas = document.getElementById('signCanvas');
+        ctx = canvas.getContext('2d');
 
-  // ✅ เติมพื้นหลังให้เป็นสีขาวจริง ๆ (ไม่โปร่งใส)
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // เติมพื้นหลังขาวกันโปร่งใส
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = '#111827';
-  ctx.lineWidth = 2;
-  ctx.lineCap = 'round';
+        ctx.strokeStyle = '#111827';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
 
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDraw);
-  canvas.addEventListener('mouseleave', stopDraw);
+        // mouse
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
 
-  canvas.addEventListener('touchstart', handleTouch);
-  canvas.addEventListener('touchmove', handleTouch);
-  canvas.addEventListener('touchend', stopDraw);
-}
+        // touch
+        canvas.addEventListener('touchstart', handleTouch);
+        canvas.addEventListener('touchmove', handleTouch);
+        canvas.addEventListener('touchend', stopDraw);
+      }
 
-
-      // ✅ แก้เรื่องตำแหน่งเมาส์ไม่ตรง canvas: ใช้ scale ตามขนาดจริง
+      // scale ตำแหน่งเมาส์ตามขนาดจริงของ canvas (เพราะเราให้ width:100% ใน CSS)
       function getCanvasPos(e) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width  / rect.width;
@@ -322,7 +330,7 @@
 
       function stopDraw(e) {
         if (!isDrawing) return;
-        e && e.preventDefault();
+        if (e) e.preventDefault();
         isDrawing = false;
       }
 
@@ -339,20 +347,27 @@
       }
 
       function clearSignature() {
-  if (!ctx) return;
-  // เคลียร์แล้วทาสีขาวทับอีกที
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  hasSignature = false;
-}
+        if (!ctx) return;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        hasSignature = false;
+      }
 
+      // ---------- helper อ่านค่าจาก form object ----------
+      function getFormValue(form, key, fallback) {
+        if (form && form[key] !== undefined && form[key] !== '') {
+          return form[key];
+        }
+        return (fallback !== undefined && fallback !== '') ? fallback : '-';
+      }
 
       // ---------- load data from server ----------
       function loadRequest() {
         document.getElementById('subtitle').textContent =
           'กำลังโหลดรายละเอียดคำขอ #' + requestNo + ' ...';
 
-        jsonpRequest('getWorkflowRequest',
+        jsonpRequest(
+          'getWorkflowRequest',
           { requestNo: requestNo, session: sessionId },
           function(res) {
             if (!res || !res.success) {
@@ -364,15 +379,15 @@
               return;
             }
 
-            const d = res.data || {};
+            const d    = res.data || {};
+            const form = d.form || {};  // 👈 ค่าจากฟอร์มทั้งหมด (ถ้า backend ส่งมา)
 
             document.getElementById('requestCard').style.display = 'block';
-            document.getElementById('reviewCard').style.display = 'block';
+            document.getElementById('reviewCard').style.display  = 'block';
 
             document.getElementById('reqNo').textContent   = d.requestNo || '';
             document.getElementById('reqName').textContent = d.requesterName || '-';
             document.getElementById('reqDept').textContent = d.requesterDept || '-';
-            document.getElementById('emploemail').textContent =d.emploemail ||'-';
 
             const statusEl = document.getElementById('reqStatus');
             const st = (d.status || 'Pending Approval');
@@ -381,11 +396,45 @@
             else if (st.indexOf('Rejected') === 0) cls = 'badge badge-rejected';
             statusEl.innerHTML = '<span class="'+cls+'">'+st+'</span>';
 
-            document.getElementById('forWork').textContent  = d.forWork     || '-';
-            document.getElementById('reason').textContent   = d.reason      || '-';
-            document.getElementById('items').textContent    = d.itemRequest || '-';
-            document.getElementById('programs').textContent = d.programUse  || '-';
-            document.getElementById('budget').textContent   = d.budget      || '-';
+            // map field หลักจาก form ถ้ามี
+            document.getElementById('emploemail').textContent =
+              getFormValue(form, 'Email', d.emploemail);
+
+            document.getElementById('forWork').textContent =
+              getFormValue(form, 'สำหรับใช้ในงาน (โปรดระบุ)', d.forWork);
+
+            document.getElementById('reason').textContent =
+              getFormValue(form, 'เหตุผลที่สั่งเพิ่ม', d.reason);
+
+            document.getElementById('items').textContent =
+              getFormValue(form, 'ขอเพิ่มอุปกรณ์', d.itemRequest);
+
+            document.getElementById('programs').textContent =
+              getFormValue(form, 'โปรแกรมที่ใช้งาน', d.programUse);
+
+            document.getElementById('budget').textContent =
+              getFormValue(form, 'การตั้งงบประมาณ', d.budget);
+
+            // ======= แสดงทุกคำถามจากฟอร์ม =======
+            const container = document.getElementById('allFormFields');
+            container.innerHTML = '';
+
+            const hiddenKeys = ['Timestamp', 'Time', 'No.', 'RequesterSignatureUrl'];
+
+            const formKeys = Object.keys(form || {});
+            if (formKeys.length > 0) {
+              formKeys.forEach(key => {
+                if (hiddenKeys.indexOf(key) !== -1) return;
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+                rowDiv.innerHTML = `
+                  <div class="row-label">${key}</div>
+                  <div class="row-value">${form[key] !== undefined && form[key] !== '' ? form[key] : '-'}</div>
+                `;
+                container.appendChild(rowDiv);
+              });
+              document.getElementById('allFormCard').style.display = 'block';
+            }
 
             document.getElementById('subtitle').textContent =
               'โปรดตรวจสอบรายละเอียดด้านล่าง และกดอนุมัติ / ไม่อนุมัติ';
