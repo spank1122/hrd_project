@@ -55,15 +55,15 @@
       .badge-approved { background: #dcfce7; color: #166534; }
       .badge-rejected { background: #fee2e2; color: #b91c1c; }
 
-      /* ❗ ปรับตรงนี้: ใช้ขนาดคงที่ให้ตรงกับ width/height ของ canvas */
+      /* ขนาด canvas ให้ตรงกับ width/height ด้านล่าง */
       canvas {
         border: 2px dashed #d4d4d8;
         border-radius: 8px;
-        width: 300px;   /* ตรงกับ attribute width */
-        height: 120px;  /* ตรงกับ attribute height */
+        width: 300px;   /* ต้องตรงกับ attribute width */
+        height: 120px;  /* ต้องตรงกับ attribute height */
         background: #fff;
         margin: 10px 0 8px;
-        touch-action: none; /* กัน browser scroll ตอนลากนิ้ว */
+        touch-action: none; /* กันการ scroll ตอนใช้นิ้วเซ็น */
       }
 
       .btn {
@@ -189,9 +189,8 @@
 
         <div style="margin-top:16px;">
           <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
-          <!-- ขนาดจริงของ canvas (พิกเซล) ต้องตรงกับ CSS -->
+          <!-- ขนาดจริงของ canvas -->
           <canvas id="signCanvas" width="300" height="120"></canvas>
-          
         </div>
 
         <div class="actions">
@@ -269,29 +268,30 @@
 
       // ---------- canvas ----------
       function initCanvas() {
-  canvas = document.getElementById('signCanvas');
-  ctx = canvas.getContext('2d');
+        canvas = document.getElementById('signCanvas');
+        ctx = canvas.getContext('2d');
 
-  // ✅ เติมพื้นหลังให้เป็นสีขาวจริง ๆ (ไม่โปร่งใส)
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // ทำพื้นหลังให้เป็นสีขาว (ไม่โปร่งใส ป้องกันขึ้นเป็นแท่งดำใน PDF)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = '#111827';
-  ctx.lineWidth = 2;
-  ctx.lineCap = 'round';
+        ctx.strokeStyle = '#111827';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
 
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDraw);
-  canvas.addEventListener('mouseleave', stopDraw);
+        // mouse
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
 
-  canvas.addEventListener('touchstart', handleTouch);
-  canvas.addEventListener('touchmove', handleTouch);
-  canvas.addEventListener('touchend', stopDraw);
-}
+        // touch
+        canvas.addEventListener('touchstart', handleTouch);
+        canvas.addEventListener('touchmove', handleTouch);
+        canvas.addEventListener('touchend', handleTouch);
+      }
 
-
-      // เมาส์: ใช้ offsetX / offsetY ให้ตรงเป๊ะ
+      // เมาส์: ใช้ offsetX / offsetY
       function startDraw(e) {
         e.preventDefault();
         isDrawing = true;
@@ -316,49 +316,33 @@
         isDrawing = false;
       }
 
-      // ทัช: แปลงจาก clientX/clientY → พิกัดบน canvas (แบบไม่ scale)
-      function getTouchPos(touch) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-          x: touch.clientX - rect.left,
-          y: touch.clientY - rect.top
-        };
-      }
-
-      function startDrawTouch(e) {
+      // ✅ touch → แปลงเป็น MouseEvent ให้ไปเข้า startDraw/draw/stopDraw
+      function handleTouch(e) {
         e.preventDefault();
-        const t = e.touches[0] || e.changedTouches[0];
-        if (!t) return;
-        const pos = getTouchPos(t);
-        isDrawing = true;
-        hasSignature = true;
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-      }
 
-      function drawTouch(e) {
-        if (!isDrawing) return;
-        e.preventDefault();
-        const t = e.touches[0] || e.changedTouches[0];
-        if (!t) return;
-        const pos = getTouchPos(t);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-      }
+        const touch = (e.touches[0] || e.changedTouches[0]);
+        if (!touch) return;
 
-      function stopDrawTouch(e) {
-        e.preventDefault();
-        isDrawing = false;
+        const mouseEventType =
+          e.type === 'touchstart' ? 'mousedown' :
+          e.type === 'touchmove'  ? 'mousemove' :
+                                    'mouseup';
+
+        const simulatedEvent = new MouseEvent(mouseEventType, {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          bubbles: true,
+          cancelable: true
+        });
+
+        canvas.dispatchEvent(simulatedEvent);
       }
 
       function clearSignature() {
-  if (!ctx) return;
-  // เคลียร์แล้วทาสีขาวทับอีกที
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  hasSignature = false;
-}
-
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        hasSignature = false;
+      }
 
       // ---------- load data from server ----------
       function loadRequest() {
@@ -386,7 +370,7 @@
             document.getElementById('reqNo').textContent   = d.requestNo || '';
             document.getElementById('reqName').textContent = d.requesterName || '-';
             document.getElementById('reqDept').textContent = d.requesterDept || '-';
-            document.getElementById('emploemail').textContent =d.emploemail || '-';
+            document.getElementById('emploemail').textContent = d.emploemail || '-';
 
             const statusEl = document.getElementById('reqStatus');
             const st = (d.status || 'Pending Review');
