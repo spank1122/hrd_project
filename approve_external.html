@@ -239,7 +239,7 @@
         script.src = WEB_APP_URL + '?' + buildQuery(params);
 
         let timeoutId;
-        const timeoutMs = (action === 'saveApproveAction') ? 90000 : 15000;
+        const timeoutMs = (action === 'saveApproveAction') ? 120000 : 15000;
 
         window[cbName] = function(res) {
           console.log('JSONP', action, 'result:', res);
