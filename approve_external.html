@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>อนุมัติคำขอเพิ่ม IT (External)</title>
+    <title>ทบทวนคำขอเพิ่ม IT (External)</title>
     <style>
       body {
         font-family: "Sarabun", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -55,14 +55,14 @@
       .badge-approved { background: #dcfce7; color: #166534; }
       .badge-rejected { background: #fee2e2; color: #b91c1c; }
 
-      /* canvas ลายเซ็น: กว้างเต็ม card แล้วใช้ scale map ไปยัง width/height จริง */
       canvas {
         border: 2px dashed #d4d4d8;
         border-radius: 8px;
-        width: 100%;
+        width: 300px;
+        height: 120px;
         background: #fff;
         margin: 10px 0 8px;
-        touch-action: none; /* กัน scroll ตอนเซ็นด้วยนิ้ว */
+        touch-action: none;
       }
 
       .btn {
@@ -88,6 +88,7 @@
       }
       .actions {
         display: flex;
+        justify-content: flex-start;
         gap: 8px;
         margin-top: 12px;
       }
@@ -123,11 +124,11 @@
     <div class="page">
       <!-- หัวข้อ -->
       <div class="card">
-        <div class="header">✅ อนุมัติคำขอเพิ่ม IT</div>
+        <div class="header">📝 ทบทวนคำขอเพิ่ม IT</div>
         <div class="sub" id="subtitle">กำลังโหลดรายละเอียดคำขอ...</div>
       </div>
 
-      <!-- รายละเอียดคำขอหลัก -->
+      <!-- รายละเอียดคำขอ -->
       <div class="card" id="requestCard" style="display:none;">
         <div class="row">
           <div class="row-label">เลขที่คำขอ</div>
@@ -145,7 +146,9 @@
           <div class="row-label">สถานะปัจจุบัน</div>
           <div class="row-value" id="reqStatus"></div>
         </div>
+
         <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+
         <div class="row">
           <div class="row-label">EMAIL</div>
           <div class="row-value" id="emploemail"></div>
@@ -167,23 +170,49 @@
           <div class="row-value" id="programs"></div>
         </div>
         <div class="row">
-          <div class="row-label">งบประมาณ</div>
+          <div class="row-label">งบประมาณ (สรุป)</div>
           <div class="row-value" id="budget"></div>
         </div>
-      </div>
 
-      <!-- รายละเอียดคำตอบจากฟอร์มทั้งหมด -->
-      <div class="card" id="allFormCard" style="display:none;">
-        <div class="header" style="font-size:16px;">รายละเอียดคำตอบจากฟอร์ม (ทั้งหมด)</div>
-        <div id="allFormFields"></div>
+        <!-- ✅ เพิ่มส่วนใหม่ให้ครบตามฟอร์ม -->
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+
+        <div class="row">
+          <div class="row-label">เครื่องเขียน</div>
+          <div class="row-value" id="stationery"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">โทรศัพท์มือถือ</div>
+          <div class="row-value" id="mobileNeed"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">เบอร์โทร (ถ้าต้องการ)</div>
+          <div class="row-value" id="mobilePhone"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">นามบัตร</div>
+          <div class="row-value" id="namecardType"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">การตั้งงบประมาณ</div>
+          <div class="row-value" id="budgetOptions"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">กำหนดส่งมอบ</div>
+          <div class="row-value" id="deliveryDate"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">Spec / Type / รุ่น / ยี่ห้อ</div>
+          <div class="row-value" id="specDetail"></div>
+        </div>
       </div>
 
       <!-- โซนการตัดสินใจ + ลายเซ็น -->
       <div class="card" id="reviewCard" style="display:none;">
-        <div class="header" style="font-size:16px;">การอนุมัติและลงลายเซ็น</div>
+        <div class="header" style="font-size:16px;">การทบทวนและลงลายเซ็น</div>
         <div class="radio-group">
-          <label><input type="radio" name="approveAction" value="Approved" checked> อนุมัติ</label>
-          <label><input type="radio" name="approveAction" value="Rejected"> ไม่อนุมัติ</label>
+          <label><input type="radio" name="reviewAction" value="Approved" checked> อนุมัติ</label>
+          <label><input type="radio" name="reviewAction" value="Rejected"> ไม่อนุมัติ</label>
         </div>
 
         <div style="margin-top:12px;">
@@ -192,18 +221,13 @@
         </div>
 
         <div style="margin-top:16px;">
-          <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้อนุมัติ (จำเป็น)</div>
-          <!-- ขนาดจริงของ canvas -->
-          <canvas id="signCanvas" width="600" height="200"></canvas>
+          <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
+          <canvas id="signCanvas" width="300" height="120"></canvas>
         </div>
 
         <div class="actions">
-          <button class="btn btn-primary" type="button" id="submitBtn">
-            บันทึกผลการอนุมัติ
-          </button>
-          <button class="btn btn-secondary" type="button" id="clearSignBtn">
-            ล้างลายเซ็น
-          </button>
+          <button class="btn btn-primary" type="button" id="submitBtn">บันทึกผลการทบทวน</button>
+          <button class="btn btn-secondary" type="button" id="clearSignBtn">ล้างลายเซ็น</button>
         </div>
 
         <div id="statusBox" class="status"></div>
@@ -219,7 +243,6 @@
       let sessionId = '';
       let canvas, ctx, isDrawing = false, hasSignature = false;
 
-      // ---------- helper status ----------
       function setStatus(msg, type) {
         const box = document.getElementById('statusBox');
         box.textContent = msg;
@@ -227,7 +250,6 @@
         box.className = 'status status-' + type;
       }
 
-      // ---------- JSONP helper ----------
       function buildQuery(params) {
         return Object.keys(params)
           .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
@@ -246,7 +268,6 @@
         script.src = WEB_APP_URL + '?' + buildQuery(params);
 
         let timeoutId;
-        const timeoutMs = (action === 'saveApproveAction') ? 120000 : 15000;
 
         window[cbName] = function(res) {
           console.log('JSONP', action, 'result:', res);
@@ -270,7 +291,7 @@
           console.error('JSONP', action, 'timeout');
           cleanup();
           callback && callback({ success: false, message: 'timeout' });
-        }, timeoutMs);
+        }, 15000);
 
         document.body.appendChild(script);
       }
@@ -280,7 +301,6 @@
         canvas = document.getElementById('signCanvas');
         ctx = canvas.getContext('2d');
 
-        // เติมพื้นหลังขาวกันโปร่งใส
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -288,80 +308,66 @@
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
 
-        // mouse
         canvas.addEventListener('mousedown', startDraw);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDraw);
         canvas.addEventListener('mouseleave', stopDraw);
 
-        // touch
         canvas.addEventListener('touchstart', handleTouch);
         canvas.addEventListener('touchmove', handleTouch);
-        canvas.addEventListener('touchend', stopDraw);
-      }
-
-      // scale ตำแหน่งเมาส์ตามขนาดจริงของ canvas (เพราะเราให้ width:100% ใน CSS)
-      function getCanvasPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width  / rect.width;
-        const scaleY = canvas.height / rect.height;
-        return {
-          x: (e.clientX - rect.left) * scaleX,
-          y: (e.clientY - rect.top)  * scaleY
-        };
+        canvas.addEventListener('touchend', handleTouch);
       }
 
       function startDraw(e) {
         e.preventDefault();
         isDrawing = true;
         hasSignature = true;
-        const pos = getCanvasPos(e);
+        const x = e.offsetX;
+        const y = e.offsetY;
         ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
+        ctx.moveTo(x, y);
       }
 
       function draw(e) {
         if (!isDrawing) return;
         e.preventDefault();
-        const pos = getCanvasPos(e);
-        ctx.lineTo(pos.x, pos.y);
+        const x = e.offsetX;
+        const y = e.offsetY;
+        ctx.lineTo(x, y);
         ctx.stroke();
       }
 
       function stopDraw(e) {
-        if (!isDrawing) return;
         if (e) e.preventDefault();
         isDrawing = false;
       }
 
       function handleTouch(e) {
-        const t = e.touches[0] || e.changedTouches[0];
-        const mouseEventType =
+        e.preventDefault();
+        const t = (e.touches[0] || e.changedTouches[0]);
+        if (!t) return;
+
+        const type =
           e.type === 'touchstart' ? 'mousedown' :
-          e.type === 'touchmove'  ? 'mousemove' : 'mouseup';
-        const ev = new MouseEvent(mouseEventType, {
+          e.type === 'touchmove'  ? 'mousemove' :
+                                    'mouseup';
+
+        const ev = new MouseEvent(type, {
           clientX: t.clientX,
-          clientY: t.clientY
+          clientY: t.clientY,
+          bubbles: true,
+          cancelable: true
         });
         canvas.dispatchEvent(ev);
       }
 
       function clearSignature() {
-        if (!ctx) return;
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         hasSignature = false;
       }
 
-      // ---------- helper อ่านค่าจาก form object ----------
-      function getFormValue(form, key, fallback) {
-        if (form && form[key] !== undefined && form[key] !== '') {
-          return form[key];
-        }
-        return (fallback !== undefined && fallback !== '') ? fallback : '-';
-      }
-
-      // ---------- load data from server ----------
+      // ---------- load data ----------
       function loadRequest() {
         document.getElementById('subtitle').textContent =
           'กำลังโหลดรายละเอียดคำขอ #' + requestNo + ' ...';
@@ -379,122 +385,91 @@
               return;
             }
 
-            const d    = res.data || {};
-            const form = d.form || {};  // 👈 ค่าจากฟอร์มทั้งหมด (ถ้า backend ส่งมา)
+            const d = res.data || {};
 
             document.getElementById('requestCard').style.display = 'block';
-            document.getElementById('reviewCard').style.display  = 'block';
+            document.getElementById('reviewCard').style.display = 'block';
 
             document.getElementById('reqNo').textContent   = d.requestNo || '';
             document.getElementById('reqName').textContent = d.requesterName || '-';
             document.getElementById('reqDept').textContent = d.requesterDept || '-';
+            document.getElementById('emploemail').textContent = d.emploemail || '-';
 
             const statusEl = document.getElementById('reqStatus');
-            const st = (d.status || 'Pending Approval');
+            const st = (d.status || 'Pending Review');
             let cls = 'badge badge-pending';
             if (st === 'Approved') cls = 'badge badge-approved';
             else if (st.indexOf('Rejected') === 0) cls = 'badge badge-rejected';
             statusEl.innerHTML = '<span class="'+cls+'">'+st+'</span>';
 
-            // map field หลักจาก form ถ้ามี
-            document.getElementById('emploemail').textContent =
-              getFormValue(form, 'Email', d.emploemail);
+            document.getElementById('forWork').textContent     = d.forWork       || '-';
+            document.getElementById('reason').textContent      = d.reason        || '-';
+            document.getElementById('items').textContent       = d.itemRequest   || '-';
+            document.getElementById('programs').textContent    = d.programUse    || '-';
+            document.getElementById('budget').textContent      = d.budgetSummary || d.budget || '-';
 
-            document.getElementById('forWork').textContent =
-              getFormValue(form, 'สำหรับใช้ในงาน (โปรดระบุ)', d.forWork);
-
-            document.getElementById('reason').textContent =
-              getFormValue(form, 'เหตุผลที่สั่งเพิ่ม', d.reason);
-
-            document.getElementById('items').textContent =
-              getFormValue(form, 'ขอเพิ่มอุปกรณ์', d.itemRequest);
-
-            document.getElementById('programs').textContent =
-              getFormValue(form, 'โปรแกรมที่ใช้งาน', d.programUse);
-
-            document.getElementById('budget').textContent =
-              getFormValue(form, 'การตั้งงบประมาณ', d.budget);
-
-            // ======= แสดงทุกคำถามจากฟอร์ม =======
-            const container = document.getElementById('allFormFields');
-            container.innerHTML = '';
-
-            const hiddenKeys = ['Timestamp', 'Time', 'No.', 'RequesterSignatureUrl'];
-
-            const formKeys = Object.keys(form || {});
-            if (formKeys.length > 0) {
-              formKeys.forEach(key => {
-                if (hiddenKeys.indexOf(key) !== -1) return;
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'row';
-                rowDiv.innerHTML = `
-                  <div class="row-label">${key}</div>
-                  <div class="row-value">${form[key] !== undefined && form[key] !== '' ? form[key] : '-'}</div>
-                `;
-                container.appendChild(rowDiv);
-              });
-              document.getElementById('allFormCard').style.display = 'block';
-            }
+            // ✅ ฟิลด์ใหม่
+            document.getElementById('stationery').textContent    = d.stationery      || '-';
+            document.getElementById('mobileNeed').textContent    = d.mobileNeed      || '-';
+            document.getElementById('mobilePhone').textContent   = d.mobilePhone     || '-';
+            document.getElementById('namecardType').textContent  = d.namecardType    || '-';
+            document.getElementById('budgetOptions').textContent = d.budgetOptions   || '-';
+            document.getElementById('deliveryDate').textContent  = d.deliveryDate    || '-';
+            document.getElementById('specDetail').textContent    = d.specDetail      || '-';
 
             document.getElementById('subtitle').textContent =
-              'โปรดตรวจสอบรายละเอียดด้านล่าง และกดอนุมัติ / ไม่อนุมัติ';
+              'โปรดตรวจสอบรายละเอียดด้านล่าง และทบทวนคำขอ';
           }
         );
       }
 
-      // ---------- submit approve ----------
-      function submitApprove() {
+      // ---------- submit ----------
+      function submitReview() {
         if (!hasSignature) {
           setStatus('กรุณาวาดลายเซ็นก่อนบันทึก', 'error');
           canvas.scrollIntoView({behavior: 'smooth', block: 'center'});
           return;
         }
 
-        const actionEl = document.querySelector('input[name="approveAction"]:checked');
+        const actionEl = document.querySelector('input[name="reviewAction"]:checked');
         const action = actionEl ? actionEl.value : 'Approved';
         const comment = document.getElementById('comment').value || '';
 
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        setStatus('กำลังบันทึกผลการอนุมัติ...', 'info');
+        setStatus('กำลังบันทึกผลการทบทวน...', 'info');
 
-        // ลดขนาด signature ให้เล็กลง (JPEG คุณภาพ 0.4)
         const dataUrl = canvas.toDataURL('image/jpeg', 0.4);
         const base64  = dataUrl.split(',')[1] || dataUrl;
-
-        console.log('signature dataUrl length =', dataUrl.length);
-        console.log('signature base64 length  =', base64.length);
 
         const payload = {
           requestNo: requestNo,
           session:   sessionId,
-          approveAction: action,
+          reviewAction: action,
           signature: base64,
           comment:   comment
-          // finalPdfUrl: ''  // ให้ backend generate เอง
         };
 
-        jsonpRequest('saveApproveAction', payload, function(res) {
-          console.log('JSONP saveApproveAction result:', res);
+        jsonpRequest('saveReviewAction', payload, function(res) {
+          console.log('JSONP saveReviewAction result:', res);
           if (!res || !res.success) {
             setStatus('บันทึกไม่สำเร็จ: ' + (res && res.message ? res.message : ''), 'error');
             btn.disabled = false;
             return;
           }
-          setStatus('บันทึกผลการอนุมัติเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
+          setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
         });
       }
 
-      // ---------- init ----------
       window.addEventListener('DOMContentLoaded', function() {
-        console.log('Approve page (external JSONP) DOMContentLoaded');
+        console.log('Review page (external JSONP) DOMContentLoaded');
         initCanvas();
         document.getElementById('clearSignBtn').addEventListener('click', clearSignature);
-        document.getElementById('submitBtn').addEventListener('click', submitApprove);
+        document.getElementById('submitBtn').addEventListener('click', submitReview);
 
         const params = new URLSearchParams(window.location.search);
         requestNo = params.get('requestNo') || '';
-        sessionId = params.get('session')   || '';
+        sessionId = params.get('session') || '';
 
         console.log('query requestNo:', requestNo, 'session:', sessionId);
 
