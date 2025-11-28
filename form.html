@@ -818,7 +818,7 @@
 
       const mobilePhone = document.querySelector('input[name="mobilePhone"]:checked');
       formData['โทรศัพท์มือถือ'] = mobilePhone ? mobilePhone.value : '';
-      formData['เบอร์โทรศัพท์'] = document.getElementById('phoneNumber').value;
+      formData['ระบุเบอร์'] = document.getElementById('phoneNumber').value || '';
 
       formData['เหตุผลที่สั่งเพิ่ม'] = document.getElementById('reason').value;
       formData['Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)'] =
