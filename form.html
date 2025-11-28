@@ -341,23 +341,20 @@
         </div>
       </div>
 
-      <!-- 🔹 นามบัตร: Multiple choice + required -->
+      <!-- 🔹 นามบัตร: Multiple choice (ไม่บังคับตอบ) -->
       <div class="question-card">
-        <label class="question-label">
-          นามบัตร <span class="required">*</span>
-        </label>
+        <label class="question-label">นามบัตร</label>
         <div class="options-group">
           <div class="option-item">
-            <input type="radio" name="businessCard" value="นามบัตร Digital" id="cardDigital" required>
+            <input type="checkbox" name="businessCard" value="นามบัตร Digital" id="cardDigital">
             <label for="cardDigital">นามบัตร Digital</label>
           </div>
           <div class="option-item">
-            <input type="radio" name="businessCard" value="นามบัตรกระดาษ" id="cardPaper">
+            <input type="checkbox" name="businessCard" value="นามบัตรกระดาษ" id="cardPaper">
             <label for="cardPaper">นามบัตรกระดาษ</label>
           </div>
         </div>
       </div>
-      <!-- จบส่วนที่แก้ 1 -->
 
       <div class="question-card">
         <label class="question-label">Email</label>
@@ -457,7 +454,6 @@
         </label>
         <input type="date" id="deliveryDate" name="กำหนดส่งมอบ" required>
       </div>
-      <!-- จบส่วนที่แก้ 2 -->
 
       <div class="question-card">
         <div class="signature-section">
@@ -815,8 +811,10 @@
       }
       formData['โปรแกรมที่ใช้งาน'] = software.join(', ');
 
-      const businessCard = document.querySelector('input[name="businessCard"]:checked');
-      formData['นามบัตร'] = businessCard ? businessCard.value : '';
+      const businessCards = [];
+      document.querySelectorAll('input[name="businessCard"]:checked')
+        .forEach(cb => businessCards.push(cb.value));
+      formData['นามบัตร'] = businessCards.join(', ');
 
       const stationery = document.querySelector('input[name="stationery"]:checked');
       formData['เครื่องเขียน'] = stationery ? stationery.value : '';
