@@ -3,115 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ลายเซ็นผู้ทบทวน - The Carpetmaker</title>
+  <title>ทบทวนใบดำเนินการ - The Carpetmaker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --pink-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --text-dark: #2d3748;
-      --text-light: #718096;
+      --text-dark: #1f2933;
+      --text-light: #7b8794;
+      --border: #e1e7ef;
+      --section-border: #4f46e5;
       --success: #10b981;
-      --border: #e2e8f0;
+      --danger: #ef4444;
     }
 
     body {
       font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--purple-gradient);
       min-height: 100vh;
-      padding: 40px 20px;
-      position: relative;
-    }
-
-    body::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
-      animation: float 20s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
+      padding: 32px 16px;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1100px;
       margin: 0 auto;
-      position: relative;
-      z-index: 1;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 40px;
-      animation: fadeInDown 0.8s ease-out;
+      margin-bottom: 24px;
+      color: #fff;
     }
 
     .header-title {
-      color: white;
-      font-size: 36px;
+      font-size: 32px;
       font-weight: 700;
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      margin-bottom: 8px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
     .header-subtitle {
-      color: rgba(255, 255, 255, 0.95);
-      font-size: 16px;
-      font-weight: 300;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      margin-top: 4px;
+      font-size: 14px;
+      opacity: 0.9;
     }
 
     .content {
       display: grid;
       grid-template-columns: 2fr 1fr;
-      gap: 24px;
-      animation: fadeInUp 0.8s ease-out;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      gap: 20px;
     }
 
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      background: #fff;
+      border-radius: 20px;
+      padding: 24px 28px 28px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
       position: relative;
       overflow: hidden;
     }
@@ -126,135 +76,207 @@
       background: var(--purple-gradient);
     }
 
-    .card.info::before {
-      background: var(--pink-gradient);
-    }
-
     .card-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--text-dark);
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid var(--border);
+      margin-bottom: 16px;
     }
 
-    .pdf-preview {
-      width: 100%;
-      height: 400px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 8px;
+    /* ฟอร์มฝั่งซ้าย */
+    .section {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px 18px;
+      margin-bottom: 14px;
+    }
+
+    .section-header {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 64px;
-      color: white;
-      margin-bottom: 20px;
-    }
-
-    .signature-pad {
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      background: white;
-      cursor: crosshair;
-      display: block;
-      width: 100%;
+      gap: 8px;
       margin-bottom: 12px;
     }
 
-    .button-group {
+    .section-bar {
+      width: 4px;
+      height: 20px;
+      border-radius: 999px;
+      background: var(--section-border);
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px 18px;
+    }
+
+    .field {
+      font-size: 13px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 3px;
+    }
+
+    .field-value-box {
+      min-height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      background: #f9fafb;
       display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-dark);
+      white-space: pre-wrap;
+    }
+
+    /* การดำเนินการ */
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .action-row input[type="radio"] {
+      width: 16px;
+      height: 16px;
+    }
+
+    .action-detail {
+      margin-left: 24px;
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+
+    .readonly-line {
+      display: inline-block;
+      min-width: 140px;
+      border-bottom: 1px solid #cbd5e1;
+      padding: 0 4px 2px;
+      color: var(--text-dark);
+    }
+
+    .textarea-box {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: #f9fafb;
+      min-height: 80px;
+      font-size: 13px;
+      color: var(--text-dark);
+      white-space: pre-wrap;
+    }
+
+    .status-line {
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    .status-msg {
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .status-msg.error {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .status-msg.success {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    /* ฝั่งลายเซ็น */
+    .signature-pad {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      background: #ffffff;
+      cursor: crosshair;
+      display: block;
+      width: 100%;
+      margin: 8px 0 12px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
     .btn {
       flex: 1;
-      padding: 12px;
+      padding: 10px 14px;
+      border-radius: 999px;
       border: none;
-      border-radius: 8px;
-      font-size: 14px;
+      font-family: inherit;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      font-family: inherit;
-      transition: all 0.3s ease;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
     .btn-clear {
-      background: #e2e8f0;
-      color: var(--text-dark);
+      background: #e5e7eb;
+      color: #374151;
     }
-
     .btn-clear:hover {
-      background: #cbd5e1;
+      background: #d1d5db;
     }
 
-    .btn-approve {
+    .btn-save {
       background: var(--success);
-      color: white;
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
     }
-
-    .btn-approve:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
-    }
-
-    .btn-reject {
-      background: #ef4444;
-      color: white;
-      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
-    }
-
-    .btn-reject:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(239, 68, 68, 0.4);
+    .btn-save:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
     }
 
     .info-item {
-      padding: 12px;
-      background: #f8fafc;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      border-left: 3px solid #667eea;
-    }
-
-    .info-label {
-      font-weight: 600;
-      color: var(--text-dark);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-
-    .info-value {
-      color: var(--text-light);
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #edf2f7;
       font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .info-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--text-light);
+      margin-bottom: 2px;
     }
 
-    .status-badge {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      background: #fef3c7;
-      color: #92400e;
-      margin-bottom: 16px;
-    }
-
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       .content {
         grid-template-columns: 1fr;
-      }
-
-      .pdf-preview {
-        height: 200px;
-      }
-
-      .button-group {
-        flex-direction: column;
       }
     }
   </style>
@@ -262,82 +284,391 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="header-title">ลายเซ็นผู้ทบทวน</h1>
-      <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
+      <h1 class="header-title">แบบฟอร์มทบทวนใบดำเนินการ</h1>
+      <p class="header-subtitle">
+        ใช้สำหรับผู้ทบทวนดูข้อมูลที่ผู้บันทึกกรอกไว้ และลงลายเซ็นอิเล็กทรอนิกส์ (e-Signature)
+      </p>
     </div>
 
     <div class="content">
-      <!-- PDF Preview -->
+      <!-- ฝั่งซ้าย: แสดงข้อมูลจาก Google Sheet -->
       <div class="card">
-        <div class="card-title">📄 ตัวอย่างเอกสาร</div>
-        <div class="pdf-preview">📄</div>
-        <div style="font-size: 13px; color: var(--text-light); text-align: center;">
-          เอกสารจะปรากฏที่นี่
+        <div class="card-title">📄 ข้อมูลใบดำเนินการ</div>
+
+        <div id="status" class="status-msg">
+          ⏳ กำลังโหลดข้อมูลจากระบบ...
+        </div>
+
+        <!-- ข้อมูลใบดำเนินการ -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-bar"></div>
+            <div class="section-title">ข้อมูลใบดำเนินการ</div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <div class="field-label">พนักงาน</div>
+              <div class="field-value-box" id="empName">-</div>
+            </div>
+            <div class="field">
+              <div class="field-label">รหัสพนักงาน / ตำแหน่ง</div>
+              <div class="field-value-box" id="empCodePos">-</div>
+            </div>
+            <div class="field">
+              <div class="field-label">แผนก / ฝ่าย</div>
+              <div class="field-value-box" id="dept">-</div>
+            </div>
+            <div class="field">
+              <div class="field-label">สภาพพนักงาน / วันเริ่มงาน</div>
+              <div class="field-value-box" id="employmentStatus">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- การดำเนินการ -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-bar"></div>
+            <div class="section-title">การดำเนินการ</div>
+          </div>
+
+          <div class="status-line">
+            * ข้อมูลด้านล่างแสดงตามที่ผู้บันทึกกรอกไว้ (อ่านอย่างเดียว แก้ไขไม่ได้)
+          </div>
+
+          <div class="action-row">
+            <input type="radio" name="actionType" id="action_appoint" disabled>
+            <label for="action_appoint">แต่งตั้ง</label>
+          </div>
+
+          <div class="action-row">
+            <input type="radio" name="actionType" id="action_transfer" disabled>
+            <label for="action_transfer">โอนย้าย</label>
+          </div>
+
+          <div class="action-row">
+            <input type="radio" name="actionType" id="action_change" disabled>
+            <label for="action_change">เปลี่ยนสภาพการจ้างงาน</label>
+          </div>
+
+          <div class="action-row">
+            <input type="radio" name="actionType" id="action_promote" disabled>
+            <label for="action_promote">เลื่อนตำแหน่ง</label>
+          </div>
+
+          <div class="action-row">
+            <input type="radio" name="actionType" id="action_passProb" disabled>
+            <label for="action_passProb">ผ่านทดลองงาน</label>
+          </div>
+
+          <div class="action-row">
+            <input type="radio" name="actionType" id="action_terminate" disabled>
+            <label for="action_terminate">ให้ออกจากงาน / ลาออก</label>
+          </div>
+
+          <div class="action-row">
+            <input type="radio" name="actionType" id="action_raise" disabled>
+            <label for="action_raise">ขึ้นค่าจ้าง / เงินเดือน</label>
+          </div>
+
+          <div class="action-row">
+            <input type="radio" name="actionType" id="action_cut" disabled>
+            <label for="action_cut">ตัดค่าจ้าง / เงินเดือน</label>
+          </div>
+
+          <div class="action-row">
+            <input type="radio" name="actionType" id="action_other" disabled>
+            <label for="action_other">อื่น ๆ</label>
+          </div>
+
+          <div class="action-detail">
+            รายละเอียดการดำเนินการ: <span id="actionDetail" class="readonly-line"></span>
+          </div>
+        </div>
+
+        <!-- รายละเอียดเพิ่มเติม & วันที่มีผล -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-bar"></div>
+            <div class="section-title">รายละเอียดเพิ่มเติม</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">รายละเอียดเพิ่มเติม / ข้อความที่ต้องการให้แสดง</div>
+            <div class="textarea-box" id="detailText">-</div>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div class="field-label">มีผลบังคับตั้งแต่วันที่</div>
+            <div class="field-value-box" id="effectiveDate">-</div>
+          </div>
         </div>
       </div>
 
-      <!-- Signature Area -->
-      <div class="card info">
-        <div class="card-title">✍️ ลายเซ็นของคุณ</div>
-        
-        <div class="status-badge">⏳ รอการอนุมัติ</div>
+      <!-- ฝั่งขวา: ลายเซ็นผู้ทบทวน -->
+      <div class="card">
+        <div class="card-title">✍️ ลายเซ็นผู้ทบทวน</div>
 
-        <canvas id="signaturePad" class="signature-pad" height="150"></canvas>
+        <div class="info-item">
+          <div class="info-label">สถานะ</div>
+          <div>แบบฟอร์มนี้สำหรับ “เซ็นรับทราบ ” เท่านั้น</div>
+        </div>
 
-        <div class="button-group">
-          <button class="btn btn-clear" onclick="clearSignature()">✕ ลบ</button>
+        <canvas id="signaturePad" class="signature-pad" height="170"></canvas>
+
+        <div class="btn-row">
+          <button type="button" class="btn btn-clear" onclick="clearSignature()">
+            ✕ ล้างลายเซ็น
+          </button>
+          <button type="button" class="btn btn-save" onclick="saveSignature()">
+            💾 บันทึกลายเซ็น
+          </button>
         </div>
 
         <div class="info-item">
-          <div class="info-label">บทบาท</div>
-          <div class="info-value">ผู้ทบทวน</div>
+          <div class="info-label">รหัสเอกสาร</div>
+          <div id="docIdDisplay">-</div>
         </div>
 
         <div class="info-item">
-          <div class="info-label">ชื่อ</div>
-          <div class="info-value">วิไล วิศวะ</div>
+          <div class="info-label">ผู้ทบทวน</div>
+          <div id="reviewerNameDisplay">ผู้จัดการฝ่าย</div>
         </div>
 
-        <div class="button-group" style="margin-top: 24px;">
-          <button class="btn btn-reject" onclick="handleReject()">✕ ปฏิเสธ</button>
-          <button class="btn btn-approve" onclick="handleApprove()">✓ อนุมัติ</button>
+        <div style="font-size: 11px; color: var(--text-light); margin-top: 6px;">
+          ระบบจะบันทึกลายเซ็นเชื่อมกับเอกสารนี้ โดยอ้างอิงจากพารามิเตอร์ <code>?id=...</code> ในลิงก์
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Setup Signature Pad
-    const canvas = document.getElementById('signaturePad');
-    canvas.width = canvas.offsetWidth;
-    const ctx = canvas.getContext('2d');
-    
-    let isDrawing = false;
+    // ================================
+    // CONFIG
+    // ================================
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
 
-    canvas.addEventListener('mousedown', () => isDrawing = true);
-    canvas.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mousemove', (e) => {
-      if (!isDrawing) return;
+    // ================================
+    // Helper: อ่าน query string
+    // ================================
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
+    }
+
+    // ================================
+    // โหลดข้อมูลจาก Google Sheet (ผ่าน Apps Script JSONP)
+    // ================================
+    function loadOperationData() {
+      const id = getQueryParam('id') || getQueryParam('row') || '';
+      const statusEl = document.getElementById('status');
+      const docIdDisplay = document.getElementById('docIdDisplay');
+      const reviewerName = getQueryParam('reviewer') || '';
+
+      if (docIdDisplay) docIdDisplay.textContent = id || '-';
+      if (reviewerName) {
+        const r = document.getElementById('reviewerNameDisplay');
+        if (r) r.textContent = reviewerName;
+      }
+
+      if (!id) {
+        statusEl.textContent = 'ไม่พบรหัสเอกสารในลิงก์ (ต้องมี ?id=xxxx)';
+        statusEl.classList.add('error');
+        return;
+      }
+
+      statusEl.textContent = '⏳ กำลังดึงข้อมูลจากระบบ...';
+      statusEl.classList.remove('error', 'success');
+
+      const callbackName = 'opCallback_' + Date.now();
+
+      window[callbackName] = function(result) {
+        console.log('operation data:', result);
+        if (result && result.success && result.data) {
+          renderOperationData(result.data);
+          statusEl.textContent = '✅ โหลดข้อมูลสำเร็จ';
+          statusEl.classList.add('success');
+          setTimeout(() => { statusEl.style.display = 'none'; }, 2500);
+        } else {
+          statusEl.textContent = '❌ ไม่สามารถโหลดข้อมูลได้';
+          statusEl.classList.add('error');
+        }
+        cleanupJSONP(callbackName);
+      };
+
+      const script = document.createElement('script');
+      script.src =
+        WEB_APP_URL +
+        '?action=getOperationData' +   // ให้ Apps Script ใช้ action นี้
+        '&id=' + encodeURIComponent(id) +
+        '&callback=' + callbackName;
+
+      script.onerror = function() {
+        statusEl.textContent = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ';
+        statusEl.classList.add('error');
+        cleanupJSONP(callbackName);
+      };
+
+      document.head.appendChild(script);
+    }
+
+    function cleanupJSONP(callbackName) {
+      try {
+        const scripts = document.getElementsByTagName('script');
+        for (let i = scripts.length - 1; i >= 0; i--) {
+          if (scripts[i].src && scripts[i].src.includes(callbackName)) {
+            scripts[i].parentNode.removeChild(scripts[i]);
+          }
+        }
+      } catch (e) {}
+      delete window[callbackName];
+    }
+
+    // ================================
+    // แสดงข้อมูลลงหน้า HTML (อ่านอย่างเดียว)
+    // ปรับชื่อ key ให้ตรงกับหัวคอลัมน์ในชีตของเกมได้เลย
+    // ================================
+    function renderOperationData(data) {
+      // ตัวอย่าง map: ปรับได้ตามหัวคอลัมน์จริงใน Google Sheet
+      document.getElementById('empName').textContent =
+        data['พนักงาน'] || data['employeeName'] || '-';
+
+      document.getElementById('empCodePos').textContent =
+        data['รหัสพนักงาน/ตำแหน่ง'] || data['empCodePosition'] || '-';
+
+      document.getElementById('dept').textContent =
+        data['แผนก/ฝ่าย'] || data['department'] || '-';
+
+      document.getElementById('employmentStatus').textContent =
+        data['สภาพพนักงาน/วันเริ่มงาน'] || data['employmentStatus'] || '-';
+
+      const actionType = data['การดำเนินการ'] || data['actionType'] || '';
+      const actionDetail = data['รายละเอียดการดำเนินการ'] || data['actionDetail'] || '';
+
+      document.getElementById('actionDetail').textContent = actionDetail || '';
+
+      const map = {
+        'แต่งตั้ง': 'action_appoint',
+        'โอนย้าย': 'action_transfer',
+        'เปลี่ยนสภาพการจ้างงาน': 'action_change',
+        'เลื่อนตำแหน่ง': 'action_promote',
+        'ผ่านทดลองงาน': 'action_passProb',
+        'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
+        'ให้ออกจากงานโดยไม่มีสมัครใจ/ลาออก': 'action_terminate',
+        'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
+        'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
+        'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
+        'ตัดค่าจ้าง/เงินเดือน': 'action_cut',
+        'อื่น ๆ': 'action_other',
+        'อื่นๆ': 'action_other'
+      };
+      const radioId = map[actionType];
+      if (radioId) {
+        const r = document.getElementById(radioId);
+        if (r) r.checked = true;
+      }
+
+      document.getElementById('detailText').textContent =
+        data['รายละเอียดเพิ่มเติม'] || data['detail'] || '-';
+
+      document.getElementById('effectiveDate').textContent =
+        data['มีผลบังคับตั้งแต่วันที่'] || data['effectiveDate'] || '-';
+    }
+
+    // ================================
+    // ส่วนลายเซ็น (ผู้ทบทวน)
+    // ================================
+    const canvas = document.getElementById('signaturePad');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let hasStroke = false;
+
+    function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = 170;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#111827';
+    }
+
+    function startDraw(e) {
+      isDrawing = true;
+      hasStroke = true;
+      const pos = getPosition(e);
       ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.lineTo(e.clientX - rect.left + 1, e.clientY - rect.top + 1);
+      ctx.moveTo(pos.x, pos.y);
+    }
+    function draw(e) {
+      if (!isDrawing) return;
+      const pos = getPosition(e);
+      ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
-    });
+    }
+    function stopDraw() { isDrawing = false; }
+
+    function getPosition(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('mouseleave', stopDraw);
+
+    canvas.addEventListener('touchstart', function(e) { e.preventDefault(); startDraw(e); }, {passive:false});
+    canvas.addEventListener('touchmove', function(e) { e.preventDefault(); draw(e); }, {passive:false});
+    canvas.addEventListener('touchend', function(e) { e.preventDefault(); stopDraw(e); }, {passive:false});
 
     function clearSignature() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasStroke = false;
     }
 
-    function handleApprove() {
-      alert('✓ อนุมัติแล้ว ส่งไปยังผู้อนุมัติถัดไป');
-      // บันทึกลายเซ็นและส่งต่อ
+    function saveSignature() {
+      const id = getQueryParam('id') || '';
+      if (!id) {
+        alert('ไม่พบรหัสเอกสาร (id) ในลิงก์');
+        return;
+      }
+      if (!hasStroke) {
+        alert('กรุณาเซ็นลายเซ็นก่อนบันทึก');
+        return;
+      }
+
+      const dataUrl = canvas.toDataURL('image/png');
+
+      const params = new URLSearchParams();
+      params.append('action', 'saveReviewerSignature'); // ให้ Apps Script ใช้ action นี้
+      params.append('id', id);
+      params.append('signature', dataUrl);
+
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: params
+      })
+      .then(() => {
+        alert('บันทึกลายเซ็นเรียบร้อยแล้ว');
+      })
+      .catch(err => {
+        console.error(err);
+        alert('เกิดข้อผิดพลาดในการบันทึกลายเซ็น: ' + err.message);
+      });
     }
 
-    function handleReject() {
-      alert('✕ ปฏิเสธเอกสาร กรุณาระบุเหตุผล');
-      // บันทึกการปฏิเสธ
-    }
+    // ================================
+    // Init
+    // ================================
+    window.addEventListener('DOMContentLoaded', () => {
+      resizeCanvas();
+      loadOperationData();
+    });
+    window.addEventListener('resize', resizeCanvas);
   </script>
 </body>
 </html>
