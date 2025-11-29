@@ -38,7 +38,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: 
+      background:
         radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
       animation: float 20s ease-in-out infinite;
@@ -65,28 +65,22 @@
 
     .header-title {
       color: white;
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 700;
       text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
     .header-subtitle {
       color: rgba(255, 255, 255, 0.95);
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 300;
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-30px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .content {
@@ -97,14 +91,8 @@
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .card {
@@ -150,6 +138,12 @@
       font-size: 64px;
       color: white;
       margin-bottom: 20px;
+    }
+
+    .pdf-hint {
+      font-size: 13px;
+      color: var(--text-light);
+      text-align: center;
     }
 
     .signature-pad {
@@ -272,32 +266,12 @@
 
     .success-message.show {
       display: block;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     @media (max-width: 768px) {
-      .content {
-        grid-template-columns: 1fr;
-      }
-
-      .pdf-preview {
-        height: 200px;
-      }
-
-      .button-group {
-        flex-direction: column;
-      }
+      .content { grid-template-columns: 1fr; }
+      .pdf-preview { height: 220px; }
+      .button-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -305,7 +279,7 @@
   <div class="container">
     <div class="header">
       <h1 class="header-title">ลายเซ็นพนักงาน</h1>
-      <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
+      <p class="header-subtitle" id="headerSubtitle">The Carpetmaker Co., Ltd.</p>
     </div>
 
     <div class="content">
@@ -313,7 +287,7 @@
       <div class="card">
         <div class="card-title">📄 เอกสารขั้นตอนสุดท้าย</div>
         <div class="pdf-preview">📄</div>
-        <div style="font-size: 13px; color: var(--text-light); text-align: center;">
+        <div class="pdf-hint" id="pdfHint">
           เอกสารพร้อมลายเซ็นครบถ้วนจากทั้ง 3 ท่าน
         </div>
       </div>
@@ -322,12 +296,13 @@
       <div class="card info">
         <div class="card-title">✍️ ลายเซ็นของคุณ</div>
         
-        <div class="status-badge">⏳ รอการรับทราบ</div>
+        <div class="status-badge" id="statusBadge">⏳ รอการรับทราบ</div>
 
         <canvas id="signaturePad" class="signature-pad" height="150"></canvas>
 
         <div class="button-group">
-          <button class="btn btn-clear" onclick="clearSignature()">✕ ลบ</button>
+          <button class="btn btn-clear" type="button" onclick="clearSignature()">✕ ลบ</button>
+          <button class="btn btn-complete" type="button" onclick="handleComplete()">✓ ยืนยันและจบขั้นตอน</button>
         </div>
 
         <div class="info-item">
@@ -337,62 +312,180 @@
 
         <div class="info-item">
           <div class="info-label">ชื่อ</div>
-          <div class="info-value">สมชาย สมการ</div>
+          <div class="info-value" id="employeeName">-</div>
         </div>
 
         <!-- Signature History -->
         <div class="signature-history">
-          <div class="signature-history-title">📋 ประวัติลายเซ็น</div>
-          <div class="signature-item">
-            <strong>ผู้เสนอ:</strong> สมชาย สมการ (20 พ.ย. 10:00)
-          </div>
-          <div class="signature-item">
-            <strong>ผู้ทบทวน:</strong> วิไล วิศวะ (21 พ.ย. 14:30)
-          </div>
-          <div class="signature-item">
-            <strong>ผู้อนุมัติ:</strong> สมหญิง สมดี (22 พ.ย. 09:00)
-          </div>
+          <div class="signature-history-title">📋 ประวัติลายเซ็นก่อนหน้า</div>
+          <div class="signature-item" id="historyStep1">กำลังโหลด...</div>
+          <div class="signature-item" id="historyStep2"></div>
+          <div class="signature-item" id="historyStep3"></div>
         </div>
 
-        <button class="btn btn-complete" onclick="handleComplete()" style="margin-top: 24px;">✓ ยืนยันและจบขั้นตอน</button>
-
         <div class="success-message" id="successMessage">
-          ✓ ขั้นตอนเสร็จสิ้น! เอกสารจะถูกบันทึก
+          ✓ ขั้นตอนเสร็จสิ้น! ระบบจะสร้าง PDF และส่งให้อัตโนมัติ
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Setup Signature Pad
+    // ======= CONFIG =======
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+    const ROLE = 'employee'; // คนที่ 4
+    let DOC_NO = '';
+    let hasSignature = false;
+
+    // ======= Helper =======
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
+    }
+
+    function formatDateTime(dt) {
+      if (!dt) return '-';
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return dt;
+      return d.toLocaleString('th-TH');
+    }
+
+    // ======= Load doc info (JSONP) =======
+    function loadDocInfo() {
+      DOC_NO = getQueryParam('docNo') || '';
+      if (!DOC_NO) {
+        document.getElementById('headerSubtitle').textContent =
+          'ไม่พบเลขที่เอกสาร (docNo)';
+        return;
+      }
+
+      document.getElementById('headerSubtitle').textContent =
+        `เลขที่เอกสาร: ${DOC_NO}`;
+
+      const callbackName = 'handleDocResponseEmp';
+      const script = document.createElement('script');
+      script.src = `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(DOC_NO)}&callback=${callbackName}`;
+      document.body.appendChild(script);
+    }
+
+    function handleDocResponseEmp(res) {
+      if (!res || !res.success) {
+        document.getElementById('pdfHint').textContent = 'ไม่พบข้อมูลเอกสารในระบบ';
+        return;
+      }
+
+      const doc = res.data;
+      const steps = doc.steps || [];
+
+      // ชื่อพนักงานจาก step4
+      if (steps[3]) {
+        document.getElementById('employeeName').textContent = steps[3].name || '-';
+      }
+
+      // history 3 คนแรก
+      if (steps[0]) {
+        document.getElementById('historyStep1').textContent =
+          `ผู้เสนอ: ${steps[0].name || '-'} (${formatDateTime(steps[0].time)})`;
+      } else {
+        document.getElementById('historyStep1').textContent = 'ยังไม่มีลายเซ็นผู้เสนอ';
+      }
+
+      if (steps[1]) {
+        document.getElementById('historyStep2').textContent =
+          `ผู้ทบทวน: ${steps[1].name || '-'} (${formatDateTime(steps[1].time)})`;
+      }
+
+      if (steps[2]) {
+        document.getElementById('historyStep3').textContent =
+          `ผู้อนุมัติ: ${steps[2].name || '-'} (${formatDateTime(steps[2].time)})`;
+      }
+    }
+
+    // ======= Signature Pad =======
     const canvas = document.getElementById('signaturePad');
-    canvas.width = canvas.offsetWidth;
     const ctx = canvas.getContext('2d');
-    
+
+    function resizeCanvas() {
+      const data = canvas.toDataURL();
+      canvas.width = canvas.offsetWidth;
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
     let isDrawing = false;
 
-    canvas.addEventListener('mousedown', () => isDrawing = true);
-    canvas.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mousemove', (e) => {
+    function startDrawing(e) {
+      isDrawing = true;
+      hasSignature = true;
+      draw(e);
+    }
+
+    function endDrawing() {
+      isDrawing = false;
+      ctx.beginPath();
+    }
+
+    function draw(e) {
       if (!isDrawing) return;
       const rect = canvas.getBoundingClientRect();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.lineTo(e.clientX - rect.left + 1, e.clientY - rect.top + 1);
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      ctx.lineTo(clientX - rect.left, clientY - rect.top);
       ctx.stroke();
-    });
+      ctx.beginPath();
+      ctx.moveTo(clientX - rect.left, clientY - rect.top);
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', endDrawing);
+    canvas.addEventListener('mouseleave', endDrawing);
+
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+    canvas.addEventListener('touchend', (e) => { e.preventDefault(); endDrawing(e); });
 
     function clearSignature() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasSignature = false;
     }
 
+    // ======= Save & Finish =======
     function handleComplete() {
+      if (!DOC_NO) {
+        alert('ไม่พบเลขเอกสาร');
+        return;
+      }
+      if (!hasSignature) {
+        alert('กรุณาวาดลายเซ็นก่อน');
+        return;
+      }
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const formData = new URLSearchParams();
+      formData.append('action', 'saveSignature');
+      formData.append('docNo', DOC_NO);
+      formData.append('role', ROLE);
+      formData.append('signature', dataUrl);
+
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+
       document.getElementById('successMessage').classList.add('show');
+      document.getElementById('statusBadge').textContent = '✓ รับทราบเรียบร้อย';
+
       setTimeout(() => {
-        alert('✓ ขั้นตอนเสร็จสิ้น! เอกสารจะถูกสร้าง PDF อัตโนมัติ');
-        // บันทึกลายเซ็นและสร้าง PDF ขั้นตอนสุดท้าย
-      }, 1500);
+        alert('✓ ขั้นตอนเสร็จสิ้น! ระบบจะสร้าง PDF สุดท้ายและส่งอีเมลให้ผู้เกี่ยวข้อง');
+      }, 800);
     }
+
+    document.addEventListener('DOMContentLoaded', loadDocInfo);
   </script>
 </body>
 </html>
