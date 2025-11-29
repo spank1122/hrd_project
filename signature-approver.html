@@ -38,7 +38,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: 
+      background:
         radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
       animation: float 20s ease-in-out infinite;
@@ -65,28 +65,22 @@
 
     .header-title {
       color: white;
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 700;
       text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
     .header-subtitle {
       color: rgba(255, 255, 255, 0.95);
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 300;
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-30px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .content {
@@ -97,14 +91,8 @@
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .card {
@@ -150,6 +138,12 @@
       font-size: 64px;
       color: white;
       margin-bottom: 20px;
+    }
+
+    .pdf-hint {
+      font-size: 13px;
+      color: var(--text-light);
+      text-align: center;
     }
 
     .signature-pad {
@@ -198,17 +192,6 @@
     .btn-approve:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
-    }
-
-    .btn-reject {
-      background: #ef4444;
-      color: white;
-      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
-    }
-
-    .btn-reject:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(239, 68, 68, 0.4);
     }
 
     .info-item {
@@ -270,18 +253,26 @@
       color: var(--text-dark);
     }
 
+    .success-message {
+      display: none;
+      margin-top: 16px;
+      padding: 12px;
+      background: #d1fae5;
+      color: #065f46;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
     @media (max-width: 768px) {
-      .content {
-        grid-template-columns: 1fr;
-      }
-
-      .pdf-preview {
-        height: 200px;
-      }
-
-      .button-group {
-        flex-direction: column;
-      }
+      .content { grid-template-columns: 1fr; }
+      .pdf-preview { height: 220px; }
+      .button-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -289,7 +280,7 @@
   <div class="container">
     <div class="header">
       <h1 class="header-title">ลายเซ็นผู้อนุมัติ</h1>
-      <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
+      <p class="header-subtitle" id="headerSubtitle">The Carpetmaker Co., Ltd.</p>
     </div>
 
     <div class="content">
@@ -297,7 +288,7 @@
       <div class="card">
         <div class="card-title">📄 ตัวอย่างเอกสาร</div>
         <div class="pdf-preview">📄</div>
-        <div style="font-size: 13px; color: var(--text-light); text-align: center;">
+        <div class="pdf-hint" id="pdfHint">
           เอกสารจะปรากฏที่นี่พร้อมลายเซ็นของผู้เสนอและผู้ทบทวน
         </div>
       </div>
@@ -306,75 +297,192 @@
       <div class="card info">
         <div class="card-title">✍️ ลายเซ็นของคุณ</div>
         
-        <div class="status-badge">⏳ รอการอนุมัติ</div>
+        <div class="status-badge" id="statusBadge">⏳ รอการอนุมัติ</div>
 
         <canvas id="signaturePad" class="signature-pad" height="150"></canvas>
 
         <div class="button-group">
-          <button class="btn btn-clear" onclick="clearSignature()">✕ ลบ</button>
+          <button class="btn btn-clear" type="button" onclick="clearSignature()">✕ ลบ</button>
+          <button class="btn btn-approve" type="button" onclick="handleApprove()">✓ บันทึกลายเซ็น</button>
         </div>
 
         <div class="info-item">
           <div class="info-label">บทบาท</div>
-          <div class="info-value">ผู้อนุมัติ</div>
+          <div class="info-value">ประธานเจ้าหน้าที่บริหาร (ผู้อนุมัติ)</div>
         </div>
 
         <div class="info-item">
           <div class="info-label">ชื่อ</div>
-          <div class="info-value">สมหญิง สมดี</div>
+          <div class="info-value" id="approverName">-</div>
         </div>
 
         <!-- Signature History -->
         <div class="signature-history">
-          <div class="signature-history-title">📋 ประวัติลายเซ็น</div>
-          <div class="signature-item">
-            <strong>ผู้เสนอ:</strong> สมชาย สมการ (20 พ.ย. 10:00)
-          </div>
-          <div class="signature-item">
-            <strong>ผู้ทบทวน:</strong> วิไล วิศวะ (21 พ.ย. 14:30)
-          </div>
+          <div class="signature-history-title">📋 ประวัติลายเซ็นก่อนหน้า</div>
+          <div class="signature-item" id="historyStep1">กำลังโหลด...</div>
+          <div class="signature-item" id="historyStep2"></div>
         </div>
 
-        <div class="button-group" style="margin-top: 24px;">
-          <button class="btn btn-reject" onclick="handleReject()">✕ ปฏิเสธ</button>
-          <button class="btn btn-approve" onclick="handleApprove()">✓ อนุมัติ</button>
+        <div class="success-message" id="successMessage">
+          ✓ บันทึกลายเซ็นเรียบร้อยแล้ว! ระบบจะส่งอีเมลไปยังพนักงานถัดไป
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Setup Signature Pad
+    // ======= CONFIG =======
+    // ใส่ URL Web App ของ Apps Script ตรงนี้
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+
+    const ROLE = 'ceo'; // คนที่ 3
+    let DOC_NO = '';
+    let hasSignature = false;
+
+    // ======= Helper =======
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
+    }
+
+    function formatDateTime(dt) {
+      if (!dt) return '-';
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return dt; // ถ้าเป็น string อยู่แล้ว
+      return d.toLocaleString('th-TH');
+    }
+
+    // ======= Load doc info (JSONP) =======
+    function loadDocInfo() {
+      DOC_NO = getQueryParam('docNo') || '';
+      if (!DOC_NO) {
+        document.getElementById('headerSubtitle').textContent =
+          'ไม่พบเลขที่เอกสาร (docNo)';
+        return;
+      }
+
+      document.getElementById('headerSubtitle').textContent =
+        `เลขที่เอกสาร: ${DOC_NO}`;
+
+      const callbackName = 'handleDocResponse';
+      const script = document.createElement('script');
+      script.src = `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(DOC_NO)}&callback=${callbackName}`;
+      document.body.appendChild(script);
+    }
+
+    function handleDocResponse(res) {
+      if (!res || !res.success) {
+        document.getElementById('pdfHint').textContent = 'ไม่พบข้อมูลเอกสารในระบบ';
+        return;
+      }
+
+      const doc = res.data;
+      const steps = doc.steps || [];
+
+      // ชื่อ approver (step3)
+      if (steps[2]) {
+        document.getElementById('approverName').textContent = steps[2].name || '-';
+      }
+
+      // history: step1 + step2
+      if (steps[0]) {
+        document.getElementById('historyStep1').textContent =
+          `ผู้เสนอ: ${steps[0].name || '-'} (${formatDateTime(steps[0].time)})`;
+      } else {
+        document.getElementById('historyStep1').textContent = 'ยังไม่มีลายเซ็นผู้เสนอ';
+      }
+
+      if (steps[1]) {
+        document.getElementById('historyStep2').textContent =
+          `ผู้ทบทวน: ${steps[1].name || '-'} (${formatDateTime(steps[1].time)})`;
+      }
+    }
+
+    // ======= Signature Pad =======
     const canvas = document.getElementById('signaturePad');
-    canvas.width = canvas.offsetWidth;
     const ctx = canvas.getContext('2d');
-    
+
+    function resizeCanvas() {
+      const data = canvas.toDataURL(); // เก็บเดิม (ถ้าอยาก)
+      canvas.width = canvas.offsetWidth;
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
+      // ไม่ restore รูปเก่า เพื่อให้เรียบง่าย
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
     let isDrawing = false;
 
-    canvas.addEventListener('mousedown', () => isDrawing = true);
-    canvas.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mousemove', (e) => {
+    function startDrawing(e) {
+      isDrawing = true;
+      hasSignature = true;
+      draw(e);
+    }
+
+    function endDrawing() {
+      isDrawing = false;
+      ctx.beginPath();
+    }
+
+    function draw(e) {
       if (!isDrawing) return;
       const rect = canvas.getBoundingClientRect();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.lineTo(e.clientX - rect.left + 1, e.clientY - rect.top + 1);
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      ctx.lineTo(clientX - rect.left, clientY - rect.top);
       ctx.stroke();
-    });
+      ctx.beginPath();
+      ctx.moveTo(clientX - rect.left, clientY - rect.top);
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', endDrawing);
+    canvas.addEventListener('mouseleave', endDrawing);
+
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+    canvas.addEventListener('touchend', (e) => { e.preventDefault(); endDrawing(e); });
 
     function clearSignature() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasSignature = false;
     }
 
+    // ======= Save Signature =======
     function handleApprove() {
-      alert('✓ อนุมัติแล้ว ส่งไปยังพนักงาน');
-      // บันทึกลายเซ็นและส่งต่อ
+      if (!DOC_NO) {
+        alert('ไม่พบเลขเอกสาร');
+        return;
+      }
+      if (!hasSignature) {
+        alert('กรุณาวาดลายเซ็นก่อน');
+        return;
+      }
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const formData = new URLSearchParams();
+      formData.append('action', 'saveSignature');
+      formData.append('docNo', DOC_NO);
+      formData.append('role', ROLE);
+      formData.append('signature', dataUrl);
+
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+
+      document.getElementById('successMessage').classList.add('show');
+      document.getElementById('statusBadge').textContent = '✓ บันทึกลายเซ็นแล้ว';
+      setTimeout(() => {
+        alert('บันทึกลายเซ็นผู้อนุมัติเรียบร้อย ระบบจะส่งต่อให้พนักงานลงนาม');
+      }, 500);
     }
 
-    function handleReject() {
-      alert('✕ ปฏิเสธเอกสาร กรุณาระบุเหตุผล');
-      // บันทึกการปฏิเสธ
-    }
+    document.addEventListener('DOMContentLoaded', loadDocInfo);
   </script>
 </body>
 </html>
