@@ -330,6 +330,7 @@
       <div class="card">
         <div class="card-title">ข้อมูลใบดำเนินการ</div>
 
+        <!-- แถวที่ 1: พนักงาน + Email พนักงาน -->
         <div class="field-row">
           <div class="field">
             <label>พนักงาน <span class="required">*</span></label>
@@ -340,6 +341,19 @@
           </div>
 
           <div class="field">
+            <label>Email พนักงาน (สำหรับส่งลิงก์เซ็นรับทราบ)</label>
+            <input
+              type="email"
+              id="empEmailManual"
+              placeholder="name@carpetmaker.co.th"
+            />
+            <small>แก้ไขได้ ถ้าอีเมลในระบบไม่ตรง</small>
+          </div>
+        </div>
+
+        <!-- แถวที่ 2: รหัส/ตำแหน่ง + แผนก/ฝ่าย -->
+        <div class="field-row">
+          <div class="field">
             <label>รหัสพนักงาน / ตำแหน่ง</label>
             <input
               id="empCodePosition"
@@ -348,21 +362,26 @@
               placeholder="- / -"
             />
           </div>
-        </div>
 
-        <div class="field-row">
           <div class="field">
             <label>แผนก / ฝ่าย</label>
             <input id="deptDivision" type="text" readonly placeholder="- / -" />
           </div>
+        </div>
 
+        <!-- แถวที่ 3: สภาพจ้างงาน / วันเริ่มงาน -->
+        <div class="field-row">
           <div class="field">
             <label>สภาพจ้างงาน / วันเริ่มงาน</label>
             <input id="empTypeStart" type="text" readonly placeholder="- / -" />
           </div>
+
+          <div class="field">
+            <!-- เว้นที่ไว้เฉย ๆ หรือจะใส่อะไรเพิ่มภายหลังก็ได้ -->
+          </div>
         </div>
 
-
+        <!-- hidden fields สำหรับส่งเข้า Apps Script -->
         <input type="hidden" name="empCode"        id="empCodeHidden" />
         <input type="hidden" name="empPosition"    id="empPositionHidden" />
         <input type="hidden" name="empDepartment"  id="empDepartmentHidden" />
@@ -716,7 +735,7 @@
     </form>
   </div>
 
-    <script>
+  <script>
     // ================== CONFIG WEB APP ==================
     // เปลี่ยนตรงนี้เป็น URL เว็บแอปจริง ของโปรเจกต์ HRD demo
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
@@ -746,9 +765,13 @@
       // แปลง proceedType → actionType/actionLabel/actionDetail
       const actionInfo = buildActionInfo(raw);
 
+      // ใช้ email ที่ HR กรอกเองเป็นหลัก ถ้าเว้นว่างค่อยใช้จาก hidden
+      const manualEmail = document.getElementById('empEmailManual').value || '';
+      const finalEmail = manualEmail || (raw.empEmail || '');
+
       // payload ที่จะส่งให้ createDocument_
       const payload = {
-        // ข้อมูลพนักงาน (มาจาก hidden input ตอนเลือกพนักงาน)
+        // ข้อมูลพนักงาน (มาจาก hidden input ตอนเลือกพนักงาน + email ที่กรอกเอง)
         empCode:        raw.empCode        || '',
         empName:        empNameText        || '',
         empPosition:    raw.empPosition    || '',
@@ -756,7 +779,7 @@
         empDivision:    raw.empDivision    || '',
         company:        raw.company        || '',
         employmentType: raw.employmentType || '',
-        empEmail:       raw.empEmail       || '',
+        empEmail:       finalEmail         || '',
 
         // รายละเอียด
         effectiveDate:  raw.effectiveDate  || '',
@@ -883,7 +906,6 @@
     }
 
     // ================== โหลดรายชื่อพนักงานจาก Apps Script (JSONP) ==================
-
     function loadEmployeesJSONP() {
       const callbackName = 'handleEmployeesJSONP';
       const script = document.createElement('script');
@@ -967,6 +989,12 @@
         document.getElementById('companyHidden').value = company;
         document.getElementById('employmentTypeHidden').value = empType;
         document.getElementById('empEmailHidden').value = email;
+
+        // เติมลงช่อง Email ให้ HR เห็นและแก้ได้
+        const emailInput = document.getElementById('empEmailManual');
+        if (emailInput) {
+          emailInput.value = email || '';
+        }
       });
 
     // เรียกโหลดรายชื่อเมื่อเปิดหน้า
