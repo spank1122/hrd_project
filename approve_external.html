@@ -471,9 +471,12 @@
               getFormValue(form, 'นามบัตร', d.nameCard); 
             document.getElementById('budgetOptions').textContent =
               getFormValue(form, 'การตั้งงบประมาณ', d.budgetType); 
+
             document.getElementById('กำหนดส่งมอบ').textContent  = formatDateOnly(d.deliveryDate);
+
             document.getElementById('specDetail').textContent =
               getFormValue(form, 'Spec / Type / รุ่น / ยี่ห้อ', d.spec); 
+              
             // ======= แสดงทุกคำถามจากฟอร์ม =======
             const container = document.getElementById('allFormFields');
             container.innerHTML = '';
