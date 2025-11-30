@@ -151,6 +151,7 @@
       font-weight: 500;
     }
 
+    /* ✅ ปรับ canvas เหมือน review: กว้างเต็ม + touch-action none */
     canvas {
       border: 2px dashed #dadce0;
       border-radius: 4px;
@@ -503,52 +504,87 @@
     function initCanvas() {
       canvas = document.getElementById('signatureCanvas');
       ctx = canvas.getContext('2d');
-      ctx.strokeStyle = '#000';
+
+      // เติมพื้นหลังให้เป็นสีขาว (กันโปร่งใสตอน export)
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = '#000000';
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
+      // mouse events
       canvas.addEventListener('mousedown', startDrawing);
       canvas.addEventListener('mousemove', draw);
       canvas.addEventListener('mouseup', stopDrawing);
-      canvas.addEventListener('mouseout', stopDrawing);
+      canvas.addEventListener('mouseleave', stopDrawing);
+
+      // touch events
       canvas.addEventListener('touchstart', handleTouch);
       canvas.addEventListener('touchmove', handleTouch);
-      canvas.addEventListener('touchend', stopDrawing);
+      canvas.addEventListener('touchend', handleTouch);
+    }
+
+    // map ตำแหน่งเมาส์/นิ้วให้ตรงกับขนาดจริงของ canvas (เหมือน review.html)
+    function getCanvasPos(e) {
+      const rect   = canvas.getBoundingClientRect();
+      const scaleX = canvas.width  / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top)  * scaleY
+      };
     }
 
     function startDrawing(e) {
+      e.preventDefault();
       isDrawing = true;
-      const rect = canvas.getBoundingClientRect();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
       hasSignature = true;
+
+      const pos = getCanvasPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
     }
 
     function draw(e) {
       if (!isDrawing) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      e.preventDefault();
+
+      const pos = getCanvasPos(e);
+      ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
     }
 
-    function stopDrawing() { isDrawing = false; }
+    function stopDrawing(e) {
+      if (e) e.preventDefault();
+      isDrawing = false;
+    }
 
     function handleTouch(e) {
       e.preventDefault();
-      const touch = e.touches[0];
+      const touch = e.touches[0] || e.changedTouches[0];
+      if (!touch) return;
+
       const type =
         e.type === 'touchstart' ? 'mousedown' :
-        e.type === 'touchmove'  ? 'mousemove' : 'mouseup';
+        e.type === 'touchmove'  ? 'mousemove' :
+                                  'mouseup';
+
       const mouseEvent = new MouseEvent(type, {
         clientX: touch.clientX,
-        clientY: touch.clientY
+        clientY: touch.clientY,
+        bubbles: true,
+        cancelable: true
       });
       canvas.dispatchEvent(mouseEvent);
     }
 
     function clearSignature() {
+      // ลบแล้วระบายขาวใหม่ให้พื้นหลังไม่โปร่งใส
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       hasSignature = false;
     }
 
