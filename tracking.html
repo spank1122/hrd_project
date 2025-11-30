@@ -1,385 +1,385 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ติดตามสถานะ - The Carpetmaker</title>
+    <!DOCTYPE html>
+    <html lang="th">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ติดตามสถานะ - The Carpetmaker</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    :root {
-      --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --pink-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --text-dark: #2d3748;
-      --text-light: #718096;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --border: #e2e8f0;
-    }
-
-    body {
-      font-family: 'Sarabun', sans-serif;
-      background: var(--purple-gradient);
-      min-height: 100vh;
-      padding: 40px 20px;
-      position: relative;
-    }
-
-    /* Background animation */
-    body::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 0%, transparent 50%);
-      animation: float 20s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header { text-align: center; margin-bottom: 40px; }
-
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .btn-back {
-      background: rgba(255,255,255,0.2);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all .3s;
-    }
-
-    .btn-back:hover { background: rgba(255,255,255,0.35); }
-
-    .header-title { color: white; font-size: 34px; font-weight: 700; }
-
-    .filter-section {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 32px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-    }
-
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-      gap: 16px;
-    }
-
-    .documents-section { margin-top: 12px; }
-
-    .document-item {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      margin-bottom: 16px;
-      border-left: 4px solid #667eea;
-      cursor: pointer;
-      transition: .3s;
-    }
-
-    .document-item:hover { transform: translateX(4px); }
-
-    .document-item.pink { border-left-color: #f5576c; }
-
-    .status-badge {
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .pending { background: #fef3c7; color: #92400e; }
-    .completed { background: #d1fae5; color: #065f46; }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .modal.show { display: flex; }
-
-    .modal-content {
-      background: white;
-      padding: 32px;
-      border-radius: 16px;
-      max-width: 520px;
-      width: 100%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    .timeline { padding-left: 30px; position: relative; }
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 7px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #ddd;
-    }
-
-    .timeline-item {
-      position: relative;
-      margin-bottom: 24px;
-    }
-
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -30px;
-      top: 4px;
-      width: 14px;
-      height: 14px;
-      background: #667eea;
-      border: 3px solid white;
-      border-radius: 50%;
-    }
-
-    .timeline-item.completed::before {
-      background: #10b981;
-    }
-
-  </style>
-</head>
-
-<body>
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <div class="header-top">
-        <button class="btn-back" onclick="history.back()">← ย้อนกลับ</button>
-        <div></div>
-      </div>
-      <h1 class="header-title">ติดตามสถานะ</h1>
-    </div>
-
-    <!-- Filter -->
-    <div class="filter-section">
-      <div class="filter-grid">
-        <div>
-          <label>ค้นหา</label>
-          <input id="searchInput" type="text" placeholder="ค้นหาจากชื่อหรือรหัส...">
-        </div>
-
-        <div>
-          <label>สถานะ</label>
-          <select id="statusFilter">
-            <option value="">-- ทั้งหมด --</option>
-            <option value="pending">รออนุมัติ</option>
-            <option value="completed">สำเร็จแล้ว</option>
-          </select>
-        </div>
-
-        <div>
-          <label>ประเภท</label>
-          <select id="typeFilter">
-            <option value="">-- ทั้งหมด --</option>
-            <option value="appoint">แต่งตั้ง</option>
-            <option value="transfer">โอนย้าย</option>
-            <option value="promotion">เลื่อนตำแหน่ง</option>
-            <option value="salary">ปรับเงินเดือน</option>
-            <option value="passprobation">ผ่านทดลองงาน</option>
-            <option value="cutwages">ตัดเงินเดือน</option>
-            <option value="other">อื่นๆ</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- List -->
-    <div id="documentsList" class="documents-section"></div>
-  </div>
-
-  <!-- Modal -->
-  <div id="timelineModal" class="modal">
-    <div class="modal-content">
-      <h2 style="margin-bottom: 20px;">รายละเอียดขั้นตอน</h2>
-      <div id="timelineContent" class="timeline"></div>
-      <button onclick="closeModal()" style="margin-top:20px;padding:10px 20px;">ปิด</button>
-    </div>
-  </div>
-
-  <script>
-    /* ===============================
-       CONFIG
-    =============================== */
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec";
-
-    let documents = [];
-
-    document.addEventListener("DOMContentLoaded", () => {
-      setupFilters();
-      loadDocuments();
-    });
-
-    /* ===============================
-       โหลดข้อมูลจาก Google Apps Script
-    =============================== */
-    function loadDocuments() {
-      const callbackName = "trackingCallback_" + Date.now();
-
-      window[callbackName] = function (response) {
-        if (response && response.success) {
-          documents = response.documents;
-          displayDocuments(documents);
+        :root {
+        --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --pink-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --text-dark: #2d3748;
+        --text-light: #718096;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --border: #e2e8f0;
         }
-        delete window[callbackName];
-      };
 
-      const script = document.createElement("script");
+        body {
+        font-family: 'Sarabun', sans-serif;
+        background: var(--purple-gradient);
+        min-height: 100vh;
+        padding: 40px 20px;
+        position: relative;
+        }
 
-      script.src =
-        WEB_APP_URL +
-        "?action=getTrackingDocs&callback=" +
-        callbackName;
+        /* Background animation */
+        body::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 0%, transparent 50%);
+        animation: float 20s ease-in-out infinite;
+        }
 
-      document.body.appendChild(script);
-    }
+        @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+        }
 
-    /* ===============================
-       แสดงรายการเอกสาร
-    =============================== */
-    function displayDocuments(listData) {
-      const container = document.getElementById("documentsList");
+        .container {
+        max-width: 1000px;
+        margin: auto;
+        position: relative;
+        z-index: 1;
+        }
 
-      if (!listData || listData.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">📭</div>
-            <div class="empty-title">ไม่พบข้อมูล</div>
-          </div>`;
-        return;
-      }
+        .header { text-align: center; margin-bottom: 40px; }
 
-      container.innerHTML = listData
-        .map(
-          (doc) => `
-        <div class="document-item ${doc.status === "pending" ? "pink" : ""}"
-             onclick="showTimeline('${doc.id}')">
-          <div class="document-header">
-            <div class="document-title">${doc.id} - ${doc.employee}</div>
-            <span class="status-badge ${
-              doc.status === "pending" ? "pending" : "completed"
-            }">
-              ${doc.status === "pending" ? "⏳ รออนุมัติ" : "✓ สำเร็จแล้ว"}
-            </span>
-          </div>
+        .header-top {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        }
 
-          <div class="document-info">
-            <div><strong>ประเภท:</strong> ${getTypeLabel(doc.type)}</div>
-            <div><strong>วันที่สร้าง:</strong> ${doc.createdDate}</div>
-            <div><strong>ขั้นตอน:</strong> ${
-              doc.steps.filter((s) => s.status === "completed").length
-            }/${doc.steps.length}</div>
-          </div>
+        .btn-back {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all .3s;
+        }
+
+        .btn-back:hover { background: rgba(255,255,255,0.35); }
+
+        .header-title { color: white; font-size: 34px; font-weight: 700; }
+
+        .filter-section {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 32px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+        gap: 16px;
+        }
+
+        .documents-section { margin-top: 12px; }
+
+        .document-item {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        margin-bottom: 16px;
+        border-left: 4px solid #667eea;
+        cursor: pointer;
+        transition: .3s;
+        }
+
+        .document-item:hover { transform: translateX(4px); }
+
+        .document-item.pink { border-left-color: #f5576c; }
+
+        .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        }
+
+        .pending { background: #fef3c7; color: #92400e; }
+        .completed { background: #d1fae5; color: #065f46; }
+
+        /* Modal */
+        .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        }
+
+        .modal.show { display: flex; }
+
+        .modal-content {
+        background: white;
+        padding: 32px;
+        border-radius: 16px;
+        max-width: 520px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+        }
+
+        .timeline { padding-left: 30px; position: relative; }
+        .timeline::before {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #ddd;
+        }
+
+        .timeline-item {
+        position: relative;
+        margin-bottom: 24px;
+        }
+
+        .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -30px;
+        top: 4px;
+        width: 14px;
+        height: 14px;
+        background: #667eea;
+        border: 3px solid white;
+        border-radius: 50%;
+        }
+
+        .timeline-item.completed::before {
+        background: #10b981;
+        }
+
+    </style>
+    </head>
+
+    <body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+        <div class="header-top">
+            <button class="btn-back" onclick="history.back()">← ย้อนกลับ</button>
+            <div></div>
         </div>
-      `
-        )
-        .join("");
-    }
+        <h1 class="header-title">ติดตามสถานะ</h1>
+        </div>
 
-    /* ===============================
-       Filter
-    =============================== */
-    function setupFilters() {
-      document.getElementById("searchInput").addEventListener("input", applyFilters);
-      document.getElementById("statusFilter").addEventListener("change", applyFilters);
-      document.getElementById("typeFilter").addEventListener("change", applyFilters);
-    }
+        <!-- Filter -->
+        <div class="filter-section">
+        <div class="filter-grid">
+            <div>
+            <label>ค้นหา</label>
+            <input id="searchInput" type="text" placeholder="ค้นหาจากชื่อหรือรหัส...">
+            </div>
 
-    function applyFilters() {
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      const status = document.getElementById("statusFilter").value;
-      const type = document.getElementById("typeFilter").value;
+            <div>
+            <label>สถานะ</label>
+            <select id="statusFilter">
+                <option value="">-- ทั้งหมด --</option>
+                <option value="pending">รออนุมัติ</option>
+                <option value="completed">สำเร็จแล้ว</option>
+            </select>
+            </div>
 
-      const filtered = documents.filter((doc) => {
-        return (
-          (doc.id.toLowerCase().includes(search) ||
-            doc.employee.toLowerCase().includes(search)) &&
-          (!status || doc.status === status) &&
-          (!type || doc.type === type)
-        );
-      });
+            <div>
+            <label>ประเภท</label>
+            <select id="typeFilter">
+                <option value="">-- ทั้งหมด --</option>
+                <option value="appoint">แต่งตั้ง</option>
+                <option value="transfer">โอนย้าย</option>
+                <option value="promotion">เลื่อนตำแหน่ง</option>
+                <option value="salary">ปรับเงินเดือน</option>
+                <option value="passprobation">ผ่านทดลองงาน</option>
+                <option value="cutwages">ตัดเงินเดือน</option>
+                <option value="other">อื่นๆ</option>
+            </select>
+            </div>
+        </div>
+        </div>
 
-      displayDocuments(filtered);
-    }
+        <!-- List -->
+        <div id="documentsList" class="documents-section"></div>
+    </div>
 
-    function getTypeLabel(type) {
-      const map = {
-        appoint: "แต่งตั้ง",
-        transfer: "โอนย้าย",
-        promotion: "เลื่อนตำแหน่ง",
-        salary: "ปรับเงินเดือน",
-        passprobation: "ผ่านทดลองงาน",
-        cutwages: "ตัดเงินเดือน",
-        other: "อื่นๆ",
-      };
-      return map[type] || type;
-    }
+    <!-- Modal -->
+    <div id="timelineModal" class="modal">
+        <div class="modal-content">
+        <h2 style="margin-bottom: 20px;">รายละเอียดขั้นตอน</h2>
+        <div id="timelineContent" class="timeline"></div>
+        <button onclick="closeModal()" style="margin-top:20px;padding:10px 20px;">ปิด</button>
+        </div>
+    </div>
 
-    /* ===============================
-       Timeline Modal
-    =============================== */
-    function showTimeline(docId) {
-      const doc = documents.find((d) => d.id === docId);
-      if (!doc) return;
+    <script>
+        /* ===============================
+        CONFIG
+        =============================== */
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec";
 
-      const html = doc.steps
-        .map(
-          (step) => `
-          <div class="timeline-item ${step.status === "completed" ? "completed" : ""}">
-            <div class="timeline-time">${step.role}</div>
-            <div class="timeline-text">${step.signer || "-"}</div>
-            <div class="timeline-detail">${step.date || "-"} เวลา ${
-            step.time || "-"
-          }</div>
-          </div>
+        let documents = [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+        setupFilters();
+        loadDocuments();
+        });
+
+        /* ===============================
+        โหลดข้อมูลจาก Google Apps Script
+        =============================== */
+        function loadDocuments() {
+        const callbackName = "trackingCallback_" + Date.now();
+
+        window[callbackName] = function (response) {
+            if (response && response.success) {
+            documents = response.documents;
+            displayDocuments(documents);
+            }
+            delete window[callbackName];
+        };
+
+        const script = document.createElement("script");
+
+        script.src =
+            WEB_APP_URL +
+            "?action=getTrackingDocs&callback=" +
+            callbackName;
+
+        document.body.appendChild(script);
+        }
+
+        /* ===============================
+        แสดงรายการเอกสาร
+        =============================== */
+        function displayDocuments(listData) {
+        const container = document.getElementById("documentsList");
+
+        if (!listData || listData.length === 0) {
+            container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <div class="empty-title">ไม่พบข้อมูล</div>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = listData
+            .map(
+            (doc) => `
+            <div class="document-item ${doc.status === "pending" ? "pink" : ""}"
+                onclick="showTimeline('${doc.id}')">
+            <div class="document-header">
+                <div class="document-title">${doc.id} - ${doc.employee}</div>
+                <span class="status-badge ${
+                doc.status === "pending" ? "pending" : "completed"
+                }">
+                ${doc.status === "pending" ? "⏳ รออนุมัติ" : "✓ สำเร็จแล้ว"}
+                </span>
+            </div>
+
+            <div class="document-info">
+                <div><strong>ประเภท:</strong> ${getTypeLabel(doc.type)}</div>
+                <div><strong>วันที่สร้าง:</strong> ${doc.createdDate}</div>
+                <div><strong>ขั้นตอน:</strong> ${
+                doc.steps.filter((s) => s.status === "completed").length
+                }/${doc.steps.length}</div>
+            </div>
+            </div>
         `
-        )
-        .join("");
+            )
+            .join("");
+        }
 
-      document.getElementById("timelineContent").innerHTML = html;
-      document.getElementById("timelineModal").classList.add("show");
-    }
+        /* ===============================
+        Filter
+        =============================== */
+        function setupFilters() {
+        document.getElementById("searchInput").addEventListener("input", applyFilters);
+        document.getElementById("statusFilter").addEventListener("change", applyFilters);
+        document.getElementById("typeFilter").addEventListener("change", applyFilters);
+        }
 
-    function closeModal() {
-      document.getElementById("timelineModal").classList.remove("show");
-    }
-  </script>
+        function applyFilters() {
+        const search = document.getElementById("searchInput").value.toLowerCase();
+        const status = document.getElementById("statusFilter").value;
+        const type = document.getElementById("typeFilter").value;
 
-</body>
-</html>
+        const filtered = documents.filter((doc) => {
+            return (
+            (doc.id.toLowerCase().includes(search) ||
+                doc.employee.toLowerCase().includes(search)) &&
+            (!status || doc.status === status) &&
+            (!type || doc.type === type)
+            );
+        });
+
+        displayDocuments(filtered);
+        }
+
+        function getTypeLabel(type) {
+        const map = {
+            appoint: "แต่งตั้ง",
+            transfer: "โอนย้าย",
+            promotion: "เลื่อนตำแหน่ง",
+            salary: "ปรับเงินเดือน",
+            passprobation: "ผ่านทดลองงาน",
+            cutwages: "ตัดเงินเดือน",
+            other: "อื่นๆ",
+        };
+        return map[type] || type;
+        }
+
+        /* ===============================
+        Timeline Modal
+        =============================== */
+        function showTimeline(docId) {
+        const doc = documents.find((d) => d.id === docId);
+        if (!doc) return;
+
+        const html = doc.steps
+            .map(
+            (step) => `
+            <div class="timeline-item ${step.status === "completed" ? "completed" : ""}">
+                <div class="timeline-time">${step.role}</div>
+                <div class="timeline-text">${step.signer || "-"}</div>
+                <div class="timeline-detail">${step.date || "-"} เวลา ${
+                step.time || "-"
+            }</div>
+            </div>
+            `
+            )
+            .join("");
+
+        document.getElementById("timelineContent").innerHTML = html;
+        document.getElementById("timelineModal").classList.add("show");
+        }
+
+        function closeModal() {
+        document.getElementById("timelineModal").classList.remove("show");
+        }
+    </script>
+
+    </body>
+    </html>
