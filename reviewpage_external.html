@@ -55,14 +55,14 @@
       .badge-approved { background: #dcfce7; color: #166534; }
       .badge-rejected { background: #fee2e2; color: #b91c1c; }
 
+      /* ✅ ลายเซ็น: กว้างเต็ม card เหมือนหน้า approve */
       canvas {
         border: 2px dashed #d4d4d8;
         border-radius: 8px;
-        width: 300px;
-        height: 120px;
+        width: 100%;          /* กว้างเต็ม card */
         background: #fff;
         margin: 10px 0 8px;
-        touch-action: none;
+        touch-action: none;   /* กัน scroll ตอนเซ็นด้วยนิ้ว */
       }
 
       .btn {
@@ -173,6 +173,7 @@
           <div class="row-label">งบประมาณ</div>
           <div class="row-value" id="budget"></div>
         </div>
+
         <div class="row">
           <div class="row-label">เครื่องเขียน</div>
           <div class="row-value" id="stationery"></div>
@@ -218,6 +219,7 @@
 
         <div style="margin-top:16px;">
           <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
+          <!-- ขนาดจริงของ canvas -->
           <canvas id="signCanvas" width="600" height="200"></canvas>
         </div>
 
@@ -297,6 +299,7 @@
         canvas = document.getElementById('signCanvas');
         ctx = canvas.getContext('2d');
 
+        // เติมพื้นหลังขาว
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -304,32 +307,45 @@
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
 
+        // mouse
         canvas.addEventListener('mousedown', startDraw);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDraw);
         canvas.addEventListener('mouseleave', stopDraw);
 
+        // touch
         canvas.addEventListener('touchstart', handleTouch);
         canvas.addEventListener('touchmove', handleTouch);
         canvas.addEventListener('touchend', handleTouch);
+      }
+
+      // map ตำแหน่ง mouse/touch ให้ตรงกับขนาดจริงของ canvas
+      function getCanvasPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width  / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+          x: (e.clientX - rect.left) * scaleX,
+          y: (e.clientY - rect.top)  * scaleY
+        };
       }
 
       function startDraw(e) {
         e.preventDefault();
         isDrawing = true;
         hasSignature = true;
-        const x = e.offsetX;
-        const y = e.offsetY;
+
+        const pos = getCanvasPos(e);
         ctx.beginPath();
-        ctx.moveTo(x, y);
+        ctx.moveTo(pos.x, pos.y);
       }
 
       function draw(e) {
         if (!isDrawing) return;
         e.preventDefault();
-        const x = e.offsetX;
-        const y = e.offsetY;
-        ctx.lineTo(x, y);
+
+        const pos = getCanvasPos(e);
+        ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
       }
 
@@ -340,15 +356,15 @@
 
       function handleTouch(e) {
         e.preventDefault();
-        const t = (e.touches[0] || e.changedTouches[0]);
+        const t = e.touches[0] || e.changedTouches[0];
         if (!t) return;
 
-        const type =
+        const mouseEventType =
           e.type === 'touchstart' ? 'mousedown' :
           e.type === 'touchmove'  ? 'mousemove' :
                                     'mouseup';
 
-        const ev = new MouseEvent(type, {
+        const ev = new MouseEvent(mouseEventType, {
           clientX: t.clientX,
           clientY: t.clientY,
           bubbles: true,
@@ -358,28 +374,26 @@
       }
 
       function clearSignature() {
+        if (!ctx) return;
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         hasSignature = false;
       }
 
-     function formatDateOnly(value) {
-  if (!value) return '-';
+      // ---------- helper: format date ----------
+      function formatDateOnly(value) {
+        if (!value) return '-';
 
-  // ถ้าเป็น string แบบ ISO (2025-12-26T17:00:00.000Z)
-  const d = new Date(value);
-  if (!isNaN(d.getTime())) {
-    const yyyy = d.getFullYear();
-    const mm   = String(d.getMonth() + 1).padStart(2, '0');
-    const dd   = String(d.getDate()).padStart(2, '0');
-    // ถ้าอยากเป็น dd/MM/yyyy ก็เปลี่ยนบรรทัดล่างนี้
-    return `${yyyy}-${mm}-${dd}`;      // ← ตอนนี้เป็น 2025-12-27
-    // return `${dd}/${mm}/${yyyy}`;   // ← ถ้าอยากได้ 27/12/2025
-  }
-
-  // ถ้า new Date() ไม่ได้ (เช่น เป็นข้อความธรรมดา) ก็คืนค่าตามเดิม
-  return value;
-}
+        const d = new Date(value);
+        if (!isNaN(d.getTime())) {
+          const yyyy = d.getFullYear();
+          const mm   = String(d.getMonth() + 1).padStart(2, '0');
+          const dd   = String(d.getDate()).padStart(2, '0');
+          // ถ้าอยากเปลี่ยนเป็น dd/MM/yyyy ให้แก้บรรทัดล่างนี้
+          return `${yyyy}-${mm}-${dd}`;
+        }
+        return value;
+      }
 
       // ---------- load data ----------
       function loadRequest() {
@@ -402,7 +416,7 @@
             const d = res.data || {};
 
             document.getElementById('requestCard').style.display = 'block';
-            document.getElementById('reviewCard').style.display = 'block';
+            document.getElementById('reviewCard').style.display  = 'block';
 
             document.getElementById('reqNo').textContent   = d.requestNo || '';
             document.getElementById('reqName').textContent = d.requesterName || '-';
@@ -422,7 +436,7 @@
             document.getElementById('programs').textContent    = d.programUse    || '-';
             document.getElementById('budget').textContent      = d.budgetSummary || d.budget || '-';
 
-            // ✅ ฟิลด์ใหม่
+            // ฟิลด์ใหม่
             document.getElementById('stationery').textContent    = d.stationery      || '-';
             document.getElementById('mobileNeed').textContent    = d.mobileNeed      || '-';
             document.getElementById('mobilePhone').textContent   = d.mobileNumber    || '-';
