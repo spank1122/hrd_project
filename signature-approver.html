@@ -7,99 +7,60 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --pink-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --text-dark: #2d3748;
-      --text-light: #718096;
+      --text-dark: #1f2933;
+      --text-light: #7b8794;
+      --border: #e1e7ef;
+      --section-border: #4f46e5;
       --success: #10b981;
-      --border: #e2e8f0;
     }
 
     body {
       font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--purple-gradient);
       min-height: 100vh;
-      padding: 40px 20px;
-      position: relative;
-    }
-
-    body::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background:
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
-      animation: float 20s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
+      padding: 32px 16px;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1100px;
       margin: 0 auto;
-      position: relative;
-      z-index: 1;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 40px;
-      animation: fadeInDown 0.8s ease-out;
+      margin-bottom: 24px;
+      color: #fff;
     }
 
     .header-title {
-      color: white;
       font-size: 28px;
       font-weight: 700;
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      margin-bottom: 4px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
     .header-subtitle {
-      color: rgba(255, 255, 255, 0.95);
+      margin-top: 4px;
       font-size: 14px;
-      font-weight: 300;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to   { opacity: 1; transform: translateY(0); }
+      opacity: 0.9;
     }
 
     .content {
       display: grid;
       grid-template-columns: 2fr 1fr;
-      gap: 24px;
-      animation: fadeInUp 0.8s ease-out;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
+      gap: 20px;
     }
 
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      background: #fff;
+      border-radius: 20px;
+      padding: 24px 28px 28px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
       position: relative;
       overflow: hidden;
     }
@@ -114,139 +75,260 @@
       background: var(--purple-gradient);
     }
 
-    .card.info::before {
-      background: var(--pink-gradient);
-    }
-
     .card-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--text-dark);
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid var(--border);
+      margin-bottom: 16px;
     }
 
-    .pdf-preview {
-      width: 100%;
-      height: 400px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 8px;
+    .section {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px 18px;
+      margin-bottom: 14px;
+      background: #f9fafb;
+    }
+
+    .section-header {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 64px;
-      color: white;
-      margin-bottom: 20px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
 
-    .pdf-hint {
+    .section-bar {
+      width: 4px;
+      height: 20px;
+      border-radius: 999px;
+      background: var(--section-border);
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px 18px;
+    }
+
+    .field {
       font-size: 13px;
-      color: var(--text-light);
-      text-align: center;
     }
 
-    .signature-pad {
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      background: white;
-      cursor: crosshair;
-      display: block;
-      width: 100%;
-      margin-bottom: 12px;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.3s ease;
-    }
-
-    .btn-clear {
-      background: #e2e8f0;
-      color: var(--text-dark);
-    }
-
-    .btn-clear:hover {
-      background: #cbd5e1;
-    }
-
-    .btn-approve {
-      background: var(--success);
-      color: white;
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-approve:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
-    }
-
-    .info-item {
-      padding: 12px;
-      background: #f8fafc;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      border-left: 3px solid #667eea;
-    }
-
-    .info-label {
-      font-weight: 600;
-      color: var(--text-dark);
+    .field-label {
       font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
+      color: var(--text-light);
+      margin-bottom: 3px;
     }
 
-    .info-value {
+    .field-value-box {
+      min-height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-dark);
+      white-space: pre-wrap;
+    }
+
+    .status-msg {
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .status-msg.error {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .status-msg.success {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    /* ===== การดำเนินการ แบบเดียวกับ reviewer ===== */
+
+    .operation-note {
+      font-size: 12px;
       color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .operation-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 4px 10px;
+      padding: 4px 0;
+    }
+
+    .operation-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-dark);
+      min-width: 140px;
+    }
+
+    .operation-left input[type="radio"] {
+      margin-top: 3px;
+    }
+
+    .operation-right {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .op-line {
+      display: flex;
+      align-items: flex-end;   /* เส้นอยู่ด้านล่าง */
+      gap: 6px;
+    }
+
+    .op-label {
+      font-size: 13px;
+      color: var(--text-dark);
+      white-space: nowrap;
+    }
+
+    .readonly-line {
+      display: inline-block;
+      flex: 1;
+      min-height: 18px;
+      border-bottom: 1px solid #cbd5e1;
+      padding: 0 4px 2px;
+      font-size: 13px;
+      color: var(--text-dark);
+      line-height: 1.3;
+      vertical-align: bottom;
+    }
+
+    .operation-detail-wrapper {
+      margin-top: 10px;
       font-size: 13px;
     }
+
+    .operation-detail-label {
+      margin-bottom: 4px;
+      color: var(--text-light);
+    }
+
+    .textarea-box {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: #ffffff;
+      min-height: 80px;
+      font-size: 13px;
+      color: var(--text-dark);
+      white-space: pre-wrap;
+    }
+
+    /* ===== ฝั่งลายเซ็น ผู้อนุมัติ ===== */
 
     .status-badge {
       display: inline-block;
       padding: 6px 12px;
-      border-radius: 20px;
+      border-radius: 999px;
       font-size: 12px;
       font-weight: 600;
       background: #fef3c7;
       color: #92400e;
+      margin-bottom: 12px;
+    }
+
+    .signature-pad {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      background: #ffffff;
+      cursor: crosshair;
+      display: block;
+      width: 100%;
+      margin: 8px 0 12px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
       margin-bottom: 16px;
     }
 
-    .signature-history {
-      margin-top: 24px;
-      padding-top: 24px;
-      border-top: 2px solid var(--border);
+    .btn {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
-    .signature-history-title {
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 12px;
-      font-size: 14px;
+    .btn-clear {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .btn-clear:hover {
+      background: #d1d5db;
+    }
+
+    .btn-save {
+      background: var(--success);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    .btn-save:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+    }
+
+    .info-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #edf2f7;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--text-light);
+      margin-bottom: 2px;
+    }
+
+    .signature-history {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+      font-size: 12px;
+      color: var(--text-light);
     }
 
     .signature-item {
-      padding: 8px;
-      background: #f8fafc;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      font-size: 12px;
-      color: var(--text-light);
+      margin-bottom: 6px;
     }
 
     .signature-item strong {
@@ -255,24 +337,20 @@
 
     .success-message {
       display: none;
-      margin-top: 16px;
       padding: 12px;
       background: #d1fae5;
-      color: #065f46;
       border-radius: 8px;
-      font-size: 13px;
+      color: #065f46;
       text-align: center;
       font-weight: 600;
+      margin-top: 12px;
+      font-size: 13px;
     }
 
-    .success-message.show {
-      display: block;
-    }
+    .success-message.show { display: block; }
 
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       .content { grid-template-columns: 1fr; }
-      .pdf-preview { height: 220px; }
-      .button-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -284,62 +362,255 @@
     </div>
 
     <div class="content">
-      <!-- PDF Preview -->
+      <!-- ฝั่งซ้าย: ข้อมูลใบดำเนินการ + การดำเนินการ -->
       <div class="card">
-        <div class="card-title">📄 ตัวอย่างเอกสาร</div>
-        <div class="pdf-preview">📄</div>
-        <div class="pdf-hint" id="pdfHint">
-          เอกสารจะปรากฏที่นี่พร้อมลายเซ็นของผู้เสนอและผู้ทบทวน
+        <div class="card-title">📄 ข้อมูลใบดำเนินการ</div>
+
+        <div id="status" class="status-msg">
+          ⏳ กำลังโหลดข้อมูลจากระบบ...
+        </div>
+
+        <!-- ข้อมูลพื้นฐาน -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-bar"></div>
+            <div class="section-title">ข้อมูลใบดำเนินการ</div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <div class="field-label">พนักงาน</div>
+              <div class="field-value-box" id="empName">-</div>
+            </div>
+            <div class="field">
+              <div class="field-label">รหัสพนักงาน / ตำแหน่ง</div>
+              <div class="field-value-box" id="empCodePos">-</div>
+            </div>
+            <div class="field">
+              <div class="field-label">แผนก / ฝ่าย</div>
+              <div class="field-value-box" id="dept">-</div>
+            </div>
+            <div class="field">
+              <div class="field-label">สภาพพนักงาน / วันเริ่มงาน</div>
+              <div class="field-value-box" id="employmentStatus">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- การดำเนินการ -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-bar"></div>
+            <div class="section-title">การดำเนินการ</div>
+          </div>
+
+          <div class="operation-note">
+            * ข้อมูลด้านล่างแสดงตามที่ผู้บันทึกทำการเลือกไว้จากฟอร์มต้นฉบับ (อ่านอย่างเดียว แก้ไขไม่ได้)
+          </div>
+
+          <!-- แต่งตั้ง -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_appoint" disabled>
+              <label for="action_appoint">แต่งตั้ง</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="appoint_to"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- โอนย้าย -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_transfer" disabled>
+              <label for="action_transfer">โอนย้าย</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="transfer_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="transfer_to"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- เปลี่ยนสภาพการจ้างงาน -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_change" disabled>
+              <label for="action_change">เปลี่ยนสภาพการจ้างงาน</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="change_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="change_to"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- เลื่อนตำแหน่ง -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_promote" disabled>
+              <label for="action_promote">เลื่อนตำแหน่ง</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="promote_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="promote_to"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ผ่านทดลองงาน -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_passProb" disabled>
+              <label for="action_passProb">ผ่านทดลองงาน</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="passProb_to"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ให้ออกจากงาน / ลาออก -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_terminate" disabled>
+              <label for="action_terminate">ให้ออกจากงาน / ลาออก</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">รายละเอียด</span>
+                <span class="readonly-line" id="terminate_detail"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ขึ้นค่าจ้าง / เงินเดือน -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_raise" disabled>
+              <label for="action_raise">ขึ้นค่าจ้าง / เงินเดือน</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="raise_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="raise_to"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ตัดค่าจ้าง / เงินเดือน -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_cut" disabled>
+              <label for="action_cut">ตัดค่าจ้าง / เงินเดือน</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="cut_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="cut_to"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- อื่น ๆ -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_other" disabled>
+              <label for="action_other">อื่น ๆ</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">รายละเอียด</span>
+                <span class="readonly-line" id="other_detail"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- รายละเอียด & วันที่มีผล -->
+          <div class="operation-detail-wrapper">
+            <div class="operation-detail-label">รายละเอียดการดำเนินการ:</div>
+            <div class="textarea-box" id="detailText">-</div>
+          </div>
+
+          <div class="operation-detail-wrapper" style="margin-top:8px;">
+            <div class="operation-detail-label">มีผลบังคับตั้งแต่วันที่</div>
+            <div class="readonly-line" id="effectiveDate"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Signature Area -->
-      <div class="card info">
+      <!-- ฝั่งขวา: ลายเซ็นผู้อนุมัติ -->
+      <div class="card">
         <div class="card-title">✍️ ลายเซ็นของคุณ</div>
-        
+
         <div class="status-badge" id="statusBadge">⏳ รอการอนุมัติ</div>
 
-        <canvas id="signaturePad" class="signature-pad" height="150"></canvas>
+        <canvas id="signaturePad" class="signature-pad" height="170"></canvas>
 
-        <div class="button-group">
-          <button class="btn btn-clear" type="button" onclick="clearSignature()">✕ ลบ</button>
-          <button class="btn btn-approve" type="button" onclick="handleApprove()">✓ บันทึกลายเซ็น</button>
+        <div class="btn-row">
+          <button type="button" class="btn btn-clear" onclick="clearSignature()">✕ ล้างลายเซ็น</button>
+          <button type="button" class="btn btn-save" onclick="handleApprove()">✓ บันทึกลายเซ็น</button>
         </div>
 
         <div class="info-item">
           <div class="info-label">บทบาท</div>
-          <div class="info-value">ประธานเจ้าหน้าที่บริหาร (ผู้อนุมัติ)</div>
+          <div>ประธานเจ้าหน้าที่บริหาร (ผู้อนุมัติ)</div>
         </div>
 
         <div class="info-item">
-          <div class="info-label">ชื่อ</div>
-          <div class="info-value" id="approverName">-</div>
+          <div class="info-label">ชื่อผู้อนุมัติ</div>
+          <div id="approverName">-</div>
         </div>
 
-        <!-- Signature History -->
         <div class="signature-history">
-          <div class="signature-history-title">📋 ประวัติลายเซ็นก่อนหน้า</div>
-          <div class="signature-item" id="historyStep1">กำลังโหลด...</div>
-          <div class="signature-item" id="historyStep2"></div>
+          <div class="signature-item" id="historyStep1">ผู้เสนอ: -</div>
+          <div class="signature-item" id="historyStep2">ผู้ทบทวน: -</div>
         </div>
 
         <div class="success-message" id="successMessage">
-          ✓ บันทึกลายเซ็นเรียบร้อยแล้ว! ระบบจะส่งอีเมลไปยังพนักงานถัดไป
+          ✓ บันทึกลายเซ็นเรียบร้อยแล้ว! ระบบจะส่งอีเมลให้พนักงานเซ็นรับทราบขั้นตอนสุดท้าย
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ======= CONFIG =======
-    // ใส่ URL Web App ของ Apps Script ตรงนี้
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+    // ============ CONFIG ============
+    const WEB_APP_URL =
+      'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+    const ROLE = 'ceo'; // step 3
 
-    const ROLE = 'ceo'; // คนที่ 3
     let DOC_NO = '';
     let hasSignature = false;
 
-    // ======= Helper =======
     function getQueryParam(name) {
       const url = new URL(window.location.href);
       return url.searchParams.get(name) || '';
@@ -348,11 +619,11 @@
     function formatDateTime(dt) {
       if (!dt) return '-';
       const d = new Date(dt);
-      if (isNaN(d.getTime())) return dt; // ถ้าเป็น string อยู่แล้ว
+      if (isNaN(d.getTime())) return dt;
       return d.toLocaleString('th-TH');
     }
 
-    // ======= Load doc info (JSONP) =======
+    // ============ LOAD DOC (JSONP) ============
     function loadDocInfo() {
       DOC_NO = getQueryParam('docNo') || '';
       if (!DOC_NO) {
@@ -364,97 +635,218 @@
       document.getElementById('headerSubtitle').textContent =
         `เลขที่เอกสาร: ${DOC_NO}`;
 
-      const callbackName = 'handleDocResponse';
+      const callbackName = 'docCb_' + Date.now();
       const script = document.createElement('script');
-      script.src = `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(DOC_NO)}&callback=${callbackName}`;
-      document.body.appendChild(script);
+      script.src = `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(
+        DOC_NO
+      )}&callback=${callbackName}`;
+
+      window[callbackName] = function(res) {
+        const statusEl = document.getElementById('status');
+        if (!res || !res.success) {
+          if (statusEl) {
+            statusEl.textContent = '❌ ไม่พบข้อมูลเอกสารในระบบ';
+            statusEl.classList.add('error');
+          }
+          cleanupJSONP(callbackName);
+          return;
+        }
+
+        const doc = res.data || {};
+        const steps = doc.steps || [];
+
+        // ข้อมูลพนักงาน / ใบดำเนินการ (operationData = object ที่ดึงจากชีต)
+        renderOperationData(doc.operationData || doc.row || {});
+
+        if (statusEl) {
+          statusEl.textContent = '✅ โหลดข้อมูลสำเร็จ';
+          statusEl.classList.add('success');
+          setTimeout(() => (statusEl.style.display = 'none'), 2500);
+        }
+
+        // ชื่อผู้อนุมัติ (step3)
+        if (steps[2]) {
+          document.getElementById('approverName').textContent =
+            steps[2].name || '-';
+        }
+
+        // history step1, step2
+        if (steps[0]) {
+          document.getElementById('historyStep1').textContent =
+            `ผู้เสนอ: ${steps[0].name || '-'} (${formatDateTime(
+              steps[0].time
+            )})`;
+        }
+        if (steps[1]) {
+          document.getElementById('historyStep2').textContent =
+            `ผู้ทบทวน: ${steps[1].name || '-'} (${formatDateTime(
+              steps[1].time
+            )})`;
+        }
+
+        cleanupJSONP(callbackName);
+      };
+
+      script.onerror = function() {
+        const statusEl = document.getElementById('status');
+        if (statusEl) {
+          statusEl.textContent = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ';
+          statusEl.classList.add('error');
+        }
+        cleanupJSONP(callbackName);
+      };
+
+      document.head.appendChild(script);
     }
 
-    function handleDocResponse(res) {
-      if (!res || !res.success) {
-        document.getElementById('pdfHint').textContent = 'ไม่พบข้อมูลเอกสารในระบบ';
-        return;
+    function cleanupJSONP(cbName) {
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        if (scripts[i].src && scripts[i].src.includes(cbName)) {
+          scripts[i].parentNode.removeChild(scripts[i]);
+        }
       }
-
-      const doc = res.data;
-      const steps = doc.steps || [];
-
-      // ชื่อ approver (step3)
-      if (steps[2]) {
-        document.getElementById('approverName').textContent = steps[2].name || '-';
-      }
-
-      // history: step1 + step2
-      if (steps[0]) {
-        document.getElementById('historyStep1').textContent =
-          `ผู้เสนอ: ${steps[0].name || '-'} (${formatDateTime(steps[0].time)})`;
-      } else {
-        document.getElementById('historyStep1').textContent = 'ยังไม่มีลายเซ็นผู้เสนอ';
-      }
-
-      if (steps[1]) {
-        document.getElementById('historyStep2').textContent =
-          `ผู้ทบทวน: ${steps[1].name || '-'} (${formatDateTime(steps[1].time)})`;
-      }
+      delete window[cbName];
     }
 
-    // ======= Signature Pad =======
+    // ============ แสดงข้อมูลใบดำเนินการ ============
+    function renderOperationData(data) {
+      // map ตามหัวคอลัมน์จริงในชีตของเกม
+      document.getElementById('empName').textContent =
+        data['พนักงาน'] || data['employeeName'] || '-';
+
+      document.getElementById('empCodePos').textContent =
+        data['รหัสพนักงาน/ตำแหน่ง'] || data['empCodePosition'] || '-';
+
+      document.getElementById('dept').textContent =
+        data['แผนก/ฝ่าย'] || data['department'] || '-';
+
+      document.getElementById('employmentStatus').textContent =
+        data['สภาพพนักงาน/วันเริ่มงาน'] || data['employmentStatus'] || '-';
+
+      const actionType = data['การดำเนินการ'] || data['actionType'] || '';
+
+      const map = {
+        'แต่งตั้ง': 'action_appoint',
+        'โอนย้าย': 'action_transfer',
+        'เปลี่ยนสภาพการจ้างงาน': 'action_change',
+        'เลื่อนตำแหน่ง': 'action_promote',
+        'ผ่านทดลองงาน': 'action_passProb',
+        'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
+        'ให้ออกจากงานโดยไม่มีสมัครใจ/ลาออก': 'action_terminate',
+        'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
+        'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
+        'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
+        'ตัดค่าจ้าง/เงินเดือน': 'action_cut',
+        'อื่น ๆ': 'action_other',
+        'อื่นๆ': 'action_other'
+      };
+      const radioId = map[actionType];
+      if (radioId) {
+        const r = document.getElementById(radioId);
+        if (r) r.checked = true;
+      }
+
+      // ===== เปลี่ยน key ให้ตรงหัวคอลัมน์ของเกมได้เลย =====
+      document.getElementById('appoint_to').textContent =
+        data['แต่งตั้ง_เป็น'] || '';
+
+      document.getElementById('transfer_from').textContent =
+        data['โอนย้าย_จากเดิม'] || '';
+      document.getElementById('transfer_to').textContent =
+        data['โอนย้าย_เป็น'] || '';
+
+      document.getElementById('change_from').textContent =
+        data['เปลี่ยนสภาพ_จากเดิม'] || '';
+      document.getElementById('change_to').textContent =
+        data['เปลี่ยนสภาพ_เป็น'] || '';
+
+      document.getElementById('promote_from').textContent =
+        data['เลื่อนตำแหน่ง_จากเดิม'] || '';
+      document.getElementById('promote_to').textContent =
+        data['เลื่อนตำแหน่ง_เป็น'] || '';
+
+      document.getElementById('passProb_to').textContent =
+        data['ผ่านทดลองงาน_เป็น'] || '';
+
+      document.getElementById('terminate_detail').textContent =
+        data['ให้ออกจากงาน_รายละเอียด'] || '';
+
+      document.getElementById('raise_from').textContent =
+        data['ขึ้นค่าจ้าง_จากเดิม'] || '';
+      document.getElementById('raise_to').textContent =
+        data['ขึ้นค่าจ้าง_เป็น'] || '';
+
+      document.getElementById('cut_from').textContent =
+        data['ตัดค่าจ้าง_จากเดิม'] || '';
+      document.getElementById('cut_to').textContent =
+        data['ตัดค่าจ้าง_เป็น'] || '';
+
+      document.getElementById('other_detail').textContent =
+        data['อื่นๆ_รายละเอียด'] || '';
+
+      document.getElementById('detailText').textContent =
+        data['รายละเอียดเพิ่มเติม'] || data['detail'] || '-';
+
+      document.getElementById('effectiveDate').textContent =
+        data['มีผลบังคับตั้งแต่วันที่'] || data['effectiveDate'] || '-';
+    }
+
+    // ============ Signature Pad ============
     const canvas = document.getElementById('signaturePad');
     const ctx = canvas.getContext('2d');
-
-    function resizeCanvas() {
-      const data = canvas.toDataURL(); // เก็บเดิม (ถ้าอยาก)
-      canvas.width = canvas.offsetWidth;
-      ctx.lineWidth = 1.5;
-      ctx.lineCap = 'round';
-      // ไม่ restore รูปเก่า เพื่อให้เรียบง่าย
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
     let isDrawing = false;
 
-    function startDrawing(e) {
-      isDrawing = true;
-      hasSignature = true;
-      draw(e);
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = 170;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#111827';
     }
 
-    function endDrawing() {
-      isDrawing = false;
+    function startDraw(e) {
+      isDrawing = true;
+      hasSignature = true;
+      const pos = getPos(e);
       ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
     }
 
     function draw(e) {
       if (!isDrawing) return;
+      const pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    function stopDraw() { isDrawing = false; }
+
+    function getPos(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-      ctx.lineTo(clientX - rect.left, clientY - rect.top);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(clientX - rect.left, clientY - rect.top);
+      return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
-    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousedown', startDraw);
     canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', endDrawing);
-    canvas.addEventListener('mouseleave', endDrawing);
+    canvas.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('mouseleave', stopDraw);
 
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
-    canvas.addEventListener('touchend', (e) => { e.preventDefault(); endDrawing(e); });
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e); }, { passive: false });
+    canvas.addEventListener('touchmove',  e => { e.preventDefault(); draw(e); },      { passive: false });
+    canvas.addEventListener('touchend',   e => { e.preventDefault(); stopDraw(e); },  { passive: false });
 
     function clearSignature() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       hasSignature = false;
     }
 
-    // ======= Save Signature =======
     function handleApprove() {
       if (!DOC_NO) {
-        alert('ไม่พบเลขเอกสาร');
+        alert('ไม่พบเลขที่เอกสาร');
         return;
       }
       if (!hasSignature) {
@@ -479,10 +871,14 @@
       document.getElementById('statusBadge').textContent = '✓ บันทึกลายเซ็นแล้ว';
       setTimeout(() => {
         alert('บันทึกลายเซ็นผู้อนุมัติเรียบร้อย ระบบจะส่งต่อให้พนักงานลงนาม');
-      }, 500);
+      }, 600);
     }
 
-    document.addEventListener('DOMContentLoaded', loadDocInfo);
+    window.addEventListener('DOMContentLoaded', () => {
+      resizeCanvas();
+      loadDocInfo();
+    });
+    window.addEventListener('resize', resizeCanvas);
   </script>
 </body>
 </html>
