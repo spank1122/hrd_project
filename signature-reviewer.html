@@ -83,12 +83,13 @@
       margin-bottom: 16px;
     }
 
-    /* ฟอร์มฝั่งซ้าย */
+    /* SECTION FRAME */
     .section {
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 16px 18px 18px;
       margin-bottom: 14px;
+      background: #f9fafb;
     }
 
     .section-header {
@@ -132,58 +133,12 @@
       border-radius: 8px;
       border: 1px solid var(--border);
       padding: 6px 10px;
-      background: #f9fafb;
+      background: #fff;
       display: flex;
       align-items: center;
       font-size: 13px;
       color: var(--text-dark);
       white-space: pre-wrap;
-    }
-
-    /* การดำเนินการ */
-    .action-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
-
-    .action-row input[type="radio"] {
-      width: 16px;
-      height: 16px;
-    }
-
-    .action-detail {
-      margin-left: 24px;
-      font-size: 12px;
-      color: var(--text-light);
-      margin-bottom: 4px;
-    }
-
-    .readonly-line {
-      display: inline-block;
-      min-width: 140px;
-      border-bottom: 1px solid #cbd5e1;
-      padding: 0 4px 2px;
-      color: var(--text-dark);
-    }
-
-    .textarea-box {
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      background: #f9fafb;
-      min-height: 80px;
-      font-size: 13px;
-      color: var(--text-dark);
-      white-space: pre-wrap;
-    }
-
-    .status-line {
-      margin-bottom: 10px;
-      font-size: 13px;
-      color: var(--text-light);
     }
 
     .status-msg {
@@ -193,7 +148,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       background: #eff6ff;
       color: #1d4ed8;
     }
@@ -207,7 +162,87 @@
       color: #047857;
     }
 
-    /* ฝั่งลายเซ็น */
+    /* ===== การดำเนินการ (ใหม่) ===== */
+
+    .operation-note {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .operation-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 4px 10px;
+      padding: 4px 0;
+    }
+
+    .operation-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-dark);
+      min-width: 140px;
+    }
+
+    .operation-left input[type="radio"] {
+      margin-top: 3px;
+    }
+
+    .operation-right {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .op-line {
+      display: flex;
+      align-items: flex-end;   /* ให้เส้นไปอยู่ล่างสุด */
+      gap: 6px;
+    }
+
+    .op-label {
+      font-size: 13px;
+      color: var(--text-dark);
+      white-space: nowrap;
+    }
+
+    .readonly-line {
+      display: inline-block;
+      flex: 1;
+      min-height: 18px;
+      border-bottom: 1px solid #cbd5e1;
+      padding: 0 4px 2px;      /* เน้น padding ล่าง */
+      font-size: 13px;
+      color: var(--text-dark);
+      line-height: 1.3;
+      vertical-align: bottom;
+    }
+
+    .operation-detail-wrapper {
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .operation-detail-label {
+      margin-bottom: 4px;
+      color: var(--text-light);
+    }
+
+    .textarea-box {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: #ffffff;
+      min-height: 80px;
+      font-size: 13px;
+      color: var(--text-dark);
+      white-space: pre-wrap;
+    }
+
+    /* ===== ฝั่งลายเซ็น ===== */
+
     .signature-pad {
       border: 2px dashed var(--border);
       border-radius: 10px;
@@ -275,9 +310,7 @@
     }
 
     @media (max-width: 900px) {
-      .content {
-        grid-template-columns: 1fr;
-      }
+      .content { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -291,7 +324,7 @@
     </div>
 
     <div class="content">
-      <!-- ฝั่งซ้าย: แสดงข้อมูลจาก Google Sheet -->
+      <!-- ฝั่งซ้าย: ข้อมูลจากชีต -->
       <div class="card">
         <div class="card-title">📄 ข้อมูลใบดำเนินการ</div>
 
@@ -299,7 +332,7 @@
           ⏳ กำลังโหลดข้อมูลจากระบบ...
         </div>
 
-        <!-- ข้อมูลใบดำเนินการ -->
+        <!-- ข้อมูลพนักงาน -->
         <div class="section">
           <div class="section-header">
             <div class="section-bar"></div>
@@ -326,82 +359,172 @@
           </div>
         </div>
 
-        <!-- การดำเนินการ -->
+        <!-- การดำเนินการ (layout แบบ Google Form) -->
         <div class="section">
           <div class="section-header">
             <div class="section-bar"></div>
             <div class="section-title">การดำเนินการ</div>
           </div>
 
-          <div class="status-line">
-            * ข้อมูลด้านล่างแสดงตามที่ผู้บันทึกกรอกไว้ (อ่านอย่างเดียว แก้ไขไม่ได้)
+          <div class="operation-note">
+            * ข้อมูลด้านล่างแสดงตามที่ผู้บันทึกทำการเลือกไว้จากฟอร์มต้นฉบับ (อ่านอย่างเดียว แก้ไขไม่ได้)
           </div>
 
-          <div class="action-row">
-            <input type="radio" name="actionType" id="action_appoint" disabled>
-            <label for="action_appoint">แต่งตั้ง</label>
+          <!-- แต่งตั้ง -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_appoint" disabled>
+              <label for="action_appoint">แต่งตั้ง</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="appoint_to"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="action-row">
-            <input type="radio" name="actionType" id="action_transfer" disabled>
-            <label for="action_transfer">โอนย้าย</label>
+          <!-- โอนย้าย -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_transfer" disabled>
+              <label for="action_transfer">โอนย้าย</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="transfer_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="transfer_to"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="action-row">
-            <input type="radio" name="actionType" id="action_change" disabled>
-            <label for="action_change">เปลี่ยนสภาพการจ้างงาน</label>
+          <!-- เปลี่ยนสภาพการจ้างงาน -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_change" disabled>
+              <label for="action_change">เปลี่ยนสภาพการจ้างงาน</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="change_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="change_to"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="action-row">
-            <input type="radio" name="actionType" id="action_promote" disabled>
-            <label for="action_promote">เลื่อนตำแหน่ง</label>
+          <!-- เลื่อนตำแหน่ง -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_promote" disabled>
+              <label for="action_promote">เลื่อนตำแหน่ง</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="promote_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="promote_to"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="action-row">
-            <input type="radio" name="actionType" id="action_passProb" disabled>
-            <label for="action_passProb">ผ่านทดลองงาน</label>
+          <!-- ผ่านทดลองงาน -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_passProb" disabled>
+              <label for="action_passProb">ผ่านทดลองงาน</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="passProb_to"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="action-row">
-            <input type="radio" name="actionType" id="action_terminate" disabled>
-            <label for="action_terminate">ให้ออกจากงาน / ลาออก</label>
+          <!-- ให้ออกจากงาน / ลาออก -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_terminate" disabled>
+              <label for="action_terminate">ให้ออกจากงาน / ลาออก</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">รายละเอียด</span>
+                <span class="readonly-line" id="terminate_detail"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="action-row">
-            <input type="radio" name="actionType" id="action_raise" disabled>
-            <label for="action_raise">ขึ้นค่าจ้าง / เงินเดือน</label>
+          <!-- ขึ้นค่าจ้าง / เงินเดือน -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_raise" disabled>
+              <label for="action_raise">ขึ้นค่าจ้าง / เงินเดือน</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="raise_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="raise_to"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="action-row">
-            <input type="radio" name="actionType" id="action_cut" disabled>
-            <label for="action_cut">ตัดค่าจ้าง / เงินเดือน</label>
+          <!-- ตัดค่าจ้าง / เงินเดือน -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_cut" disabled>
+              <label for="action_cut">ตัดค่าจ้าง / เงินเดือน</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">จากเดิม</span>
+                <span class="readonly-line" id="cut_from"></span>
+              </div>
+              <div class="op-line">
+                <span class="op-label">เป็น</span>
+                <span class="readonly-line" id="cut_to"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="action-row">
-            <input type="radio" name="actionType" id="action_other" disabled>
-            <label for="action_other">อื่น ๆ</label>
+          <!-- อื่น ๆ -->
+          <div class="operation-row">
+            <div class="operation-left">
+              <input type="radio" name="actionType" id="action_other" disabled>
+              <label for="action_other">อื่น ๆ</label>
+            </div>
+            <div class="operation-right">
+              <div class="op-line">
+                <span class="op-label">รายละเอียด</span>
+                <span class="readonly-line" id="other_detail"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="action-detail">
-            รายละเอียดการดำเนินการ: <span id="actionDetail" class="readonly-line"></span>
-          </div>
-        </div>
-
-        <!-- รายละเอียดเพิ่มเติม & วันที่มีผล -->
-        <div class="section">
-          <div class="section-header">
-            <div class="section-bar"></div>
-            <div class="section-title">รายละเอียดเพิ่มเติม</div>
-          </div>
-
-          <div class="field">
-            <div class="field-label">รายละเอียดเพิ่มเติม / ข้อความที่ต้องการให้แสดง</div>
+          <!-- รายละเอียดรวม / วันที่มีผล (ใช้ id เดิม) -->
+          <div class="operation-detail-wrapper">
+            <div class="operation-detail-label">รายละเอียดการดำเนินการ:</div>
             <div class="textarea-box" id="detailText">-</div>
           </div>
 
-          <div style="margin-top: 12px;">
-            <div class="field-label">มีผลบังคับตั้งแต่วันที่</div>
-            <div class="field-value-box" id="effectiveDate">-</div>
+          <div class="operation-detail-wrapper" style="margin-top:8px;">
+            <div class="operation-detail-label">มีผลบังคับตั้งแต่วันที่</div>
+            <div class="readonly-line" id="effectiveDate"></div>
           </div>
         </div>
       </div>
@@ -447,7 +570,8 @@
     // ================================
     // CONFIG
     // ================================
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+    const WEB_APP_URL =
+      'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
 
     // ================================
     // Helper: อ่าน query string
@@ -500,7 +624,7 @@
       const script = document.createElement('script');
       script.src =
         WEB_APP_URL +
-        '?action=getOperationData' +   // ให้ Apps Script ใช้ action นี้
+        '?action=getOperationData' +
         '&id=' + encodeURIComponent(id) +
         '&callback=' + callbackName;
 
@@ -527,10 +651,9 @@
 
     // ================================
     // แสดงข้อมูลลงหน้า HTML (อ่านอย่างเดียว)
-    // ปรับชื่อ key ให้ตรงกับหัวคอลัมน์ในชีตของเกมได้เลย
+    // *** ตรงนี้เกมสามารถ map field จากชีตมาใส่แต่ละช่อง จากเดิม/เป็น ได้ ***
     // ================================
     function renderOperationData(data) {
-      // ตัวอย่าง map: ปรับได้ตามหัวคอลัมน์จริงใน Google Sheet
       document.getElementById('empName').textContent =
         data['พนักงาน'] || data['employeeName'] || '-';
 
@@ -544,11 +667,8 @@
         data['สภาพพนักงาน/วันเริ่มงาน'] || data['employmentStatus'] || '-';
 
       const actionType = data['การดำเนินการ'] || data['actionType'] || '';
-      const actionDetail = data['รายละเอียดการดำเนินการ'] || data['actionDetail'] || '';
 
-      document.getElementById('actionDetail').textContent = actionDetail || '';
-
-      const map = {
+      const radioMap = {
         'แต่งตั้ง': 'action_appoint',
         'โอนย้าย': 'action_transfer',
         'เปลี่ยนสภาพการจ้างงาน': 'action_change',
@@ -563,11 +683,51 @@
         'อื่น ๆ': 'action_other',
         'อื่นๆ': 'action_other'
       };
-      const radioId = map[actionType];
+
+      const radioId = radioMap[actionType];
       if (radioId) {
         const r = document.getElementById(radioId);
         if (r) r.checked = true;
       }
+
+      // ⭐ ตัวอย่าง mapping จากข้อมูลชีต → ช่องจากเดิม/เป็น
+      // เกมสามารถเปลี่ยนชื่อ key ให้ตรงกับหัวคอลัมน์จริงได้เลย
+      document.getElementById('appoint_to').textContent =
+        data['แต่งตั้ง_เป็น'] || '';
+
+      document.getElementById('transfer_from').textContent =
+        data['โอนย้าย_จากเดิม'] || '';
+      document.getElementById('transfer_to').textContent =
+        data['โอนย้าย_เป็น'] || '';
+
+      document.getElementById('change_from').textContent =
+        data['เปลี่ยนสภาพ_จากเดิม'] || '';
+      document.getElementById('change_to').textContent =
+        data['เปลี่ยนสภาพ_เป็น'] || '';
+
+      document.getElementById('promote_from').textContent =
+        data['เลื่อนตำแหน่ง_จากเดิม'] || '';
+      document.getElementById('promote_to').textContent =
+        data['เลื่อนตำแหน่ง_เป็น'] || '';
+
+      document.getElementById('passProb_to').textContent =
+        data['ผ่านทดลองงาน_เป็น'] || '';
+
+      document.getElementById('terminate_detail').textContent =
+        data['ให้ออกจากงาน_รายละเอียด'] || '';
+
+      document.getElementById('raise_from').textContent =
+        data['ขึ้นค่าจ้าง_จากเดิม'] || '';
+      document.getElementById('raise_to').textContent =
+        data['ขึ้นค่าจ้าง_เป็น'] || '';
+
+      document.getElementById('cut_from').textContent =
+        data['ตัดค่าจ้าง_จากเดิม'] || '';
+      document.getElementById('cut_to').textContent =
+        data['ตัดค่าจ้าง_เป็น'] || '';
+
+      document.getElementById('other_detail').textContent =
+        data['อื่นๆ_รายละเอียด'] || '';
 
       document.getElementById('detailText').textContent =
         data['รายละเอียดเพิ่มเติม'] || data['detail'] || '-';
@@ -643,7 +803,7 @@
       const dataUrl = canvas.toDataURL('image/png');
 
       const params = new URLSearchParams();
-      params.append('action', 'saveReviewerSignature'); // ให้ Apps Script ใช้ action นี้
+      params.append('action', 'saveReviewerSignature');
       params.append('id', id);
       params.append('signature', dataUrl);
 
