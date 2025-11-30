@@ -399,6 +399,35 @@
       FORM_URL: "https://spank1122.github.io/hrd_project/form.html"
     };
 
+    // ========= Helper สำหรับฟิลด์ + รูปแบบวันที่ =========
+    function getRequestId(item) {
+      // รองรับทั้ง requestId (ฝั่งเก่า) และ requestNo (ฝั่งใหม่)
+      return item.requestId || item.requestNo || '-';
+    }
+
+    function getRequester(item) {
+      return item.requester || item.requesterName || '-';
+    }
+
+    function getDept(item) {
+      return item.dept || item.requesterDept || item.deptName || '-';
+    }
+
+    function getStatusText(item) {
+      return item.status || item.finalStatus || '-';
+    }
+
+    // แปลงวันที่ ISO → dd/mm/yyyy
+    function formatDateDisplay(value) {
+      if (!value) return '-';
+      const d = new Date(value);
+      if (isNaN(d)) return value; // ถ้า parse ไม่ได้ แสดงค่าดิบไปเลย
+      const day   = ('0' + d.getDate()).slice(-2);
+      const month = ('0' + (d.getMonth() + 1)).slice(-2);
+      const year  = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
     let allCandidates = [];
 
     // ====== สำหรับเมนู 2 & 3 ======
@@ -669,10 +698,11 @@
       let html = '';
 
       pageItems.forEach(item => {
-        const requestId = item.requestId || '-';
-        const lastUpdated = item.lastUpdated || item.requestTime || '-';
-        const statusRaw = item.status || item.finalStatus || '-';
-        const statusLower = statusRaw.toLowerCase();
+        const requestId      = getRequestId(item);
+        const rawLastUpdated = item.lastUpdated || item.requestTime || '';
+        const lastUpdated    = formatDateDisplay(rawLastUpdated);
+        const statusRaw      = getStatusText(item);
+        const statusLower    = statusRaw.toLowerCase();
 
         let badgeClass = 'badge-pending';
         if (statusLower === 'approved') badgeClass = 'badge-approved';
@@ -751,10 +781,10 @@
       if (!statusDataAll || statusDataAll.length === 0) return;
 
       const filtered = statusDataAll.filter(item => {
-        const requestId = (item.requestId || '').toLowerCase();
-        const requester = (item.requester || '').toLowerCase();
-        const dept      = (item.dept || '').toLowerCase();
-        const status    = (item.status || item.finalStatus || '').toLowerCase();
+        const requestId = getRequestId(item).toLowerCase();
+        const requester = getRequester(item).toLowerCase();
+        const dept      = getDept(item).toLowerCase();
+        const status    = getStatusText(item).toLowerCase();
         return requestId.includes(q)
           || requester.includes(q)
           || dept.includes(q)
@@ -774,9 +804,9 @@
       if (!approvalDataAll || approvalDataAll.length === 0) return;
 
       const filtered = approvalDataAll.filter(item => {
-        const requestId = (item.requestId || '').toLowerCase();
-        const requester = (item.requester || '').toLowerCase();
-        const dept      = (item.dept || '').toLowerCase();
+        const requestId = getRequestId(item).toLowerCase();
+        const requester = getRequester(item).toLowerCase();
+        const dept      = getDept(item).toLowerCase();
         return requestId.includes(q)
           || requester.includes(q)
           || dept.includes(q);
@@ -791,24 +821,27 @@
     // ========================================
     function openStatusModal(requestId) {
       if (!statusDataAll || statusDataAll.length === 0) return;
-      const item = statusDataAll.find(r => String(r.requestId) === String(requestId));
+
+      const item = statusDataAll.find(r => String(getRequestId(r)) === String(requestId));
       if (!item) return;
 
       currentStatusItem = item;
 
-      const requester = item.requester || '-';
-      const dept = item.dept || '-';
-      const statusRaw = item.status || item.finalStatus || '-';
-      const createdAt = item.requestTime || item.createdAt || item.lastUpdated || '-';
+      const requester = getRequester(item);
+      const dept      = getDept(item);
+      const statusRaw = getStatusText(item);
 
-      const reviewer = item.reviewer || '-';
+      const createdAtRaw   = item.requestTime || item.createdAt || item.lastUpdated || '';
+      const createdAt      = formatDateDisplay(createdAtRaw);
+      const reviewer       = item.reviewer || '-';
       const reviewerAction = item.reviewerAction || item.reviewerStatus || '';
-      const reviewerTime = item.reviewerActionTime || '';
-      const approver = item.approver || '-';
+      const reviewerTime   = formatDateDisplay(item.reviewerActionTime || '');
+      const approver       = item.approver || '-';
       const approverAction = item.approverAction || item.approverStatus || '';
-      const approverTime = item.approverActionTime || '';
+      const approverTime   = formatDateDisplay(item.approverActionTime || '');
 
-      document.getElementById('modalTitle').innerText = `เลขคำขอ ${item.requestId || '-'}`;
+      document.getElementById('modalTitle').innerText =
+        `เลขคำขอ ${getRequestId(item)}`;
       document.getElementById('modalSub').innerText =
         `ผู้ขอ: ${requester} (${dept}) · สถานะ: ${statusRaw}`;
 
