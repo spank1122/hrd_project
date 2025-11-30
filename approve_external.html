@@ -472,10 +472,13 @@
             document.getElementById('budgetOptions').textContent =
               getFormValue(form, 'การตั้งงบประมาณ', d.budgetType); 
 
-            document.getElementById('กำหนดส่งมอบ').textContent  = formatDateOnly(d.deliveryDate);
+            document.getElementById('deliveryDate').textContent =
+              formatDateOnly(
+              getFormValue(form, 'กำหนดส่งมอบ', d.deliveryDate) );
+ 
 
             document.getElementById('specDetail').textContent =
-              getFormValue(form, 'Spec / Type / รุ่น / ยี่ห้อ', d.spec); 
+              getFormValue(form,'Spec. /Type. /รุ่น /ยี่ห้อ (ถ้ามีโปรดระบุ)', d.spec);
               
             // ======= แสดงทุกคำถามจากฟอร์ม =======
             const container = document.getElementById('allFormFields');
