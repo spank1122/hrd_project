@@ -170,6 +170,34 @@
           <div class="row-label">งบประมาณ</div>
           <div class="row-value" id="budget"></div>
         </div>
+        <div class="row">
+          <div class="row-label">เครื่องเขียน</div>
+          <div class="row-value" id="stationery"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">โทรศัพท์มือถือ</div>
+          <div class="row-value" id="mobileNeed"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">เบอร์โทร (ถ้าต้องการ)</div>
+          <div class="row-value" id="mobilePhone"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">นามบัตร</div>
+          <div class="row-value" id="namecardType"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">การตั้งงบประมาณ</div>
+          <div class="row-value" id="budgetOptions"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">กำหนดส่งมอบ</div>
+          <div class="row-value" id="deliveryDate"></div>
+        </div>
+        <div class="row">
+          <div class="row-label">Spec / Type / รุ่น / ยี่ห้อ</div>
+          <div class="row-value" id="specDetail"></div>
+        </div>
       </div>
 
       <!-- รายละเอียดคำตอบจากฟอร์มทั้งหมด -->
@@ -361,6 +389,25 @@
         return (fallback !== undefined && fallback !== '') ? fallback : '-';
       }
 
+      function formatDateOnly(value) {
+  if (!value) return '-';
+
+  // ถ้าเป็น string แบบ ISO (2025-12-26T17:00:00.000Z)
+  const d = new Date(value);
+  if (!isNaN(d.getTime())) {
+    const yyyy = d.getFullYear();
+    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+    const dd   = String(d.getDate()).padStart(2, '0');
+    // ถ้าอยากเป็น dd/MM/yyyy ก็เปลี่ยนบรรทัดล่างนี้
+    return `${yyyy}-${mm}-${dd}`;      // ← ตอนนี้เป็น 2025-12-27
+    // return `${dd}/${mm}/${yyyy}`;   // ← ถ้าอยากได้ 27/12/2025
+  }
+
+  // ถ้า new Date() ไม่ได้ (เช่น เป็นข้อความธรรมดา) ก็คืนค่าตามเดิม
+  return value;
+}
+
+
       // ---------- load data from server ----------
       function loadRequest() {
         document.getElementById('subtitle').textContent =
@@ -414,7 +461,19 @@
 
             document.getElementById('budget').textContent =
               getFormValue(form, 'การตั้งงบประมาณ', d.budget);
-
+            document.getElementById('stationery').textContent =
+              getFormValue(form, 'เครื่องเขียน', d.stationery); 
+            document.getElementById('mobileNeed').textContent =
+              getFormValue(form, 'โทรศัพท์มือถือ', d.mobileNeed); 
+            document.getElementById('mobilePhone').textContent =
+              getFormValue(form, 'เครื่องเขียน', d.mobileNumber); 
+            document.getElementById('namecardType').textContent =
+              getFormValue(form, 'นามบัตร', d.nameCard); 
+            document.getElementById('budgetOptions').textContent =
+              getFormValue(form, 'การตั้งงบประมาณ', d.budgetType); 
+            document.getElementById('กำหนดส่งมอบ').textContent  = formatDateOnly(d.deliveryDate);
+            document.getElementById('specDetail').textContent =
+              getFormValue(form, 'Spec / Type / รุ่น / ยี่ห้อ', d.spec); 
             // ======= แสดงทุกคำถามจากฟอร์ม =======
             const container = document.getElementById('allFormFields');
             container.innerHTML = '';
