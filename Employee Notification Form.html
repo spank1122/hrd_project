@@ -725,7 +725,7 @@
       </div>
 
       <div class="btn-row">
-        <button type="button" class="btn-secondary" onclick="hrDocForm.reset(); clearSignature();">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('hrDocForm').reset(); clearSignature();">
           ล้างฟอร์ม
         </button>
         <button type="submit" class="btn-primary">
@@ -737,7 +737,6 @@
 
   <script>
     // ================== CONFIG WEB APP ==================
-    // เปลี่ยนตรงนี้เป็น URL เว็บแอปจริง ของโปรเจกต์ HRD demo
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
 
     // ================== SUBMIT FORM ==================
@@ -748,30 +747,41 @@
     async function handleSubmit(e) {
       e.preventDefault();
 
-      // เก็บลายเซ็นลง hidden field ก่อน
+      // 1) เก็บลายเซ็นลง hidden field ก่อน
       saveSignatureToInput();
 
       const form = e.target;
-      const fd = new FormData(form);
-      const raw = Object.fromEntries(fd.entries());
+      const fd   = new FormData(form);
+      const raw  = Object.fromEntries(fd.entries());
 
-      // เตรียมชื่อพนักงานจาก option ที่เลือก
+      // 2) เช็กว่ามีการเลือกพนักงานหรือยัง
       const empSelect = document.getElementById('employeeName');
+      if (!empSelect.value) {
+        alert('กรุณาเลือกพนักงานก่อนบันทึกใบดำเนินการ');
+        return;
+      }
+
       const selectedOption = empSelect.options[empSelect.selectedIndex] || null;
       const empNameText = selectedOption
         ? selectedOption.textContent.split('(')[0].trim()
         : '';
 
-      // แปลง proceedType → actionType/actionLabel/actionDetail
+      // 3) แปลง proceedType → actionType/actionLabel/actionDetail
       const actionInfo = buildActionInfo(raw);
 
-      // ใช้ email ที่ HR กรอกเองเป็นหลัก ถ้าเว้นว่างค่อยใช้จาก hidden
-      const manualEmail = document.getElementById('empEmailManual').value || '';
-      const finalEmail = manualEmail || (raw.empEmail || '');
+      // 4) ใช้ email ที่ HR กรอกเองเป็นหลัก ถ้าเว้นว่างค่อยใช้จาก hidden
+      const manualEmail = (document.getElementById('empEmailManual').value || '').trim();
+      const baseEmail   = (raw.empEmail || '').trim();
+      const finalEmail  = manualEmail || baseEmail;
 
-      // payload ที่จะส่งให้ createDocument_
+      if (!finalEmail) {
+        alert('กรุณากรอก Email พนักงาน ก่อนบันทึกใบดำเนินการ');
+        return;
+      }
+
+      // 5) เตรียม payload ส่งเข้า Apps Script → createDocument_
       const payload = {
-        // ข้อมูลพนักงาน (มาจาก hidden input ตอนเลือกพนักงาน + email ที่กรอกเอง)
+        // ข้อมูลพนักงาน
         empCode:        raw.empCode        || '',
         empName:        empNameText        || '',
         empPosition:    raw.empPosition    || '',
@@ -797,7 +807,6 @@
       console.log('HR Document payload:', payload);
 
       try {
-        // ใช้ mode: 'no-cors' เพื่อเลี่ยง preflight / CORS (อ่าน response ไม่ได้แต่ส่งได้)
         await fetch(WEB_APP_URL, {
           method: 'POST',
           mode: 'no-cors',
