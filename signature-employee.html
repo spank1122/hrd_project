@@ -160,7 +160,7 @@
       color: #047857;
     }
 
-    /* การดำเนินการ เหมือน reviewer */
+    /* การดำเนินการ */
 
     .operation-note {
       font-size: 12px;
@@ -598,394 +598,403 @@
     </div>
   </div>
 
- <script>
-  const WEB_APP_URL =
-    'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
-  const ROLE = 'employee'; // step 4
+  <script>
+    const WEB_APP_URL =
+      'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+    const ROLE = 'employee';
 
-  let DOC_NO = '';
-  let hasSignature = false;
+    let DOC_NO = '';
+    let hasSignature = false;
+    let canvas, ctx;
+    let isDrawing = false;
 
-  function getQueryParam(name) {
-    const url = new URL(window.location.href);
-    return url.searchParams.get(name) || '';
-  }
-
-  function formatDateDisplay(raw) {
-    if (!raw) return '';
-    const d = new Date(raw);
-    if (isNaN(d.getTime())) return raw;
-    const day = d.getDate();
-    const month = d.getMonth() + 1;
-    const year = d.getFullYear();
-    return day + '/' + month + '/' + year;
-  }
-
-  function formatDateTime(dt) {
-    if (!dt) return '-';
-    const d = new Date(dt);
-    if (isNaN(d.getTime())) return dt;
-    return d.toLocaleString('th-TH');
-  }
-
-  function applyActionDetailToLines(actionCode, actionType, actionDetail) {
-    if (!actionDetail) return;
-
-    const isTransfer =
-      actionCode === 'transfer' || actionType === 'โอนย้าย';
-    const isPromote =
-      actionCode === 'promote' || actionType === 'เลื่อนตำแหน่ง';
-    const isChange =
-      actionCode === 'change_status' || actionType === 'เปลี่ยนสภาพการจ้างงาน';
-    const isRaise =
-      actionCode === 'raise' || actionType === 'ขึ้นค่าจ้าง / เงินเดือน';
-    const isCut =
-      actionCode === 'cut' || actionType === 'ตัดค่าจ้าง / เงินเดือน';
-
-    const m = actionDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
-    let fromText = '';
-    let toText   = '';
-
-    if (m) {
-      fromText = (m[1] || '').trim();
-      toText   = (m[2] || '').trim();
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
     }
 
-    if (isTransfer) {
-      if (fromText) document.getElementById('transfer_from').textContent = fromText;
-      if (toText)   document.getElementById('transfer_to').textContent   = toText;
-    } else if (isPromote) {
-      if (fromText) document.getElementById('promote_from').textContent = fromText;
-      if (toText)   document.getElementById('promote_to').textContent   = toText;
-    } else if (isChange) {
-      if (fromText) document.getElementById('change_from').textContent = fromText;
-      if (toText)   document.getElementById('change_to').textContent   = toText;
-    } else if (isRaise) {
-      if (fromText) document.getElementById('raise_from').textContent = fromText;
-      if (toText)   document.getElementById('raise_to').textContent   = toText;
-    } else if (isCut) {
-      if (fromText) document.getElementById('cut_from').textContent = fromText;
-      if (toText)   document.getElementById('cut_to').textContent   = toText;
-    } else {
-      const od = document.getElementById('other_detail');
-      if (od && !od.textContent) od.textContent = actionDetail;
+    function formatDateDisplay(raw) {
+      if (!raw) return '';
+      const d = new Date(raw);
+      if (isNaN(d.getTime())) return raw;
+      const day = d.getDate();
+      const month = d.getMonth() + 1;
+      const year = d.getFullYear();
+      return day + '/' + month + '/' + year;
     }
-  }
 
-  function loadDocInfo() {
-    const statusEl = document.getElementById('status');
+    function formatDateTime(dt) {
+      if (!dt) return '-';
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return dt;
+      return d.toLocaleString('th-TH');
+    }
 
-    DOC_NO =
-      getQueryParam('docNo') ||
-      getQueryParam('id') ||
-      getQueryParam('row') ||
-      '';
+    function applyActionDetailToLines(actionCode, actionType, actionDetail) {
+      if (!actionDetail) return;
 
-    if (!DOC_NO) {
-      document.getElementById('headerSubtitle').textContent =
-        'ไม่พบเลขที่เอกสาร (docNo/id/row)';
-      if (statusEl) {
-        statusEl.textContent = 'ไม่พบเลขที่เอกสารในลิงก์';
-        statusEl.classList.add('error');
+      const isTransfer =
+        actionCode === 'transfer' || actionType === 'โอนย้าย';
+      const isPromote =
+        actionCode === 'promote' || actionType === 'เลื่อนตำแหน่ง';
+      const isChange =
+        actionCode === 'change_status' || actionType === 'เปลี่ยนสภาพการจ้างงาน';
+      const isRaise =
+        actionCode === 'raise' || actionType === 'ขึ้นค่าจ้าง / เงินเดือน';
+      const isCut =
+        actionCode === 'cut' || actionType === 'ตัดค่าจ้าง / เงินเดือน';
+
+      const m = actionDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
+      let fromText = '';
+      let toText   = '';
+
+      if (m) {
+        fromText = (m[1] || '').trim();
+        toText   = (m[2] || '').trim();
       }
-      return;
+
+      if (isTransfer) {
+        if (fromText) document.getElementById('transfer_from').textContent = fromText;
+        if (toText)   document.getElementById('transfer_to').textContent   = toText;
+      } else if (isPromote) {
+        if (fromText) document.getElementById('promote_from').textContent = fromText;
+        if (toText)   document.getElementById('promote_to').textContent   = toText;
+      } else if (isChange) {
+        if (fromText) document.getElementById('change_from').textContent = fromText;
+        if (toText)   document.getElementById('change_to').textContent   = toText;
+      } else if (isRaise) {
+        if (fromText) document.getElementById('raise_from').textContent = fromText;
+        if (toText)   document.getElementById('raise_to').textContent   = toText;
+      } else if (isCut) {
+        if (fromText) document.getElementById('cut_from').textContent = fromText;
+        if (toText)   document.getElementById('cut_to').textContent   = toText;
+      } else {
+        const od = document.getElementById('other_detail');
+        if (od && !od.textContent) od.textContent = actionDetail;
+      }
     }
 
-    document.getElementById('headerSubtitle').textContent =
-      `เลขที่เอกสาร: ${DOC_NO}`;
+    function loadDocInfo() {
+      const statusEl = document.getElementById('status');
 
-    const cbName = 'docEmp_' + Date.now();
-    const script = document.createElement('script');
-    script.src = `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(
-      DOC_NO
-    )}&callback=${cbName}`;
+      DOC_NO =
+        getQueryParam('docNo') ||
+        getQueryParam('id') ||
+        getQueryParam('row') ||
+        '';
 
-    window[cbName] = function(res) {
-      if (!res || !res.success) {
+      if (!DOC_NO) {
+        document.getElementById('headerSubtitle').textContent =
+          'ไม่พบเลขที่เอกสาร (docNo/id/row)';
         if (statusEl) {
-          statusEl.textContent = '❌ ไม่พบข้อมูลเอกสารในระบบ';
+          statusEl.textContent = 'ไม่พบเลขที่เอกสารในลิงก์';
           statusEl.classList.add('error');
         }
-        cleanupJSONP(cbName);
         return;
       }
 
-      const doc = res.data || {};
-      const steps = doc.steps || [];
+      document.getElementById('headerSubtitle').textContent =
+        `เลขที่เอกสาร: ${DOC_NO}`;
 
-      renderOperationData(doc.operationData || doc.row || {});
+      const cbName = 'docEmp_' + Date.now();
+      const script = document.createElement('script');
+      script.src = `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(
+        DOC_NO
+      )}&callback=${cbName}`;
 
-      if (statusEl) {
-        statusEl.textContent = '✅ โหลดข้อมูลสำเร็จ';
-        statusEl.classList.add('success');
-        setTimeout(() => (statusEl.style.display = 'none'), 2500);
-      }
+      window[cbName] = function(res) {
+        console.log('getDoc (employee) raw:', res);
 
-      if (steps[3]) {
-        document.getElementById('employeeName').textContent =
-          steps[3].name || '-';
-      }
+        if (!res || !res.success || !res.data) {
+          if (statusEl) {
+            statusEl.textContent = '❌ ไม่พบข้อมูลเอกสารในระบบ';
+            statusEl.classList.add('error');
+          }
+          cleanupJSONP(cbName);
+          return;
+        }
 
-      if (steps[0]) {
-        document.getElementById('historyStep1').textContent =
-          `ผู้เสนอ: ${steps[0].name || '-'} (${formatDateTime(
-            steps[0].time
-          )})`;
-      }
-      if (steps[1]) {
-        document.getElementById('historyStep2').textContent =
-          `ผู้ทบทวน: ${steps[1].name || '-'} (${formatDateTime(
-            steps[1].time
-          )})`;
-      }
-      if (steps[2]) {
-        document.getElementById('historyStep3').textContent =
-          `ผู้อนุมัติ: ${steps[2].name || '-'} (${formatDateTime(
-            steps[2].time
-          )})`;
-      }
+        const row = res.data;
 
-      cleanupJSONP(cbName);
-    };
+        renderOperationData(row);
 
-  script.onerror = function() {
-    if (statusEl) {
-      statusEl.textContent = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ';
-      statusEl.classList.add('error');
+        const empNameRight =
+          row['ชื่อพนักงาน'] ||
+          row['พนักงาน'] ||
+          row.employeeName ||
+          '-';
+        document.getElementById('employeeName').textContent = empNameRight;
+
+        const step1Name = row['ชื่อผู้เสนอ'] || '';
+        const step1Time = row['วันเวลาสร้าง'] || '';
+        if (step1Name) {
+          document.getElementById('historyStep1').textContent =
+            `ผู้เสนอ: ${step1Name} (${formatDateTime(step1Time)})`;
+        }
+
+        const step2Name = row['ชื่อผู้ทบทวน'] || '';
+        const step2Time = row['วันเวลาผู้ทบทวน'] || '';
+        if (step2Name) {
+          document.getElementById('historyStep2').textContent =
+            `ผู้ทบทวน: ${step2Name} (${formatDateTime(step2Time)})`;
+        }
+
+        const step3Name = row['ชื่อผู้อนุมัติ'] || '';
+        const step3Time = row['วันเวลาผู้อนุมัติ'] || '';
+        if (step3Name) {
+          document.getElementById('historyStep3').textContent =
+            `ผู้อนุมัติ: ${step3Name} (${formatDateTime(step3Time)})`;
+        }
+
+        if (statusEl) {
+          statusEl.textContent = '✅ โหลดข้อมูลสำเร็จ';
+          statusEl.classList.add('success');
+          setTimeout(() => (statusEl.style.display = 'none'), 2500);
+        }
+
+        cleanupJSONP(cbName);
+      };
+
+      script.onerror = function() {
+        if (statusEl) {
+          statusEl.textContent = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ';
+          statusEl.classList.add('error');
+        }
+        cleanupJSONP(cbName);
+      };
+
+      document.head.appendChild(script);
     }
-    cleanupJSONP(cbName);
-  };
 
-  document.head.appendChild(script);
-}
-
-function cleanupJSONP(cbName) {
-  const scripts = document.getElementsByTagName('script');
-  for (let i = scripts.length - 1; i >= 0; i--) {
-    if (scripts[i].src && scripts[i].src.includes(cbName)) {
-      scripts[i].parentNode.removeChild(scripts[i]);
+    function cleanupJSONP(cbName) {
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        if (scripts[i].src && scripts[i].src.includes(cbName)) {
+          scripts[i].parentNode.removeChild(scripts[i]);
+        }
+      }
+      try { delete window[cbName]; } catch (e) {}
     }
-  }
-  delete window[cbName];
-}
 
-function renderOperationData(data) {
-  console.log('employee render data:', data);
+    function renderOperationData(data) {
+      console.log('employee render data:', data);
 
-  const empName =
-    data['ชื่อพนักงาน'] ||
-    data['พนักงาน'] ||
-    data['employeeName'] ||
-    '-';
-  document.getElementById('empName').textContent = empName;
+      const empName =
+        data['ชื่อพนักงาน'] ||
+        data['พนักงาน'] ||
+        data['employeeName'] ||
+        '-';
+      document.getElementById('empName').textContent = empName;
 
-  const empCode = data['รหัสพนักงาน'] || '';
-  const empPos  = data['ตำแหน่ง'] || '';
-  const codePos =
-    data['รหัสพนักงาน/ตำแหน่ง'] ||
-    data['empCodePosition'] ||
-    '';
+      const empCode = data['รหัสพนักงาน'] || '';
+      const empPos  = data['ตำแหน่ง'] || '';
+      const codePos =
+        data['รหัสพนักงาน/ตำแหน่ง'] ||
+        data['empCodePosition'] ||
+        '';
 
-  document.getElementById('empCodePos').textContent =
-    codePos ||
-    (empCode && empPos
-      ? empCode + ' / ' + empPos
-      : (empCode || empPos || '-'));
+      document.getElementById('empCodePos').textContent =
+        codePos ||
+        (empCode && empPos
+          ? `${empCode} / ${empPos}`
+          : (empCode || empPos || '-'));
 
-  const deptOnly  = data['แผนก'] || '';
-  const divOnly   = data['ฝ่าย'] || '';
-  const deptCombo =
-    data['แผนก/ฝ่าย'] ||
-    data['department'] ||
-    '';
+      const deptOnly  = data['แผนก'] || '';
+      const divOnly   = data['ฝ่าย'] || '';
+      const deptCombo =
+        data['แผนก/ฝ่าย'] ||
+        data['department'] ||
+        '';
 
-  document.getElementById('dept').textContent =
-    deptCombo ||
-    (deptOnly || divOnly
-      ? [deptOnly, divOnly].filter(Boolean).join(' / ')
-      : '-');
+      document.getElementById('dept').textContent =
+        deptCombo ||
+        (deptOnly || divOnly
+          ? [deptOnly, divOnly].filter(Boolean).join(' / ')
+          : '-');
 
-  const empStatus =
-    data['สภาพพนักงาน/วันเริ่มงาน'] ||
-    data['employmentStatus'] ||
-    data['สภาพจ้างงาน'] ||
-    '';
-  document.getElementById('employmentStatus').textContent =
-    empStatus || '-';
+      const empStatus =
+        data['สภาพพนักงาน/วันเริ่มงาน'] ||
+        data['employmentStatus'] ||
+        data['สภาพจ้างงาน'] ||
+        '';
+      document.getElementById('employmentStatus').textContent =
+        empStatus || '-';
 
-  const actionType =
-    data['ประเภทการดำเนินการ'] ||
-    data['การดำเนินการ'] ||
-    data['actionType'] ||
-    '';
+      document.getElementById('employeeName').textContent = empName;
 
-  const actionCode =
-    data['รหัสการดำเนินการ (code)'] ||
-    data['actionCode'] ||
-    '';
+      const actionType =
+        data['ประเภทการดำเนินการ'] ||
+        data['การดำเนินการ'] ||
+        data['actionType'] ||
+        '';
 
-  const map = {
-    'แต่งตั้ง': 'action_appoint',
-    'โอนย้าย': 'action_transfer',
-    'เปลี่ยนสภาพการจ้างงาน': 'action_change',
-    'เลื่อนตำแหน่ง': 'action_promote',
-    'ผ่านทดลองงาน': 'action_passProb',
-    'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
-    'ให้ออกจากงานโดยไม่มีสมัครใจ/ลาออก': 'action_terminate',
-    'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
-    'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
-    'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
-    'ตัดค่าจ้าง/เงินเดือน': 'action_cut',
-    'อื่น ๆ': 'action_other',
-    'อื่นๆ': 'action_other'
-  };
-  const radioId = map[actionType];
-  if (radioId) {
-    const r = document.getElementById(radioId);
-    if (r) r.checked = true;
-  }
+      const actionCode =
+        data['รหัสการดำเนินการ (code)'] ||
+        data['actionCode'] ||
+        '';
 
-  const actionDetail = data['รายละเอียดการดำเนินการ'] || '';
-  const extraDetail  = data['รายละเอียดเพิ่มเติม'] || '';
+      const map = {
+        'แต่งตั้ง': 'action_appoint',
+        'โอนย้าย': 'action_transfer',
+        'เปลี่ยนสภาพการจ้างงาน': 'action_change',
+        'เลื่อนตำแหน่ง': 'action_promote',
+        'ผ่านทดลองงาน': 'action_passProb',
+        'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก': 'action_terminate',
+        'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
+        'ให้ออกจากงานโดยไม่มีสมัครใจ/ลาออก': 'action_terminate',
+        'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
+        'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
+        'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
+        'ตัดค่าจ้าง/เงินเดือน': 'action_cut',
+        'อื่น ๆ': 'action_other',
+        'อื่นๆ': 'action_other'
+      };
+      const radioId = map[actionType];
+      if (radioId) {
+        const r = document.getElementById(radioId);
+        if (r) r.checked = true;
+      }
 
-  applyActionDetailToLines(actionCode, actionType, actionDetail);
+      const actionDetail = data['รายละเอียดการดำเนินการ'] || '';
+      const extraDetail  = data['รายละเอียดเพิ่มเติม'] || '';
 
-  document.getElementById('detailText').textContent =
-    extraDetail || '-';
+      applyActionDetailToLines(actionCode, actionType, actionDetail);
 
-  const effRaw =
-    data['วันที่มีผล'] ||
-    data['มีผลบังคับตั้งแต่วันที่'] ||
-    data['effectiveDate'] ||
-    '';
-  const effDisplay = effRaw ? formatDateDisplay(effRaw) : '-';
-  document.getElementById('effectiveDate').textContent =
-    effDisplay || '-';
+      document.getElementById('detailText').textContent =
+        extraDetail || '-';
 
-  document.getElementById('appoint_to').textContent      =
-    document.getElementById('appoint_to').textContent      || (data['แต่งตั้ง_เป็น'] || '');
-  document.getElementById('transfer_from').textContent   =
-    document.getElementById('transfer_from').textContent   || (data['โอนย้าย_จากเดิม'] || '');
-  document.getElementById('transfer_to').textContent     =
-    document.getElementById('transfer_to').textContent     || (data['โอนย้าย_เป็น'] || '');
-  document.getElementById('change_from').textContent     =
-    document.getElementById('change_from').textContent     || (data['เปลี่ยนสภาพ_จากเดิม'] || '');
-  document.getElementById('change_to').textContent       =
-    document.getElementById('change_to').textContent       || (data['เปลี่ยนสภาพ_เป็น'] || '');
-  document.getElementById('promote_from').textContent    =
-    document.getElementById('promote_from').textContent    || (data['เลื่อนตำแหน่ง_จากเดิม'] || '');
-  document.getElementById('promote_to').textContent      =
-    document.getElementById('promote_to').textContent      || (data['เลื่อนตำแหน่ง_เป็น'] || '');
-  document.getElementById('passProb_to').textContent     =
-    document.getElementById('passProb_to').textContent     || (data['ผ่านทดลองงาน_เป็น'] || '');
-  document.getElementById('terminate_detail').textContent=
-    document.getElementById('terminate_detail').textContent|| (data['ให้ออกจากงาน_รายละเอียด'] || '');
-  document.getElementById('raise_from').textContent      =
-    document.getElementById('raise_from').textContent      || (data['ขึ้นค่าจ้าง_จากเดิม'] || '');
-  document.getElementById('raise_to').textContent        =
-    document.getElementById('raise_to').textContent        || (data['ขึ้นค่าจ้าง_เป็น'] || '');
-  document.getElementById('cut_from').textContent        =
-    document.getElementById('cut_from').textContent        || (data['ตัดค่าจ้าง_จากเดิม'] || '');
-  document.getElementById('cut_to').textContent          =
-    document.getElementById('cut_to').textContent          || (data['ตัดค่าจ้าง_เป็น'] || '');
-  document.getElementById('other_detail').textContent    =
-    document.getElementById('other_detail').textContent    || (data['อื่นๆ_รายละเอียด'] || '');
-}
+      const effRaw =
+        data['วันที่มีผล'] ||
+        data['มีผลบังคับตั้งแต่วันที่'] ||
+        data['effectiveDate'] ||
+        '';
+      const effDisplay = effRaw ? formatDateDisplay(effRaw) : '-';
+      document.getElementById('effectiveDate').textContent =
+        effDisplay || '-';
 
-const canvas = document.getElementById('signaturePad');
-const ctx = canvas.getContext('2d');
-let isDrawing = false;
+      document.getElementById('appoint_to').textContent      =
+        document.getElementById('appoint_to').textContent      || (data['แต่งตั้ง_เป็น'] || '');
+      document.getElementById('transfer_from').textContent   =
+        document.getElementById('transfer_from').textContent   || (data['โอนย้าย_จากเดิม'] || '');
+      document.getElementById('transfer_to').textContent     =
+        document.getElementById('transfer_to').textContent     || (data['โอนย้าย_เป็น'] || '');
+      document.getElementById('change_from').textContent     =
+        document.getElementById('change_from').textContent     || (data['เปลี่ยนสภาพ_จากเดิม'] || '');
+      document.getElementById('change_to').textContent       =
+        document.getElementById('change_to').textContent       || (data['เปลี่ยนสภาพ_เป็น'] || '');
+      document.getElementById('promote_from').textContent    =
+        document.getElementById('promote_from').textContent    || (data['เลื่อนตำแหน่ง_จากเดิม'] || '');
+      document.getElementById('promote_to').textContent      =
+        document.getElementById('promote_to').textContent      || (data['เลื่อนตำแหน่ง_เป็น'] || '');
+      document.getElementById('passProb_to').textContent     =
+        document.getElementById('passProb_to').textContent     || (data['ผ่านทดลองงาน_เป็น'] || '');
+      document.getElementById('terminate_detail').textContent=
+        document.getElementById('terminate_detail').textContent|| (data['ให้ออกจากงาน_รายละเอียด'] || '');
+      document.getElementById('raise_from').textContent      =
+        document.getElementById('raise_from').textContent      || (data['ขึ้นค่าจ้าง_จากเดิม'] || '');
+      document.getElementById('raise_to').textContent        =
+        document.getElementById('raise_to').textContent        || (data['ขึ้นค่าจ้าง_เป็น'] || '');
+      document.getElementById('cut_from').textContent        =
+        document.getElementById('cut_from').textContent        || (data['ตัดค่าจ้าง_จากเดิม'] || '');
+      document.getElementById('cut_to').textContent          =
+        document.getElementById('cut_to').textContent          || (data['ตัดค่าจ้าง_เป็น'] || '');
+      document.getElementById('other_detail').textContent    =
+        document.getElementById('other_detail').textContent    || (data['อื่นๆ_รายละเอียด'] || '');
+    }
 
-function resizeCanvas() {
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = 170;
-  ctx.lineWidth = 2;
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = '#111827';
-}
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = 170;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#111827';
+    }
 
-function startDraw(e) {
-  isDrawing = true;
-  hasSignature = true;
-  const pos = getPos(e);
-  ctx.beginPath();
-  ctx.moveTo(pos.x, pos.y);
-}
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
 
-function draw(e) {
-  if (!isDrawing) return;
-  const pos = getPos(e);
-  ctx.lineTo(pos.x, pos.y);
-  ctx.stroke();
-}
+    function startDraw(e) {
+      isDrawing = true;
+      hasSignature = true;
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
 
-function stopDraw() { isDrawing = false; }
+    function draw(e) {
+      if (!isDrawing) return;
+      const pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
 
-function getPos(e) {
-  const rect = canvas.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-  return { x: clientX - rect.left, y: clientY - rect.top };
-}
+    function stopDraw() {
+      isDrawing = false;
+    }
 
-function clearSignature() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  hasSignature = false;
-  const msg = document.getElementById('successMessage');
-  if (msg) msg.classList.remove('show');
-  const badge = document.getElementById('statusBadge');
-  if (badge) badge.textContent = '⏳ รอการรับทราบ';
-}
+    function clearSignature() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasSignature = false;
+    }
 
-function handleComplete() {
-  if (!DOC_NO) {
-    alert('ไม่พบเลขที่เอกสาร');
-    return;
-  }
-  if (!hasSignature) {
-    alert('กรุณาวาดลายเซ็นก่อน');
-    return;
-  }
+    function handleComplete() {
+      if (!DOC_NO) {
+        alert('ไม่พบเลขที่เอกสาร');
+        return;
+      }
+      if (!hasSignature) {
+        alert('กรุณาวาดลายเซ็นก่อน');
+        return;
+      }
 
-  const dataUrl = canvas.toDataURL('image/png');
-  const formData = new URLSearchParams();
-  formData.append('action', 'saveSignature');
-  formData.append('docNo', DOC_NO);
-  formData.append('role', ROLE);
-  formData.append('signature', dataUrl);
+      const dataUrl = canvas.toDataURL('image/png');
+      const formData = new URLSearchParams();
+      formData.append('action', 'saveSignature');
+      formData.append('docNo', DOC_NO);
+      formData.append('role', ROLE);
+      formData.append('signature', dataUrl);
 
-  fetch(WEB_APP_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: formData
-  });
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
 
-  document.getElementById('successMessage').classList.add('show');
-  document.getElementById('statusBadge').textContent = '✓ รับทราบเรียบร้อย';
-  setTimeout(() => {
-    alert('ขั้นตอนเสร็จสิ้น ระบบจะสร้าง PDF สุดท้ายและส่งอีเมลให้อัตโนมัติ');
-  }, 700);
-}
+      document.getElementById('successMessage').classList.add('show');
+      document.getElementById('statusBadge').textContent = '✓ รับทราบเรียบร้อย';
+      setTimeout(() => {
+        alert('ขั้นตอนเสร็จสิ้น ระบบจะสร้าง PDF สุดท้ายและส่งอีเมลให้อัตโนมัติ');
+      }, 700);
+    }
 
-window.addEventListener('DOMContentLoaded', () => {
-  resizeCanvas();
-  loadDocInfo();
+    window.addEventListener('DOMContentLoaded', () => {
+      canvas = document.getElementById('signaturePad');
+      ctx = canvas.getContext('2d');
 
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDraw);
-  canvas.addEventListener('mouseleave', stopDraw);
+      resizeCanvas();
+      loadDocInfo();
 
-  canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e); }, { passive: false });
-  canvas.addEventListener('touchmove',  e => { e.preventDefault(); draw(e); },      { passive: false });
-  canvas.addEventListener('touchend',   e => { e.preventDefault(); stopDraw(e); },  { passive: false });
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mouseleave', stopDraw);
 
-  document.getElementById('btnClear').addEventListener('click', clearSignature);
-  document.getElementById('btnSave').addEventListener('click', handleComplete);
-});
+      canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e); }, { passive: false });
+      canvas.addEventListener('touchmove',  e => { e.preventDefault(); draw(e); },      { passive: false });
+      canvas.addEventListener('touchend',   e => { e.preventDefault(); stopDraw(e); },  { passive: false });
 
-window.addEventListener('resize', resizeCanvas);
-</script>
+      document.getElementById('btnClear').addEventListener('click', clearSignature);
+      document.getElementById('btnSave').addEventListener('click', handleComplete);
+    });
+
+    window.addEventListener('resize', () => {
+      if (canvas && ctx) resizeCanvas();
+    });
+  </script>
 </body>
 </html>
