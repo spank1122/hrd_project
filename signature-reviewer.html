@@ -151,7 +151,6 @@
       background: #eff6ff;
       color: #1d4ed8;
     }
-
     .status-msg.error {
       background: #fef2f2;
       color: #b91c1c;
@@ -327,6 +326,7 @@
           ⏳ กำลังโหลดข้อมูลจากระบบ...
         </div>
 
+        <!-- ข้อมูลพนักงาน -->
         <div class="section">
           <div class="section-header">
             <div class="section-bar"></div>
@@ -364,6 +364,7 @@
             * ข้อมูลด้านล่างแสดงตามที่ผู้บันทึกทำการเลือกไว้จากฟอร์มต้นฉบับ (อ่านอย่างเดียว แก้ไขไม่ได้)
           </div>
 
+          <!-- แต่งตั้ง -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_appoint" disabled>
@@ -377,6 +378,7 @@
             </div>
           </div>
 
+          <!-- โอนย้าย -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_transfer" disabled>
@@ -394,6 +396,7 @@
             </div>
           </div>
 
+          <!-- เปลี่ยนสภาพการจ้างงาน -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_change" disabled>
@@ -411,6 +414,7 @@
             </div>
           </div>
 
+          <!-- เลื่อนตำแหน่ง -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_promote" disabled>
@@ -428,6 +432,7 @@
             </div>
           </div>
 
+          <!-- ผ่านทดลองงาน -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_passProb" disabled>
@@ -441,6 +446,7 @@
             </div>
           </div>
 
+          <!-- ให้ออกจากงาน / ลาออก -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_terminate" disabled>
@@ -454,6 +460,7 @@
             </div>
           </div>
 
+          <!-- ขึ้นค่าจ้าง / เงินเดือน -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_raise" disabled>
@@ -471,6 +478,7 @@
             </div>
           </div>
 
+          <!-- ตัดค่าจ้าง / เงินเดือน -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_cut" disabled>
@@ -488,6 +496,7 @@
             </div>
           </div>
 
+          <!-- อื่น ๆ -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_other" disabled>
@@ -501,6 +510,7 @@
             </div>
           </div>
 
+          <!-- รายละเอียดรวม / วันที่มีผล -->
           <div class="operation-detail-wrapper">
             <div class="operation-detail-label">รายละเอียดการดำเนินการ:</div>
             <div class="textarea-box" id="detailText">-</div>
@@ -543,7 +553,6 @@
           <div id="reviewerNameDisplay">ผู้จัดการฝ่าย</div>
         </div>
 
-        <!-- ✅ เพิ่มแสดง Role ผู้ทบทวน -->
         <div class="info-item">
           <div class="info-label">ตำแหน่งผู้ทบทวน</div>
           <div id="reviewerRoleDisplay">-</div>
@@ -551,42 +560,55 @@
 
         <div style="font-size: 11px; color: var(--text-light); margin-top: 6px;">
           ระบบจะบันทึกลายเซ็นเชื่อมกับเอกสารนี้ โดยอ้างอิงจากพารามิเตอร์
-          <code>?id=...</code>, <code>?reviewer=...</code>, <code>?role=...</code> ในลิงก์
+          <code>?id=...&reviewer=...&role=...</code> ในลิงก์
         </div>
       </div>
     </div>
   </div>
 
   <script>
+    // ================================
+    // CONFIG
+    // ================================
     const WEB_APP_URL =
       'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
 
+    // อ่าน query string
     function getQueryParam(name) {
       const url = new URL(window.location.href);
       return url.searchParams.get(name) || '';
     }
 
+    // ================================
+    // โหลดข้อมูลจาก Google Sheet (JSONP)
+    // ================================
     function loadOperationData() {
-      const id = getQueryParam('id') || getQueryParam('row') || '';
+      // รองรับทั้ง ?id=, ?row=, ?docNo=
+      const id =
+        getQueryParam('id') ||
+        getQueryParam('row') ||
+        getQueryParam('docNo') ||
+        '';
       const statusEl = document.getElementById('status');
       const docIdDisplay = document.getElementById('docIdDisplay');
-      const reviewerName = getQueryParam('reviewer') || '';
-      const reviewerRole = getQueryParam('role') || getQueryParam('reviewerRole') || '';
+
+      const reviewerNameParam = getQueryParam('reviewer') || '';
+      const reviewerRoleParam = getQueryParam('role') || '';
 
       if (docIdDisplay) docIdDisplay.textContent = id || '-';
 
-      if (reviewerName) {
+      if (reviewerNameParam) {
         const r = document.getElementById('reviewerNameDisplay');
-        if (r) r.textContent = reviewerName;
+        if (r) r.textContent = reviewerNameParam;
       }
-
-      if (reviewerRole) {
+      if (reviewerRoleParam) {
         const rr = document.getElementById('reviewerRoleDisplay');
-        if (rr) rr.textContent = reviewerRole;
+        if (rr) rr.textContent = reviewerRoleParam;
       }
 
       if (!id) {
-        statusEl.textContent = 'ไม่พบรหัสเอกสารในลิงก์ (ต้องมี ?id=xxxx)';
+        statusEl.textContent =
+          'ไม่พบรหัสเอกสารในลิงก์ (ต้องมี ?id=... หรือ ?docNo=...)';
         statusEl.classList.add('error');
         return;
       }
@@ -638,6 +660,9 @@
       delete window[callbackName];
     }
 
+    // ================================
+    // แสดงข้อมูลลงหน้า HTML
+    // ================================
     function renderOperationData(data) {
       document.getElementById('empName').textContent =
         data['พนักงาน'] || data['employeeName'] || '-';
@@ -719,6 +744,9 @@
         data['มีผลบังคับตั้งแต่วันที่'] || data['effectiveDate'] || '-';
     }
 
+    // ================================
+    // ส่วนลายเซ็น (ผู้ทบทวน)
+    // ================================
     const canvas = document.getElementById('signaturePad');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
@@ -770,9 +798,15 @@
     }
 
     function saveSignature() {
-      const id = getQueryParam('id') || '';
+      // ใช้ logic เดียวกับตอนโหลดข้อมูล (รองรับ docNo ด้วย)
+      const id =
+        getQueryParam('id') ||
+        getQueryParam('row') ||
+        getQueryParam('docNo') ||
+        '';
+
       if (!id) {
-        alert('ไม่พบรหัสเอกสาร (id) ในลิงก์');
+        alert('ไม่พบรหัสเอกสาร (id/docNo) ในลิงก์');
         return;
       }
       if (!hasStroke) {
@@ -784,7 +818,7 @@
 
       const params = new URLSearchParams();
       params.append('action', 'saveReviewerSignature');
-      params.append('id', id);
+      params.append('id', id);              // ส่งเป็น id ให้ฝั่ง Apps Script ใช้หาเอกสาร
       params.append('signature', dataUrl);
 
       fetch(WEB_APP_URL, {
@@ -801,6 +835,9 @@
       });
     }
 
+    // ================================
+    // Init
+    // ================================
     window.addEventListener('DOMContentLoaded', () => {
       resizeCanvas();
       loadOperationData();
