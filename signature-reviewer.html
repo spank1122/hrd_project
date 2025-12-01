@@ -83,7 +83,6 @@
       margin-bottom: 16px;
     }
 
-    /* SECTION FRAME */
     .section {
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -162,8 +161,6 @@
       color: #047857;
     }
 
-    /* ===== การดำเนินการ (ใหม่) ===== */
-
     .operation-note {
       font-size: 12px;
       color: var(--text-light);
@@ -198,7 +195,7 @@
 
     .op-line {
       display: flex;
-      align-items: flex-end;   /* ให้เส้นไปอยู่ล่างสุด */
+      align-items: flex-end;
       gap: 6px;
     }
 
@@ -213,7 +210,7 @@
       flex: 1;
       min-height: 18px;
       border-bottom: 1px solid #cbd5e1;
-      padding: 0 4px 2px;      /* เน้น padding ล่าง */
+      padding: 0 4px 2px;
       font-size: 13px;
       color: var(--text-dark);
       line-height: 1.3;
@@ -240,8 +237,6 @@
       color: var(--text-dark);
       white-space: pre-wrap;
     }
-
-    /* ===== ฝั่งลายเซ็น ===== */
 
     .signature-pad {
       border: 2px dashed var(--border);
@@ -332,7 +327,6 @@
           ⏳ กำลังโหลดข้อมูลจากระบบ...
         </div>
 
-        <!-- ข้อมูลพนักงาน -->
         <div class="section">
           <div class="section-header">
             <div class="section-bar"></div>
@@ -359,7 +353,7 @@
           </div>
         </div>
 
-        <!-- การดำเนินการ (layout แบบ Google Form) -->
+        <!-- การดำเนินการ -->
         <div class="section">
           <div class="section-header">
             <div class="section-bar"></div>
@@ -370,7 +364,6 @@
             * ข้อมูลด้านล่างแสดงตามที่ผู้บันทึกทำการเลือกไว้จากฟอร์มต้นฉบับ (อ่านอย่างเดียว แก้ไขไม่ได้)
           </div>
 
-          <!-- แต่งตั้ง -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_appoint" disabled>
@@ -384,7 +377,6 @@
             </div>
           </div>
 
-          <!-- โอนย้าย -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_transfer" disabled>
@@ -402,7 +394,6 @@
             </div>
           </div>
 
-          <!-- เปลี่ยนสภาพการจ้างงาน -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_change" disabled>
@@ -420,7 +411,6 @@
             </div>
           </div>
 
-          <!-- เลื่อนตำแหน่ง -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_promote" disabled>
@@ -438,7 +428,6 @@
             </div>
           </div>
 
-          <!-- ผ่านทดลองงาน -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_passProb" disabled>
@@ -452,7 +441,6 @@
             </div>
           </div>
 
-          <!-- ให้ออกจากงาน / ลาออก -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_terminate" disabled>
@@ -466,7 +454,6 @@
             </div>
           </div>
 
-          <!-- ขึ้นค่าจ้าง / เงินเดือน -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_raise" disabled>
@@ -484,7 +471,6 @@
             </div>
           </div>
 
-          <!-- ตัดค่าจ้าง / เงินเดือน -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_cut" disabled>
@@ -502,7 +488,6 @@
             </div>
           </div>
 
-          <!-- อื่น ๆ -->
           <div class="operation-row">
             <div class="operation-left">
               <input type="radio" name="actionType" id="action_other" disabled>
@@ -516,7 +501,6 @@
             </div>
           </div>
 
-          <!-- รายละเอียดรวม / วันที่มีผล (ใช้ id เดิม) -->
           <div class="operation-detail-wrapper">
             <div class="operation-detail-label">รายละเอียดการดำเนินการ:</div>
             <div class="textarea-box" id="detailText">-</div>
@@ -559,41 +543,46 @@
           <div id="reviewerNameDisplay">ผู้จัดการฝ่าย</div>
         </div>
 
+        <!-- ✅ เพิ่มแสดง Role ผู้ทบทวน -->
+        <div class="info-item">
+          <div class="info-label">ตำแหน่งผู้ทบทวน</div>
+          <div id="reviewerRoleDisplay">-</div>
+        </div>
+
         <div style="font-size: 11px; color: var(--text-light); margin-top: 6px;">
-          ระบบจะบันทึกลายเซ็นเชื่อมกับเอกสารนี้ โดยอ้างอิงจากพารามิเตอร์ <code>?id=...</code> ในลิงก์
+          ระบบจะบันทึกลายเซ็นเชื่อมกับเอกสารนี้ โดยอ้างอิงจากพารามิเตอร์
+          <code>?id=...</code>, <code>?reviewer=...</code>, <code>?role=...</code> ในลิงก์
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ================================
-    // CONFIG
-    // ================================
     const WEB_APP_URL =
       'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
 
-    // ================================
-    // Helper: อ่าน query string
-    // ================================
     function getQueryParam(name) {
       const url = new URL(window.location.href);
       return url.searchParams.get(name) || '';
     }
 
-    // ================================
-    // โหลดข้อมูลจาก Google Sheet (ผ่าน Apps Script JSONP)
-    // ================================
     function loadOperationData() {
       const id = getQueryParam('id') || getQueryParam('row') || '';
       const statusEl = document.getElementById('status');
       const docIdDisplay = document.getElementById('docIdDisplay');
       const reviewerName = getQueryParam('reviewer') || '';
+      const reviewerRole = getQueryParam('role') || getQueryParam('reviewerRole') || '';
 
       if (docIdDisplay) docIdDisplay.textContent = id || '-';
+
       if (reviewerName) {
         const r = document.getElementById('reviewerNameDisplay');
         if (r) r.textContent = reviewerName;
+      }
+
+      if (reviewerRole) {
+        const rr = document.getElementById('reviewerRoleDisplay');
+        if (rr) rr.textContent = reviewerRole;
       }
 
       if (!id) {
@@ -649,10 +638,6 @@
       delete window[callbackName];
     }
 
-    // ================================
-    // แสดงข้อมูลลงหน้า HTML (อ่านอย่างเดียว)
-    // *** ตรงนี้เกมสามารถ map field จากชีตมาใส่แต่ละช่อง จากเดิม/เป็น ได้ ***
-    // ================================
     function renderOperationData(data) {
       document.getElementById('empName').textContent =
         data['พนักงาน'] || data['employeeName'] || '-';
@@ -690,8 +675,6 @@
         if (r) r.checked = true;
       }
 
-      // ⭐ ตัวอย่าง mapping จากข้อมูลชีต → ช่องจากเดิม/เป็น
-      // เกมสามารถเปลี่ยนชื่อ key ให้ตรงกับหัวคอลัมน์จริงได้เลย
       document.getElementById('appoint_to').textContent =
         data['แต่งตั้ง_เป็น'] || '';
 
@@ -736,9 +719,6 @@
         data['มีผลบังคับตั้งแต่วันที่'] || data['effectiveDate'] || '-';
     }
 
-    // ================================
-    // ส่วนลายเซ็น (ผู้ทบทวน)
-    // ================================
     const canvas = document.getElementById('signaturePad');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
@@ -821,9 +801,6 @@
       });
     }
 
-    // ================================
-    // Init
-    // ================================
     window.addEventListener('DOMContentLoaded', () => {
       resizeCanvas();
       loadOperationData();
