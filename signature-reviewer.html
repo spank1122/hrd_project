@@ -510,9 +510,11 @@
             </div>
           </div>
 
-          <!-- รายละเอียดรวม / วันที่มีผล -->
+          <!-- รายละเอียดเพิ่มเติม / วันที่มีผล -->
           <div class="operation-detail-wrapper">
-            <div class="operation-detail-label">รายละเอียดการดำเนินการ:</div>
+            <div class="operation-detail-label">
+              รายละเอียดเพิ่มเติม / ข้อความที่ต้องการให้แสดง
+            </div>
             <div class="textarea-box" id="detailText">-</div>
           </div>
 
@@ -529,7 +531,7 @@
 
         <div class="info-item">
           <div class="info-label">สถานะ</div>
-          <div>แบบฟอร์มนี้สำหรับ “เซ็นรับทราบ ” เท่านั้น</div>
+          <div>แบบฟอร์มนี้สำหรับ “เซ็นรับทราบ” เท่านั้น</div>
         </div>
 
         <canvas id="signaturePad" class="signature-pad" height="170"></canvas>
@@ -578,11 +580,68 @@
       return url.searchParams.get(name) || '';
     }
 
+    // helper แปลงวันที่ ISO → d/M/yyyy
+    function formatDateDisplay(raw) {
+      if (!raw) return '';
+      const d = new Date(raw);
+      if (isNaN(d.getTime())) return raw; // ถ้า parse ไม่ได้ก็แสดงดิบ ๆ
+      const day = d.getDate();
+      const month = d.getMonth() + 1;
+      const year = d.getFullYear();
+      return day + '/' + month + '/' + year;
+    }
+
+    // พยายามแตก "รายละเอียดการดำเนินการ" ไปลงบรรทัด จากเดิม / เป็น
+    function applyActionDetailToLines(actionCode, actionType, actionDetail) {
+      if (!actionDetail) return;
+
+      const isTransfer =
+        actionCode === 'transfer' || actionType === 'โอนย้าย';
+      const isPromote =
+        actionCode === 'promote' || actionType === 'เลื่อนตำแหน่ง';
+      const isChange =
+        actionCode === 'change_status' || actionType === 'เปลี่ยนสภาพการจ้างงาน';
+      const isRaise =
+        actionCode === 'raise' || actionType === 'ขึ้นค่าจ้าง / เงินเดือน';
+      const isCut =
+        actionCode === 'cut' || actionType === 'ตัดค่าจ้าง / เงินเดือน';
+
+      // pattern ง่าย ๆ: "จากเดิม ... เป็น ..."
+      const m = actionDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
+      let fromText = '';
+      let toText = '';
+
+      if (m) {
+        fromText = (m[1] || '').trim();
+        toText   = (m[2] || '').trim();
+      }
+
+      if (isTransfer) {
+        if (fromText) document.getElementById('transfer_from').textContent = fromText;
+        if (toText)   document.getElementById('transfer_to').textContent   = toText;
+      } else if (isPromote) {
+        if (fromText) document.getElementById('promote_from').textContent = fromText;
+        if (toText)   document.getElementById('promote_to').textContent   = toText;
+      } else if (isChange) {
+        if (fromText) document.getElementById('change_from').textContent = fromText;
+        if (toText)   document.getElementById('change_to').textContent   = toText;
+      } else if (isRaise) {
+        if (fromText) document.getElementById('raise_from').textContent = fromText;
+        if (toText)   document.getElementById('raise_to').textContent   = toText;
+      } else if (isCut) {
+        if (fromText) document.getElementById('cut_from').textContent = fromText;
+        if (toText)   document.getElementById('cut_to').textContent   = toText;
+      } else {
+        // ถ้าไม่เข้าเคสไหนเลย เอาไปไว้ใน other_detail แทน
+        document.getElementById('other_detail').textContent =
+          document.getElementById('other_detail').textContent || actionDetail;
+      }
+    }
+
     // ================================
     // โหลดข้อมูลจาก Google Sheet (JSONP)
     // ================================
     function loadOperationData() {
-      // รองรับทั้ง ?docNo=, ?id=, ?row=
       const id =
         getQueryParam('docNo') ||
         getQueryParam('id') ||
@@ -663,7 +722,7 @@
     }
 
     // ================================
-    // แสดงข้อมูลลงหน้า HTML (ใช้คีย์จากชีตใบดำเนินการ)
+    // แสดงข้อมูลลงหน้า HTML
     // ================================
     function renderOperationData(data) {
       console.log('render data:', data);
@@ -676,10 +735,9 @@
         '-';
       document.getElementById('empName').textContent = empName;
 
-      // รหัสพนักงาน / ตำแหน่ง
-      const empCode   = data['รหัสพนักงาน'] || '';
-      const empPos    = data['ตำแหน่ง'] || '';
-      const codePos   =
+      const empCode = data['รหัสพนักงาน'] || '';
+      const empPos  = data['ตำแหน่ง'] || '';
+      const codePos =
         data['รหัสพนักงาน/ตำแหน่ง'] ||
         data['empCodePosition'] ||
         '';
@@ -690,7 +748,6 @@
           ? empCode + ' / ' + empPos
           : (empCode || empPos || '-'));
 
-      // แผนก / ฝ่าย
       const deptOnly  = data['แผนก'] || '';
       const divOnly   = data['ฝ่าย'] || '';
       const deptCombo =
@@ -704,7 +761,6 @@
           ? [deptOnly, divOnly].filter(Boolean).join(' / ')
           : '-');
 
-      // สภาพพนักงาน / วันเริ่มงาน
       const empStatus =
         data['สภาพพนักงาน/วันเริ่มงาน'] ||
         data['employmentStatus'] ||
@@ -718,6 +774,11 @@
         data['ประเภทการดำเนินการ'] ||
         data['การดำเนินการ'] ||
         data['actionType'] ||
+        '';
+
+      const actionCode =
+        data['รหัสการดำเนินการ (code)'] ||
+        data['actionCode'] ||
         '';
 
       const radioMap = {
@@ -742,35 +803,55 @@
         if (r) r.checked = true;
       }
 
-      // ---------- รายละเอียด / วันที่มีผล ----------
-      document.getElementById('detailText').textContent =
-        data['รายละเอียดการดำเนินการ'] ||
-        data['รายละเอียดเพิ่มเติม'] ||
-        data['detail'] ||
-        '-';
+      // ---------- รายละเอียดการดำเนินการ / เพิ่มเติม ----------
+      const actionDetail = data['รายละเอียดการดำเนินการ'] || '';
+      const extraDetail  = data['รายละเอียดเพิ่มเติม'] || '';
 
-      const eff =
+      // ใช้ actionDetail ไปลงช่องย่อย (จากเดิม / เป็น ...)
+      applyActionDetailToLines(actionCode, actionType, actionDetail);
+
+      // กล่องใหญ่ล่าง = รายละเอียดเพิ่มเติม เท่านั้น
+      document.getElementById('detailText').textContent =
+        extraDetail || '-';
+
+      const effRaw =
         data['วันที่มีผล'] ||
         data['มีผลบังคับตั้งแต่วันที่'] ||
         data['effectiveDate'] ||
         '';
-      document.getElementById('effectiveDate').textContent = eff || '-';
+      const effDisplay = effRaw ? formatDateDisplay(effRaw) : '-';
+      document.getElementById('effectiveDate').textContent =
+        effDisplay || '-';
 
-      // ---------- ช่องย่อย (กรณีเกมแยก column เพิ่มในอนาคต) ----------
-      document.getElementById('appoint_to').textContent      = data['แต่งตั้ง_เป็น'] || '';
-      document.getElementById('transfer_from').textContent   = data['โอนย้าย_จากเดิม'] || '';
-      document.getElementById('transfer_to').textContent     = data['โอนย้าย_เป็น'] || '';
-      document.getElementById('change_from').textContent     = data['เปลี่ยนสภาพ_จากเดิม'] || '';
-      document.getElementById('change_to').textContent       = data['เปลี่ยนสภาพ_เป็น'] || '';
-      document.getElementById('promote_from').textContent    = data['เลื่อนตำแหน่ง_จากเดิม'] || '';
-      document.getElementById('promote_to').textContent      = data['เลื่อนตำแหน่ง_เป็น'] || '';
-      document.getElementById('passProb_to').textContent     = data['ผ่านทดลองงาน_เป็น'] || '';
-      document.getElementById('terminate_detail').textContent= data['ให้ออกจากงาน_รายละเอียด'] || '';
-      document.getElementById('raise_from').textContent      = data['ขึ้นค่าจ้าง_จากเดิม'] || '';
-      document.getElementById('raise_to').textContent        = data['ขึ้นค่าจ้าง_เป็น'] || '';
-      document.getElementById('cut_from').textContent        = data['ตัดค่าจ้าง_จากเดิม'] || '';
-      document.getElementById('cut_to').textContent          = data['ตัดค่าจ้าง_เป็น'] || '';
-      document.getElementById('other_detail').textContent    = data['อื่นๆ_รายละเอียด'] || '';
+      // ---------- default ช่องย่อยถ้าแยก column ไว้ในอนาคต ----------
+      document.getElementById('appoint_to').textContent      =
+        document.getElementById('appoint_to').textContent || (data['แต่งตั้ง_เป็น'] || '');
+      document.getElementById('transfer_from').textContent   =
+        document.getElementById('transfer_from').textContent || (data['โอนย้าย_จากเดิม'] || '');
+      document.getElementById('transfer_to').textContent     =
+        document.getElementById('transfer_to').textContent || (data['โอนย้าย_เป็น'] || '');
+      document.getElementById('change_from').textContent     =
+        document.getElementById('change_from').textContent || (data['เปลี่ยนสภาพ_จากเดิม'] || '');
+      document.getElementById('change_to').textContent       =
+        document.getElementById('change_to').textContent || (data['เปลี่ยนสภาพ_เป็น'] || '');
+      document.getElementById('promote_from').textContent    =
+        document.getElementById('promote_from').textContent || (data['เลื่อนตำแหน่ง_จากเดิม'] || '');
+      document.getElementById('promote_to').textContent      =
+        document.getElementById('promote_to').textContent || (data['เลื่อนตำแหน่ง_เป็น'] || '');
+      document.getElementById('passProb_to').textContent     =
+        document.getElementById('passProb_to').textContent || (data['ผ่านทดลองงาน_เป็น'] || '');
+      document.getElementById('terminate_detail').textContent=
+        document.getElementById('terminate_detail').textContent || (data['ให้ออกจากงาน_รายละเอียด'] || '');
+      document.getElementById('raise_from').textContent      =
+        document.getElementById('raise_from').textContent || (data['ขึ้นค่าจ้าง_จากเดิม'] || '');
+      document.getElementById('raise_to').textContent        =
+        document.getElementById('raise_to').textContent || (data['ขึ้นค่าจ้าง_เป็น'] || '');
+      document.getElementById('cut_from').textContent        =
+        document.getElementById('cut_from').textContent || (data['ตัดค่าจ้าง_จากเดิม'] || '');
+      document.getElementById('cut_to').textContent          =
+        document.getElementById('cut_to').textContent || (data['ตัดค่าจ้าง_เป็น'] || '');
+      document.getElementById('other_detail').textContent    =
+        document.getElementById('other_detail').textContent || (data['อื่นๆ_รายละเอียด'] || '');
     }
 
     // ================================
