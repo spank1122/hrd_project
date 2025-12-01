@@ -560,7 +560,7 @@
 
         <div style="font-size: 11px; color: var(--text-light); margin-top: 6px;">
           ระบบจะบันทึกลายเซ็นเชื่อมกับเอกสารนี้ โดยอ้างอิงจากพารามิเตอร์
-          <code>?id=...&reviewer=...&role=...</code> ในลิงก์
+          <code>?docNo=...&reviewer=...&role=...</code> ในลิงก์
         </div>
       </div>
     </div>
@@ -573,7 +573,6 @@
     const WEB_APP_URL =
       'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
 
-    // อ่าน query string
     function getQueryParam(name) {
       const url = new URL(window.location.href);
       return url.searchParams.get(name) || '';
@@ -583,12 +582,13 @@
     // โหลดข้อมูลจาก Google Sheet (JSONP)
     // ================================
     function loadOperationData() {
-      // รองรับทั้ง ?id=, ?row=, ?docNo=
+      // รองรับทั้ง ?docNo=, ?id=, ?row=
       const id =
+        getQueryParam('docNo') ||
         getQueryParam('id') ||
         getQueryParam('row') ||
-        getQueryParam('docNo') ||
         '';
+
       const statusEl = document.getElementById('status');
       const docIdDisplay = document.getElementById('docIdDisplay');
 
@@ -608,7 +608,7 @@
 
       if (!id) {
         statusEl.textContent =
-          'ไม่พบรหัสเอกสารในลิงก์ (ต้องมี ?id=... หรือ ?docNo=...)';
+          'ไม่พบรหัสเอกสารในลิงก์ (ต้องมี ?docNo=... หรือ ?id=...)';
         statusEl.classList.add('error');
         return;
       }
@@ -626,7 +626,9 @@
           statusEl.classList.add('success');
           setTimeout(() => { statusEl.style.display = 'none'; }, 2500);
         } else {
-          statusEl.textContent = '❌ ไม่สามารถโหลดข้อมูลได้';
+          statusEl.textContent =
+            '❌ ไม่สามารถโหลดข้อมูลได้' +
+            (result && result.message ? ' : ' + result.message : '');
           statusEl.classList.add('error');
         }
         cleanupJSONP(callbackName);
@@ -635,8 +637,8 @@
       const script = document.createElement('script');
       script.src =
         WEB_APP_URL +
-        '?action=getOperationData' +
-        '&id=' + encodeURIComponent(id) +
+        '?action=getDoc' +
+        '&docNo=' + encodeURIComponent(id) +
         '&callback=' + callbackName;
 
       script.onerror = function() {
@@ -798,15 +800,14 @@
     }
 
     function saveSignature() {
-      // ใช้ logic เดียวกับตอนโหลดข้อมูล (รองรับ docNo ด้วย)
       const id =
+        getQueryParam('docNo') ||
         getQueryParam('id') ||
         getQueryParam('row') ||
-        getQueryParam('docNo') ||
         '';
 
       if (!id) {
-        alert('ไม่พบรหัสเอกสาร (id/docNo) ในลิงก์');
+        alert('ไม่พบรหัสเอกสาร (docNo/id) ในลิงก์');
         return;
       }
       if (!hasStroke) {
@@ -818,7 +819,7 @@
 
       const params = new URLSearchParams();
       params.append('action', 'saveReviewerSignature');
-      params.append('id', id);              // ส่งเป็น id ให้ฝั่ง Apps Script ใช้หาเอกสาร
+      params.append('id', id);
       params.append('signature', dataUrl);
 
       fetch(WEB_APP_URL, {
