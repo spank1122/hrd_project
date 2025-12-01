@@ -663,22 +663,62 @@
     }
 
     // ================================
-    // แสดงข้อมูลลงหน้า HTML
+    // แสดงข้อมูลลงหน้า HTML (ใช้คีย์จากชีตใบดำเนินการ)
     // ================================
     function renderOperationData(data) {
-      document.getElementById('empName').textContent =
-        data['พนักงาน'] || data['employeeName'] || '-';
+      console.log('render data:', data);
+
+      // ---------- ข้อมูลพนักงาน ----------
+      const empName =
+        data['ชื่อพนักงาน'] ||
+        data['พนักงาน'] ||
+        data['employeeName'] ||
+        '-';
+      document.getElementById('empName').textContent = empName;
+
+      // รหัสพนักงาน / ตำแหน่ง
+      const empCode   = data['รหัสพนักงาน'] || '';
+      const empPos    = data['ตำแหน่ง'] || '';
+      const codePos   =
+        data['รหัสพนักงาน/ตำแหน่ง'] ||
+        data['empCodePosition'] ||
+        '';
 
       document.getElementById('empCodePos').textContent =
-        data['รหัสพนักงาน/ตำแหน่ง'] || data['empCodePosition'] || '-';
+        codePos ||
+        (empCode && empPos
+          ? empCode + ' / ' + empPos
+          : (empCode || empPos || '-'));
+
+      // แผนก / ฝ่าย
+      const deptOnly  = data['แผนก'] || '';
+      const divOnly   = data['ฝ่าย'] || '';
+      const deptCombo =
+        data['แผนก/ฝ่าย'] ||
+        data['department'] ||
+        '';
 
       document.getElementById('dept').textContent =
-        data['แผนก/ฝ่าย'] || data['department'] || '-';
+        deptCombo ||
+        (deptOnly || divOnly
+          ? [deptOnly, divOnly].filter(Boolean).join(' / ')
+          : '-');
 
+      // สภาพพนักงาน / วันเริ่มงาน
+      const empStatus =
+        data['สภาพพนักงาน/วันเริ่มงาน'] ||
+        data['employmentStatus'] ||
+        data['สภาพจ้างงาน'] ||
+        '';
       document.getElementById('employmentStatus').textContent =
-        data['สภาพพนักงาน/วันเริ่มงาน'] || data['employmentStatus'] || '-';
+        empStatus || '-';
 
-      const actionType = data['การดำเนินการ'] || data['actionType'] || '';
+      // ---------- ประเภทการดำเนินการ ----------
+      const actionType =
+        data['ประเภทการดำเนินการ'] ||
+        data['การดำเนินการ'] ||
+        data['actionType'] ||
+        '';
 
       const radioMap = {
         'แต่งตั้ง': 'action_appoint',
@@ -702,48 +742,35 @@
         if (r) r.checked = true;
       }
 
-      document.getElementById('appoint_to').textContent =
-        data['แต่งตั้ง_เป็น'] || '';
-
-      document.getElementById('transfer_from').textContent =
-        data['โอนย้าย_จากเดิม'] || '';
-      document.getElementById('transfer_to').textContent =
-        data['โอนย้าย_เป็น'] || '';
-
-      document.getElementById('change_from').textContent =
-        data['เปลี่ยนสภาพ_จากเดิม'] || '';
-      document.getElementById('change_to').textContent =
-        data['เปลี่ยนสภาพ_เป็น'] || '';
-
-      document.getElementById('promote_from').textContent =
-        data['เลื่อนตำแหน่ง_จากเดิม'] || '';
-      document.getElementById('promote_to').textContent =
-        data['เลื่อนตำแหน่ง_เป็น'] || '';
-
-      document.getElementById('passProb_to').textContent =
-        data['ผ่านทดลองงาน_เป็น'] || '';
-
-      document.getElementById('terminate_detail').textContent =
-        data['ให้ออกจากงาน_รายละเอียด'] || '';
-
-      document.getElementById('raise_from').textContent =
-        data['ขึ้นค่าจ้าง_จากเดิม'] || '';
-      document.getElementById('raise_to').textContent =
-        data['ขึ้นค่าจ้าง_เป็น'] || '';
-
-      document.getElementById('cut_from').textContent =
-        data['ตัดค่าจ้าง_จากเดิม'] || '';
-      document.getElementById('cut_to').textContent =
-        data['ตัดค่าจ้าง_เป็น'] || '';
-
-      document.getElementById('other_detail').textContent =
-        data['อื่นๆ_รายละเอียด'] || '';
-
+      // ---------- รายละเอียด / วันที่มีผล ----------
       document.getElementById('detailText').textContent =
-        data['รายละเอียดเพิ่มเติม'] || data['detail'] || '-';
+        data['รายละเอียดการดำเนินการ'] ||
+        data['รายละเอียดเพิ่มเติม'] ||
+        data['detail'] ||
+        '-';
 
-      document.getElementById('effectiveDate').textContent =
-        data['มีผลบังคับตั้งแต่วันที่'] || data['effectiveDate'] || '-';
+      const eff =
+        data['วันที่มีผล'] ||
+        data['มีผลบังคับตั้งแต่วันที่'] ||
+        data['effectiveDate'] ||
+        '';
+      document.getElementById('effectiveDate').textContent = eff || '-';
+
+      // ---------- ช่องย่อย (กรณีเกมแยก column เพิ่มในอนาคต) ----------
+      document.getElementById('appoint_to').textContent      = data['แต่งตั้ง_เป็น'] || '';
+      document.getElementById('transfer_from').textContent   = data['โอนย้าย_จากเดิม'] || '';
+      document.getElementById('transfer_to').textContent     = data['โอนย้าย_เป็น'] || '';
+      document.getElementById('change_from').textContent     = data['เปลี่ยนสภาพ_จากเดิม'] || '';
+      document.getElementById('change_to').textContent       = data['เปลี่ยนสภาพ_เป็น'] || '';
+      document.getElementById('promote_from').textContent    = data['เลื่อนตำแหน่ง_จากเดิม'] || '';
+      document.getElementById('promote_to').textContent      = data['เลื่อนตำแหน่ง_เป็น'] || '';
+      document.getElementById('passProb_to').textContent     = data['ผ่านทดลองงาน_เป็น'] || '';
+      document.getElementById('terminate_detail').textContent= data['ให้ออกจากงาน_รายละเอียด'] || '';
+      document.getElementById('raise_from').textContent      = data['ขึ้นค่าจ้าง_จากเดิม'] || '';
+      document.getElementById('raise_to').textContent        = data['ขึ้นค่าจ้าง_เป็น'] || '';
+      document.getElementById('cut_from').textContent        = data['ตัดค่าจ้าง_จากเดิม'] || '';
+      document.getElementById('cut_to').textContent          = data['ตัดค่าจ้าง_เป็น'] || '';
+      document.getElementById('other_detail').textContent    = data['อื่นๆ_รายละเอียด'] || '';
     }
 
     // ================================
