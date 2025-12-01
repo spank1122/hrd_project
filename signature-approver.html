@@ -589,7 +589,7 @@
 
         <div class="info-item">
           <div class="info-label">ชื่อผู้อนุมัติ</div>
-          <div id="approverName">-</div>
+          <div id="approverName">ประธานเจ้าหน้าที่บริหาร</div>
         </div>
 
         <div class="signature-history">
@@ -608,7 +608,7 @@
     // ================= CONFIG =================
     const WEB_APP_URL =
       'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
-    const ROLE = 'approver'; // ใช้ role นี้ฝั่ง Apps Script
+    const ROLE = 'approver';
 
     let DOC_NO = '';
     let hasSignature = false;
@@ -677,21 +677,20 @@
         if (fromText) document.getElementById('cut_from').textContent = fromText;
         if (toText)   document.getElementById('cut_to').textContent   = toText;
       } else {
-        // ถ้าไม่เข้าเคสไหนเลย แปะไว้ใน other_detail แทน
         const od = document.getElementById('other_detail');
         if (od && !od.textContent) od.textContent = actionDetail;
       }
     }
 
-    // ============ LOAD DOC (JSONP) ============
+    // ============ LOAD DOC (ใช้ hrGetOperationData แบบเดียวกับ signature-review) ============
     function loadDocInfo() {
       const statusEl = document.getElementById('status');
 
-      // รองรับทั้ง docNo, id, row เหมือนหน้า reviewer
+      // รองรับหลาย param เหมือน reviewer
       const id =
         getQueryParam('docNo') ||
-        getQueryParam('id') ||
-        getQueryParam('row') ||
+        getQueryParam('id')    ||
+        getQueryParam('row')   ||
         '';
 
       DOC_NO = id;
@@ -709,11 +708,11 @@
       document.getElementById('headerSubtitle').textContent =
         `เลขที่เอกสาร: ${DOC_NO}`;
 
-      const callbackName = 'docCb_' + Date.now();
+      const callbackName = 'opCb_' + Date.now();
       const script = document.createElement('script');
-      script.src = `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(
-        DOC_NO
-      )}&callback=${callbackName}`;
+      // ใช้ API เดิมที่หน้า reviewer ใช้: hrGetOperationData
+      script.src =
+        `${WEB_APP_URL}?action=hrGetOperationData&id=${encodeURIComponent(DOC_NO)}&callback=${callbackName}`;
 
       window[callbackName] = function(res) {
         if (!res || !res.success) {
@@ -725,11 +724,9 @@
           return;
         }
 
-        const doc = res.data || {};
-        const steps = doc.steps || [];
-
-        // ใช้ operationData หรือ row เหมือน reviewer
-        renderOperationData(doc.operationData || doc.row || {});
+        const data = res.data || {};
+        console.log('approver operation data:', data);
+        renderOperationData(data);
 
         if (statusEl) {
           statusEl.textContent = '✅ โหลดข้อมูลสำเร็จ';
@@ -737,26 +734,7 @@
           setTimeout(() => (statusEl.style.display = 'none'), 2500);
         }
 
-        // ชื่อผู้อนุมัติ
-        if (steps[2]) {
-          document.getElementById('approverName').textContent =
-            steps[2].name || '-';
-        }
-
-        // history step1, step2
-        if (steps[0]) {
-          document.getElementById('historyStep1').textContent =
-            `ผู้เสนอ: ${steps[0].name || '-'} (${formatDateTime(
-              steps[0].time
-            )})`;
-        }
-        if (steps[1]) {
-          document.getElementById('historyStep2').textContent =
-            `ผู้ทบทวน: ${steps[1].name || '-'} (${formatDateTime(
-              steps[1].time
-            )})`;
-        }
-
+        // history/ชื่อผู้อนุมัติ ตอนนี้ใส่ default ไว้ก่อน
         cleanupJSONP(callbackName);
       };
 
@@ -778,10 +756,11 @@
           scripts[i].parentNode.removeChild(scripts[i]);
         }
       }
-      delete window[cbName];
+      try { delete window[cbName]; } catch (e) {}
     }
 
     // ============ แสดงข้อมูลใบดำเนินการ ============
+
     function renderOperationData(data) {
       console.log('approver render data:', data);
 
@@ -866,7 +845,6 @@
 
       applyActionDetailToLines(actionCode, actionType, actionDetail);
 
-      // ช่องใหญ่ด้านล่าง: ใช้เฉพาะ "รายละเอียดเพิ่มเติม"
       document.getElementById('detailText').textContent =
         extraDetail || '-';
 
@@ -911,6 +889,7 @@
     }
 
     // ============ Signature Pad ============
+
     const canvas = document.getElementById('signaturePad');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
@@ -939,9 +918,7 @@
       ctx.stroke();
     }
 
-    function stopDraw() {
-      isDrawing = false;
-    }
+    function stopDraw() { isDrawing = false; }
 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
@@ -977,19 +954,21 @@
       if (btnClear) btnClear.disabled = true;
 
       const dataUrl = canvas.toDataURL('image/png');
-
-      // ส่งแบบ form-urlencoded เข้ากับ doPost ที่ใช้ e.parameter
-      const formData = new URLSearchParams();
-      formData.append('action', 'saveSignature');
-      formData.append('docNo', DOC_NO);
-      formData.append('role', ROLE);
-      formData.append('signature', dataUrl);
+      const payload = {
+        action: 'saveSignature',
+        docNo: DOC_NO,
+        role: ROLE,
+        signature: dataUrl
+      };
 
       try {
         await fetch(WEB_APP_URL, {
           method: 'POST',
           mode: 'no-cors',
-          body: formData
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
         });
 
         const successMessage = document.getElementById('successMessage');
