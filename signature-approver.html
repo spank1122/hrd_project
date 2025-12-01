@@ -578,8 +578,8 @@
         <canvas id="signaturePad" class="signature-pad" height="170"></canvas>
 
         <div class="btn-row">
-          <button type="button" class="btn btn-clear" onclick="clearSignature()">✕ ล้างลายเซ็น</button>
-          <button type="button" class="btn btn-save" onclick="handleApprove()">✓ บันทึกลายเซ็น</button>
+          <button type="button" class="btn btn-clear" id="btnClear">✕ ล้างลายเซ็น</button>
+          <button type="button" class="btn btn-save" id="btnSave">✓ บันทึกลายเซ็น</button>
         </div>
 
         <div class="info-item">
@@ -608,10 +608,11 @@
     // ================= CONFIG =================
     const WEB_APP_URL =
       'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
-    const ROLE = 'ceo'; // step 3
+    const ROLE = 'approver'; // ให้ฝั่ง Apps Script ใช้ role นี้แยก logic
 
     let DOC_NO = '';
     let hasSignature = false;
+    let isSubmitting = false;
 
     function getQueryParam(name) {
       const url = new URL(window.location.href);
@@ -683,11 +684,17 @@
     }
 
     // ============ LOAD DOC (JSONP) ============
+
     function loadDocInfo() {
       DOC_NO = getQueryParam('docNo') || '';
       if (!DOC_NO) {
         document.getElementById('headerSubtitle').textContent =
           'ไม่พบเลขที่เอกสาร (docNo)';
+        const statusEl = document.getElementById('status');
+        if (statusEl) {
+          statusEl.textContent = '❌ ไม่พบเลขที่เอกสารในลิงก์';
+          statusEl.classList.add('error');
+        }
         return;
       }
 
@@ -723,7 +730,7 @@
           setTimeout(() => (statusEl.style.display = 'none'), 2500);
         }
 
-        // ชื่อผู้อนุมัติ
+        // ชื่อผู้อนุมัติ (step index 2 ตามที่เรากำหนดใน backend)
         if (steps[2]) {
           document.getElementById('approverName').textContent =
             steps[2].name || '-';
@@ -769,6 +776,7 @@
     }
 
     // ============ แสดงข้อมูลใบดำเนินการ ============
+
     function renderOperationData(data) {
       console.log('approver render data:', data);
 
@@ -866,7 +874,7 @@
       document.getElementById('effectiveDate').textContent =
         effDisplay || '-';
 
-      // ----- ถ้ามีคอลัมน์แยกไว้แล้ว ก็ตั้งค่า default -----
+      // ถ้ามีคอลัมน์แยกไว้แล้ว ก็ตั้งค่า default จาก data
       document.getElementById('appoint_to').textContent      =
         document.getElementById('appoint_to').textContent      || (data['แต่งตั้ง_เป็น'] || '');
       document.getElementById('transfer_from').textContent   =
@@ -898,14 +906,17 @@
     }
 
     // ============ Signature Pad ============
+
     const canvas = document.getElementById('signaturePad');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
 
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
+      const prev = ctx.getImageData(0, 0, canvas.width, canvas.height);
       canvas.width = rect.width;
       canvas.height = 170;
+      ctx.putImageData(prev, 0, 0);
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.strokeStyle = '#111827';
@@ -935,21 +946,16 @@
       return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
-    canvas.addEventListener('mousedown', startDraw);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDraw);
-    canvas.addEventListener('mouseleave', stopDraw);
-
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e); }, { passive: false });
-    canvas.addEventListener('touchmove',  e => { e.preventDefault(); draw(e); },      { passive: false });
-    canvas.addEventListener('touchend',   e => { e.preventDefault(); stopDraw(e); },  { passive: false });
-
     function clearSignature() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       hasSignature = false;
+      const msg = document.getElementById('successMessage');
+      if (msg) msg.classList.remove('show');
+      const badge = document.getElementById('statusBadge');
+      if (badge) badge.textContent = '⏳ รอการอนุมัติ';
     }
 
-    function handleApprove() {
+    async function handleApprove() {
       if (!DOC_NO) {
         alert('ไม่พบเลขที่เอกสาร');
         return;
@@ -958,32 +964,72 @@
         alert('กรุณาวาดลายเซ็นก่อน');
         return;
       }
+      if (isSubmitting) return;
+      isSubmitting = true;
+
+      const btnSave = document.getElementById('btnSave');
+      const btnClear = document.getElementById('btnClear');
+      if (btnSave) btnSave.disabled = true;
+      if (btnClear) btnClear.disabled = true;
 
       const dataUrl = canvas.toDataURL('image/png');
-      const formData = new URLSearchParams();
-      formData.append('action', 'saveSignature');
-      formData.append('docNo', DOC_NO);
-      formData.append('role', ROLE);
-      formData.append('signature', dataUrl);
+      const payload = {
+        action: 'saveSignature',
+        docNo: DOC_NO,
+        role: ROLE,
+        signature: dataUrl
+        // ถ้าภายหลังจะเพิ่ม decision / comment ก็ใส่เพิ่มตรงนี้เลย
+      };
 
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: formData
-      });
+      try {
+        // ใช้ JSON body เข้ากับ doPost ที่ parse JSON อยู่แล้ว
+        await fetch(WEB_APP_URL, {
+          method: 'POST',
+          mode: 'no-cors', // ถ้า backend ใส่ CORS header แล้วจะเปลี่ยนเป็น 'cors' ได้
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
 
-      document.getElementById('successMessage').classList.add('show');
-      document.getElementById('statusBadge').textContent = '✓ บันทึกลายเซ็นแล้ว';
-      setTimeout(() => {
-        alert('บันทึกลายเซ็นผู้อนุมัติเรียบร้อย ระบบจะส่งต่อให้พนักงานลงนาม');
-      }, 600);
+        const successMessage = document.getElementById('successMessage');
+        if (successMessage) successMessage.classList.add('show');
+
+        const statusBadge = document.getElementById('statusBadge');
+        if (statusBadge) statusBadge.textContent = '✓ บันทึกลายเซ็นแล้ว';
+
+        setTimeout(() => {
+          alert('บันทึกลายเซ็นผู้อนุมัติเรียบร้อย ระบบจะส่งต่อให้พนักงานลงนาม');
+        }, 600);
+      } catch (err) {
+        console.error(err);
+        alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
+      } finally {
+        isSubmitting = false;
+        if (btnSave) btnSave.disabled = false;
+        if (btnClear) btnClear.disabled = false;
+      }
     }
 
     // ============ Init ============
+
     window.addEventListener('DOMContentLoaded', () => {
       resizeCanvas();
       loadDocInfo();
+
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mouseleave', stopDraw);
+
+      canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e); }, { passive: false });
+      canvas.addEventListener('touchmove',  e => { e.preventDefault(); draw(e); },      { passive: false });
+      canvas.addEventListener('touchend',   e => { e.preventDefault(); stopDraw(e); },  { passive: false });
+
+      document.getElementById('btnClear').addEventListener('click', clearSignature);
+      document.getElementById('btnSave').addEventListener('click', handleApprove);
     });
+
     window.addEventListener('resize', resizeCanvas);
   </script>
 </body>
