@@ -630,6 +630,7 @@
       return d.toLocaleString('th-TH');
     }
 
+    // แยก "จากเดิม ... เป็น ..." เฉพาะประเภทที่ต้องใช้
     function applyActionDetailToLines(actionCode, actionType, actionDetail) {
       if (!actionDetail) return;
 
@@ -643,6 +644,15 @@
         actionCode === 'raise' || actionType === 'ขึ้นค่าจ้าง / เงินเดือน';
       const isCut =
         actionCode === 'cut' || actionType === 'ตัดค่าจ้าง / เงินเดือน';
+      const isTerminate =
+        actionCode === 'resign' || (actionType && actionType.indexOf('ให้ออกจากงาน') !== -1);
+
+      // ✅ เคส "ให้ออกจากงาน / ลาออก" ให้ใส่เหตุผลลง terminate_detail แล้วจบ
+      if (isTerminate) {
+        const td = document.getElementById('terminate_detail');
+        if (td && !td.textContent) td.textContent = actionDetail;
+        return;
+      }
 
       const m = actionDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
       let fromText = '';
@@ -669,6 +679,7 @@
         if (fromText) document.getElementById('cut_from').textContent = fromText;
         if (toText)   document.getElementById('cut_to').textContent   = toText;
       } else {
+        // ใช้กับ "อื่น ๆ" เท่านั้น
         const od = document.getElementById('other_detail');
         if (od && !od.textContent) od.textContent = actionDetail;
       }
@@ -842,6 +853,7 @@
         'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก': 'action_terminate',
         'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
         'ให้ออกจากงานโดยไม่มีสมัครใจ/ลาออก': 'action_terminate',
+        'ให้ออกจากงาน / ลาออก': 'action_terminate',
         'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
         'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
         'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
@@ -858,8 +870,19 @@
       const actionDetail = data['รายละเอียดการดำเนินการ'] || '';
       const extraDetail  = data['รายละเอียดเพิ่มเติม'] || '';
 
+      // ✅ ถ้าเป็นให้ออกจากงาน / ลาออก ใส่เหตุผลลง terminate_detail ไว้ก่อน
+      const isTerminate =
+        actionCode === 'resign' || (actionType && actionType.indexOf('ให้ออกจากงาน') !== -1);
+      if (isTerminate) {
+        const td = document.getElementById('terminate_detail');
+        if (td && !td.textContent) {
+          td.textContent = actionDetail || extraDetail || '-';
+        }
+      }
+
       applyActionDetailToLines(actionCode, actionType, actionDetail);
 
+      // กล่องใหญ่ด้านล่าง: ใช้ "รายละเอียดเพิ่มเติม"
       document.getElementById('detailText').textContent =
         extraDetail || '-';
 
