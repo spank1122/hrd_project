@@ -685,95 +685,102 @@
 
     // ============ LOAD DOC (JSONP) ============
 
-    function loadDocInfo() {
-      DOC_NO = getQueryParam('docNo') || '';
-      if (!DOC_NO) {
-        document.getElementById('headerSubtitle').textContent =
-          'ไม่พบเลขที่เอกสาร (docNo)';
-        const statusEl = document.getElementById('status');
-        if (statusEl) {
-          statusEl.textContent = '❌ ไม่พบเลขที่เอกสารในลิงก์';
-          statusEl.classList.add('error');
-        }
-        return;
+function loadDocInfo() {
+  const statusEl = document.getElementById('status');
+
+  // ✅ รองรับทั้ง docNo, id, row เหมือนหน้า reviewer
+  const id =
+    getQueryParam('docNo') ||
+    getQueryParam('id') ||
+    getQueryParam('row') ||
+    '';
+
+  DOC_NO = id;
+
+  if (!DOC_NO) {
+    document.getElementById('headerSubtitle').textContent =
+      'ไม่พบเลขที่เอกสาร (docNo/id/row)';
+    if (statusEl) {
+      statusEl.textContent = 'ไม่พบเลขที่เอกสารในลิงก์';
+      statusEl.classList.add('error');
+    }
+    return;
+  }
+
+  document.getElementById('headerSubtitle').textContent =
+    `เลขที่เอกสาร: ${DOC_NO}`;
+
+  const callbackName = 'docCb_' + Date.now();
+  const script = document.createElement('script');
+  script.src = `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(
+    DOC_NO
+  )}&callback=${callbackName}`;
+
+  window[callbackName] = function(res) {
+    if (!res || !res.success) {
+      if (statusEl) {
+        statusEl.textContent = '❌ ไม่พบข้อมูลเอกสารในระบบ';
+        statusEl.classList.add('error');
       }
-
-      document.getElementById('headerSubtitle').textContent =
-        `เลขที่เอกสาร: ${DOC_NO}`;
-
-      const callbackName = 'docCb_' + Date.now();
-      const script = document.createElement('script');
-      script.src = `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(
-        DOC_NO
-      )}&callback=${callbackName}`;
-
-      window[callbackName] = function(res) {
-        const statusEl = document.getElementById('status');
-        if (!res || !res.success) {
-          if (statusEl) {
-            statusEl.textContent = '❌ ไม่พบข้อมูลเอกสารในระบบ';
-            statusEl.classList.add('error');
-          }
-          cleanupJSONP(callbackName);
-          return;
-        }
-
-        const doc = res.data || {};
-        const steps = doc.steps || [];
-
-        // ข้อมูลจากชีตใบดำเนินการ
-        renderOperationData(doc.operationData || doc.row || {});
-
-        if (statusEl) {
-          statusEl.textContent = '✅ โหลดข้อมูลสำเร็จ';
-          statusEl.classList.add('success');
-          setTimeout(() => (statusEl.style.display = 'none'), 2500);
-        }
-
-        // ชื่อผู้อนุมัติ (step index 2 ตามที่เรากำหนดใน backend)
-        if (steps[2]) {
-          document.getElementById('approverName').textContent =
-            steps[2].name || '-';
-        }
-
-        // history step1, step2
-        if (steps[0]) {
-          document.getElementById('historyStep1').textContent =
-            `ผู้เสนอ: ${steps[0].name || '-'} (${formatDateTime(
-              steps[0].time
-            )})`;
-        }
-        if (steps[1]) {
-          document.getElementById('historyStep2').textContent =
-            `ผู้ทบทวน: ${steps[1].name || '-'} (${formatDateTime(
-              steps[1].time
-            )})`;
-        }
-
-        cleanupJSONP(callbackName);
-      };
-
-      script.onerror = function() {
-        const statusEl = document.getElementById('status');
-        if (statusEl) {
-          statusEl.textContent = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ';
-          statusEl.classList.add('error');
-        }
-        cleanupJSONP(callbackName);
-      };
-
-      document.head.appendChild(script);
+      cleanupJSONP(callbackName);
+      return;
     }
 
-    function cleanupJSONP(cbName) {
-      const scripts = document.getElementsByTagName('script');
-      for (let i = scripts.length - 1; i >= 0; i--) {
-        if (scripts[i].src && scripts[i].src.includes(cbName)) {
-          scripts[i].parentNode.removeChild(scripts[i]);
-        }
-      }
-      delete window[cbName];
+    const doc = res.data || {};
+    const steps = doc.steps || [];
+
+    // ✅ ดึงข้อมูลจาก operationData/row เหมือน reviewer
+    renderOperationData(doc.operationData || doc.row || {});
+
+    if (statusEl) {
+      statusEl.textContent = '✅ โหลดข้อมูลสำเร็จ';
+      statusEl.classList.add('success');
+      setTimeout(() => (statusEl.style.display = 'none'), 2500);
     }
+
+    // ตั้งชื่อผู้อนุมัติจาก steps[2] (เหมือนโค้ดเดิมของคุณ)
+    if (steps[2]) {
+      document.getElementById('approverName').textContent =
+        steps[2].name || '-';
+    }
+
+    // history step1, step2
+    if (steps[0]) {
+      document.getElementById('historyStep1').textContent =
+        `ผู้เสนอ: ${steps[0].name || '-'} (${formatDateTime(
+          steps[0].time
+        )})`;
+    }
+    if (steps[1]) {
+      document.getElementById('historyStep2').textContent =
+        `ผู้ทบทวน: ${steps[1].name || '-'} (${formatDateTime(
+          steps[1].time
+        )})`;
+    }
+
+    cleanupJSONP(callbackName);
+  };
+
+  script.onerror = function() {
+    if (statusEl) {
+      statusEl.textContent = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ';
+      statusEl.classList.add('error');
+    }
+    cleanupJSONP(callbackName);
+  };
+
+  document.head.appendChild(script);
+}
+
+function cleanupJSONP(cbName) {
+  const scripts = document.getElementsByTagName('script');
+  for (let i = scripts.length - 1; i >= 0; i--) {
+    if (scripts[i].src && scripts[i].src.includes(cbName)) {
+      scripts[i].parentNode.removeChild(scripts[i]);
+    }
+  }
+  delete window[cbName];
+}
 
     // ============ แสดงข้อมูลใบดำเนินการ ============
 
