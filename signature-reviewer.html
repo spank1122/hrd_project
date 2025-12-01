@@ -906,41 +906,48 @@
     }
 
     function saveSignature() {
-      const id =
-        getQueryParam('docNo') ||
-        getQueryParam('id') ||
-        getQueryParam('row') ||
-        '';
+  // ใช้ docNo จาก URL เหมือนเดิม
+  const docNo =
+    getQueryParam('docNo') ||
+    getQueryParam('id') ||
+    getQueryParam('row') ||
+    '';
 
-      if (!id) {
-        alert('ไม่พบรหัสเอกสาร (docNo/id) ในลิงก์');
-        return;
-      }
-      if (!hasStroke) {
-        alert('กรุณาเซ็นลายเซ็นก่อนบันทึก');
-        return;
-      }
+  if (!docNo) {
+    alert('ไม่พบรหัสเอกสาร (docNo/id) ในลิงก์');
+    return;
+  }
+  if (!hasStroke) {
+    alert('กรุณาเซ็นลายเซ็นก่อนบันทึก');
+    return;
+  }
 
-      const dataUrl = canvas.toDataURL('image/png');
+  // ถ้าในลิงก์มี ?reviewer=... จะเอาไว้เซฟชื่อผู้ทบทวนในชีตด้วย
+  const reviewerName = getQueryParam('reviewer') || '';
 
-      const params = new URLSearchParams();
-      params.append('action', 'saveReviewerSignature');
-      params.append('id', id);
-      params.append('signature', dataUrl);
+  const dataUrl = canvas.toDataURL('image/png');
 
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: params
-      })
-      .then(() => {
-        alert('บันทึกลายเซ็นเรียบร้อยแล้ว');
-      })
-      .catch(err => {
-        console.error(err);
-        alert('เกิดข้อผิดพลาดในการบันทึกลายเซ็น: ' + err.message);
-      });
-    }
+  const params = new URLSearchParams();
+  // ❗ เปลี่ยน action ให้ไปใช้ระบบใหม่
+  params.append('action', 'saveSignature');
+  params.append('docNo', docNo);
+  params.append('role', 'reviewer');        // บอกว่าเป็นผู้ทบทวน
+  params.append('signature', dataUrl);
+  params.append('actorName', reviewerName); // ชื่อผู้ทบทวน (optional)
+
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors',   // จะใช้หรือเอาออกก็ได้ เราไม่ได้อ่าน response
+    body: params
+  })
+  .then(() => {
+    alert('บันทึกลายเซ็นผู้ทบทวนเรียบร้อย ระบบจะส่งอีเมลให้ผู้อนุมัติ');
+  })
+  .catch(err => {
+    console.error(err);
+    alert('เกิดข้อผิดพลาดในการบันทึกลายเซ็น: ' + err.message);
+  });
+}
 
     // ================================
     // Init
