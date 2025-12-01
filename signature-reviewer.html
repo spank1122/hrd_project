@@ -908,41 +908,48 @@
     }
 
     function saveSignature() {
-      const id =
-        getQueryParam('docNo') ||
-        getQueryParam('id') ||
-        getQueryParam('row') ||
-        '';
+  const id =
+    getQueryParam('docNo') ||
+    getQueryParam('id') ||
+    getQueryParam('row') ||
+    '';
 
-      if (!id) {
-        alert('ไม่พบรหัสเอกสาร (docNo/id) ในลิงก์');
-        return;
-      }
-      if (!hasStroke) {
-        alert('กรุณาเซ็นลายเซ็นก่อนบันทึก');
-        return;
-      }
+  if (!id) {
+    alert('ไม่พบรหัสเอกสาร (docNo/id) ในลิงก์');
+    return;
+  }
+  if (!hasStroke) {
+    alert('กรุณาเซ็นลายเซ็นก่อนบันทึก');
+    return;
+  }
 
-      const dataUrl = canvas.toDataURL('image/png');
+  const dataUrl = canvas.toDataURL('image/png');
 
-      const params = new URLSearchParams();
-      params.append('action', 'saveReviewerSignature');
-      params.append('id', id);
-      params.append('signature', dataUrl);
+  // ดึงชื่อผู้ทบทวนจากพารามิเตอร์ในลิงก์ (ถ้ามี)
+  const reviewerNameParam = getQueryParam('reviewer') || 'ผู้ทบทวน';
 
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: params
-      })
-      .then(() => {
-        alert('บันทึกลายเซ็นเรียบร้อยแล้ว');
-      })
-      .catch(err => {
-        console.error(err);
-        alert('เกิดข้อผิดพลาดในการบันทึกลายเซ็น: ' + err.message);
-      });
-    }
+  const params = new URLSearchParams();
+  // 🔹 เรียก action ใหม่ให้ตรงกับ Apps Script
+  params.append('action', 'saveSignature');
+  params.append('docNo', id);
+  params.append('role', 'reviewer');
+  params.append('signature', dataUrl);
+  params.append('actorName', reviewerNameParam);
+
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: params
+  })
+    .then(() => {
+      alert('บันทึกลายเซ็นเรียบร้อยแล้ว');
+    })
+    .catch(err => {
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการบันทึกลายเซ็น: ' + err.message);
+    });
+}
+
 
     // ================================
     // Init
