@@ -766,7 +766,7 @@
         ? selectedOption.textContent.split('(')[0].trim()
         : '';
 
-      // 3) แปลง proceedType → actionType/actionLabel/actionDetail
+      // 3) แปลง proceedType → actionType + actionFrom/actionTo
       const actionInfo = buildActionInfo(raw);
 
       // 4) ใช้ email ที่ HR กรอกเองเป็นหลัก ถ้าเว้นว่างค่อยใช้จาก hidden
@@ -793,12 +793,14 @@
 
         // รายละเอียด
         effectiveDate:  raw.effectiveDate  || '',
-        details:        raw.details        || '',
+        details:        raw.details        || '',   // เก็บไว้เหมือนเดิม
 
         // การดำเนินการ
-        actionType:     actionInfo.actionType,
-        actionLabel:    actionInfo.actionLabel,
-        actionDetail:   actionInfo.actionDetail,
+        actionType:   actionInfo.actionType,
+        actionLabel:  actionInfo.actionLabel,  // ใช้เป็นชื่อบรรทัดในฟอร์ม
+        actionFrom:   actionInfo.actionFrom,  // ฝั่ง "จากเดิม"
+        actionTo:     actionInfo.actionTo,    // ฝั่ง "เป็น"
+        actionDetail: raw.details || '',      // รายละเอียดข้อความยาวด้านล่าง (ACTION_DETAIL)
 
         // ลายเซ็น (Base64 dataURL)
         proposerSignature: raw.proposerSignature || ''
@@ -828,89 +830,80 @@
       }
     }
 
-    // แปลง radio + ช่อง from/to ให้เป็นข้อความเดียวตามรูปแบบในเอกสาร
+    // แปลง radio + ช่อง from/to ให้เป็น actionFrom / actionTo ตามแบบฟอร์ม
     function buildActionInfo(raw) {
       const type = raw.proceedType || '';
       let actionLabel = '';
-      let actionDetail = '';
+      let actionFrom  = '';
+      let actionTo    = '';
 
       switch (type) {
         case 'appoint':
           actionLabel = 'แต่งตั้ง';
-          if (raw.appoint_to) {
-            actionDetail = 'เป็น ' + raw.appoint_to;
-          }
+          actionFrom  = '';
+          actionTo    = raw.appoint_to || '';
           break;
 
         case 'transfer':
           actionLabel = 'โอนย้าย';
-          actionDetail =
-            'จากเดิม ' +
-            (raw.transfer_from || '-') +
-            ' เป็น ' +
-            (raw.transfer_to || '-');
+          actionFrom  = raw.transfer_from || '';
+          actionTo    = raw.transfer_to   || '';
           break;
 
         case 'change_condition':
           actionLabel = 'เปลี่ยนสภาพการจ้างงาน';
-          actionDetail =
-            'จากเดิม ' +
-            (raw.change_from || '-') +
-            ' เป็น ' +
-            (raw.change_to || '-');
+          actionFrom  = raw.change_from || '';
+          actionTo    = raw.change_to   || '';
           break;
 
         case 'promote':
           actionLabel = 'เลื่อนตำแหน่ง';
-          actionDetail =
-            'จากเดิม ' +
-            (raw.promote_from || '-') +
-            ' เป็น ' +
-            (raw.promote_to || '-');
+          actionFrom  = raw.promote_from || '';
+          actionTo    = raw.promote_to   || '';
           break;
 
         case 'pass_probation':
           actionLabel = 'ผ่านทดลองงาน';
-          actionDetail = raw.pass_detail || '';
+          // ช่องเดียว → ใส่ที่ ACTION_FROM
+          actionFrom  = raw.pass_detail || '';
+          actionTo    = '';
           break;
 
         case 'resign':
           actionLabel = 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก';
-          actionDetail = raw.resign_detail || '';
+          actionFrom  = raw.resign_detail || '';
+          actionTo    = '';
           break;
 
         case 'increase':
           actionLabel = 'ขึ้นค่าจ้าง / เงินเดือน';
-          actionDetail =
-            'จากเดิม ' +
-            (raw.increase_from || '-') +
-            ' เป็น ' +
-            (raw.increase_to || '-');
+          actionFrom  = raw.increase_from || '';
+          actionTo    = raw.increase_to   || '';
           break;
 
         case 'cut':
           actionLabel = 'ตัดค่าจ้าง / เงินเดือน';
-          actionDetail =
-            'จากเดิม ' +
-            (raw.cut_from || '-') +
-            ' เป็น ' +
-            (raw.cut_to || '-');
+          actionFrom  = raw.cut_from || '';
+          actionTo    = raw.cut_to   || '';
           break;
 
         case 'other':
           actionLabel = 'อื่น ๆ';
-          actionDetail = raw.other_detail || '';
+          actionFrom  = raw.other_detail || '';
+          actionTo    = '';
           break;
 
         default:
           actionLabel = '';
-          actionDetail = '';
+          actionFrom  = '';
+          actionTo    = '';
       }
 
       return {
-        actionType: type,
+        actionType:  type,
         actionLabel: actionLabel,
-        actionDetail: actionDetail
+        actionFrom:  actionFrom,
+        actionTo:    actionTo
       };
     }
 
@@ -1108,6 +1101,5 @@
       document.getElementById('signatureDataInput').value = dataUrl;
     }
   </script>
-
 </body>
 </html>
