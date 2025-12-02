@@ -337,7 +337,7 @@
             <select id="employeeName" name="empName" required>
               <option value="">กำลังโหลดรายชื่อพนักงาน...</option>
             </select>
-            <small>ดึงจากชีต “ผู้ผ่านการสัมภาษณ์” ใน HRD demo</small>
+            <small>ดึงจากชีต "ผู้ผ่านการสัมภาษณ์" ใน HRD demo</small>
           </div>
 
           <div class="field">
@@ -395,7 +395,7 @@
       <div class="card">
         <div class="card-title">การดำเนินการ</div>
         <small style="font-size: 12px; color: #6b7280;">
-          เลือกประเภทการดำเนินการให้ตรงกับในฟอร์ม แล้วกรอกรายละเอียด “จากเดิม / เป็น”
+          เลือกประเภทการดำเนินการให้ตรงกับในฟอร์ม แล้วกรอกรายละเอียด "จากเดิม / เป็น"
           ตามแบบฟอร์มกระดาษ
         </small>
 
@@ -696,8 +696,8 @@
         </div>
 
         <div class="field effective-row">
-          <label>มีผลบังคับตั้งแต่วันที่</label>
-          <input type="date" name="effectiveDate" />
+          <label>มีผลบังคับตั้งแต่วันที่ <span class="required">*</span></label>
+          <input type="date" name="effectiveDate" required />
         </div>
 
         <div class="signature-section">
@@ -766,7 +766,7 @@
         ? selectedOption.textContent.split('(')[0].trim()
         : '';
 
-      // 3) แปลง proceedType → actionType + actionFrom/actionTo
+      // 3) แปลง proceedType → actionType/actionLabel/actionDetail
       const actionInfo = buildActionInfo(raw);
 
       // 4) ใช้ email ที่ HR กรอกเองเป็นหลัก ถ้าเว้นว่างค่อยใช้จาก hidden
@@ -793,14 +793,12 @@
 
         // รายละเอียด
         effectiveDate:  raw.effectiveDate  || '',
-        details:        raw.details        || '',   // เก็บไว้เหมือนเดิม
+        details:        raw.details        || '',
 
         // การดำเนินการ
-        actionType:   actionInfo.actionType,
-        actionLabel:  actionInfo.actionLabel,  // ใช้เป็นชื่อบรรทัดในฟอร์ม
-        actionFrom:   actionInfo.actionFrom,  // ฝั่ง "จากเดิม"
-        actionTo:     actionInfo.actionTo,    // ฝั่ง "เป็น"
-        actionDetail: raw.details || '',      // รายละเอียดข้อความยาวด้านล่าง (ACTION_DETAIL)
+        actionType:     actionInfo.actionType,
+        actionLabel:    actionInfo.actionLabel,
+        actionDetail:   actionInfo.actionDetail,
 
         // ลายเซ็น (Base64 dataURL)
         proposerSignature: raw.proposerSignature || ''
@@ -830,80 +828,89 @@
       }
     }
 
-    // แปลง radio + ช่อง from/to ให้เป็น actionFrom / actionTo ตามแบบฟอร์ม
+    // แปลง radio + ช่อง from/to ให้เป็นข้อความเดียวตามรูปแบบในเอกสาร
     function buildActionInfo(raw) {
       const type = raw.proceedType || '';
       let actionLabel = '';
-      let actionFrom  = '';
-      let actionTo    = '';
+      let actionDetail = '';
 
       switch (type) {
         case 'appoint':
           actionLabel = 'แต่งตั้ง';
-          actionFrom  = '';
-          actionTo    = raw.appoint_to || '';
+          if (raw.appoint_to) {
+            actionDetail = 'เป็น ' + raw.appoint_to;
+          }
           break;
 
         case 'transfer':
           actionLabel = 'โอนย้าย';
-          actionFrom  = raw.transfer_from || '';
-          actionTo    = raw.transfer_to   || '';
+          actionDetail =
+            'จากเดิม ' +
+            (raw.transfer_from || '-') +
+            ' เป็น ' +
+            (raw.transfer_to || '-');
           break;
 
         case 'change_condition':
           actionLabel = 'เปลี่ยนสภาพการจ้างงาน';
-          actionFrom  = raw.change_from || '';
-          actionTo    = raw.change_to   || '';
+          actionDetail =
+            'จากเดิม ' +
+            (raw.change_from || '-') +
+            ' เป็น ' +
+            (raw.change_to || '-');
           break;
 
         case 'promote':
           actionLabel = 'เลื่อนตำแหน่ง';
-          actionFrom  = raw.promote_from || '';
-          actionTo    = raw.promote_to   || '';
+          actionDetail =
+            'จากเดิม ' +
+            (raw.promote_from || '-') +
+            ' เป็น ' +
+            (raw.promote_to || '-');
           break;
 
         case 'pass_probation':
           actionLabel = 'ผ่านทดลองงาน';
-          // ช่องเดียว → ใส่ที่ ACTION_FROM
-          actionFrom  = raw.pass_detail || '';
-          actionTo    = '';
+          actionDetail = raw.pass_detail || '';
           break;
 
         case 'resign':
           actionLabel = 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก';
-          actionFrom  = raw.resign_detail || '';
-          actionTo    = '';
+          actionDetail = raw.resign_detail || '';
           break;
 
         case 'increase':
           actionLabel = 'ขึ้นค่าจ้าง / เงินเดือน';
-          actionFrom  = raw.increase_from || '';
-          actionTo    = raw.increase_to   || '';
+          actionDetail =
+            'จากเดิม ' +
+            (raw.increase_from || '-') +
+            ' เป็น ' +
+            (raw.increase_to || '-');
           break;
 
         case 'cut':
           actionLabel = 'ตัดค่าจ้าง / เงินเดือน';
-          actionFrom  = raw.cut_from || '';
-          actionTo    = raw.cut_to   || '';
+          actionDetail =
+            'จากเดิม ' +
+            (raw.cut_from || '-') +
+            ' เป็น ' +
+            (raw.cut_to || '-');
           break;
 
         case 'other':
           actionLabel = 'อื่น ๆ';
-          actionFrom  = raw.other_detail || '';
-          actionTo    = '';
+          actionDetail = raw.other_detail || '';
           break;
 
         default:
           actionLabel = '';
-          actionFrom  = '';
-          actionTo    = '';
+          actionDetail = '';
       }
 
       return {
-        actionType:  type,
+        actionType: type,
         actionLabel: actionLabel,
-        actionFrom:  actionFrom,
-        actionTo:    actionTo
+        actionDetail: actionDetail
       };
     }
 
