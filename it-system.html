@@ -324,14 +324,10 @@
       <!-- ===================== MENU 1 (ของเดิม) ===================== -->
       <div id="menu1" class="menu-content active">
         <h2 class="section-title">📝 ผู้ผ่านการสัมภาษณ์ (จาก HRD)</h2>
-        
-        <div class="alert alert-info">
-          <span>ℹ️</span>
-          <div>ระบบจะดึงรายชื่อจากชีต HRD Demo อัตโนมัติ หากไม่พบข้อมูลให้กดรีเฟรชหน้าเว็บ</div>
-        </div>
 
         <div class="search-box">
           <input type="text" id="searchCandidate" placeholder="🔍 ค้นหาชื่อ, แผนก หรือตำแหน่ง..." onkeyup="filterCandidates()">
+          <button onclick="refreshCandidates()">🔄 รีเฟรช</button>
         </div>
 
         <div id="loader" class="loader"></div>
@@ -344,16 +340,9 @@
       <div id="menu2" class="menu-content">
         <h2 class="section-title">🔍 ติดตามสถานะคำขอ</h2>
 
-        <div class="alert alert-info">
-          <span>ℹ️</span>
-          <div>
-            หน้านี้แสดงคำขอเพิ่ม IT จากระบบทั้งหมด (เรียงจากรายการล่าสุดขึ้นก่อน)<br>
-            สามารถค้นหาเลขคำขอ / ชื่อผู้ขอ / ส่วนงาน / สถานะ ได้จากช่องค้นหาด้านล่าง
-          </div>
-        </div>
-
         <div class="search-box">
           <input type="text" id="statusSearch" placeholder="🔍 ค้นหาเลขคำขอ, ชื่อผู้ขอ, ส่วนงาน หรือสถานะ..." onkeyup="filterStatusList()">
+          <button onclick="refreshStatus()">🔄 รีเฟรช</button>
         </div>
 
         <div id="statusLoader" class="loader"></div>
@@ -374,17 +363,10 @@
       <!-- ===================== MENU 3: ผลการอนุมัติ ===================== -->
       <div id="menu3" class="menu-content">
         <h2 class="section-title">✅ ผลการอนุมัติ</h2>
-
-        <div class="alert alert-info">
-          <span>ℹ️</span>
-          <div>
-            แสดงเฉพาะคำขอที่อนุมัติครบแล้ว พร้อมลิงก์เปิดไฟล์ PDF ฉบับสมบูรณ์<br>
-            คลิกที่รายการเพื่อเปิดเอกสารในแท็บใหม่
-          </div>
-        </div>
-
+        
         <div class="search-box">
           <input type="text" id="approvalSearch" placeholder="🔍 ค้นหาเลขคำขอ, ชื่อผู้ขอ หรือส่วนงาน..." onkeyup="filterApprovalList()">
+          <button onclick="refreshApproval()">🔄 รีเฟรช</button>
         </div>
 
         <div id="approvalLoader" class="loader"></div>
@@ -1022,6 +1004,26 @@
       loadStatus('status');
       loadStatus('approval');
     };
+
+    // ========================================
+    // REFRESH FUNCTIONS
+    // ========================================
+    function refreshCandidates() {
+      document.getElementById('searchCandidate').value = '';
+      loadCandidatesFromSheet();
+    }
+
+    function refreshStatus() {
+      document.getElementById('statusSearch').value = '';
+      statusPage = 1;
+      loadStatus('status');
+    }
+
+    function refreshApproval() {
+      document.getElementById('approvalSearch').value = '';
+      approvalPage = 1;
+      loadStatus('approval');
+    }
   </script>
 </body>
 </html>
