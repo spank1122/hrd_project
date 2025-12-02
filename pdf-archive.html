@@ -699,6 +699,13 @@
 
         console.log('All documents count:', response.documents ? response.documents.length : 0);
         
+        // Log completed docs เพื่อดูว่ามี field อะไร
+        const completedSample = (response.documents || []).filter(doc => doc.status === 'completed')[0];
+        if (completedSample) {
+          console.log('Sample completed doc:', completedSample);
+          console.log('All fields in doc:', Object.keys(completedSample));
+        }
+        
         // ดึงเฉพาะเอกสารที่ completed (สำเร็จแล้ว) และมี Final PDF URL
         const completedDocs = (response.documents || []).filter(doc => {
           const status = (doc.status || '').toLowerCase();
