@@ -596,22 +596,7 @@
       <div class="filter-grid">
         <div class="filter-input">
           <label>ค้นหา</label>
-          <input type="text" placeholder="ค้นหาเอกสาร..." id="searchInput">
-        </div>
-        <div class="filter-input">
-          <label>ประเภท</label>
-          <select id="typeFilter">
-            <option value="">ทั้งหมด</option>
-            <option value="appoint">แต่งตั้ง</option>
-            <option value="transfer">โอนย้าย</option>
-            <option value="employmentchange">เปลี่ยนสภาพการจ้างงาน</option>
-            <option value="promotion">เลื่อนตำแหน่ง</option>
-            <option value="passprobation">ผ่านการทดลองงาน</option>
-            <option value="termination">ให้ออกจากงานโดยไม่สมัครใจ/ลาออก</option>
-            <option value="salaryup">ขึ้นค่าจ้าง / เงินเดือน</option>
-            <option value="salarydown">ตัดค่าจ้าง / เงินเดือน</option>
-            <option value="other">อื่นๆ</option>
-          </select>
+          <input type="text" placeholder="ค้นหาเลขที่, ชื่อ หรือส่วนงาน..." id="searchInput">
         </div>
         <div class="filter-input">
           <label>เรียงลำดับ</label>
@@ -633,19 +618,6 @@
     <div id="paginationBar"></div>
   </div>
 
-  <!-- Modal สำหรับดูไฟล์ PDF -->
-  <div class="modal" id="pdfModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title" id="modalTitle">ดูไฟล์ PDF</h2>
-        <button class="btn-close" onclick="closePDFModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <iframe id="pdfFrame" class="pdf-iframe"></iframe>
-      </div>
-    </div>
-  </div>
-
   <!-- Toast Notification -->
   <div class="toast" id="toast" style="display: none;"></div>
 
@@ -654,12 +626,11 @@
     // CONFIG
     // ========================================
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
-    const PAGE_SIZE = 12; // จำนวนรายการต่อหน้า
+    const PAGE_SIZE = 12;
 
     let allDocuments = [];
     let filteredDocuments = [];
     let currentPage = 1;
-    let isLoading = false;
 
     // ========================================
     // INIT
@@ -670,7 +641,7 @@
     });
 
     // ========================================
-    // LOAD PDF LIST FROM GAS API
+    // LOAD FINAL PDF DOCUMENTS ONLY
     // ========================================
     function loadPDFList() {
       const grid = document.getElementById('pdfGrid');
@@ -683,25 +654,11 @@
       `;
       document.getElementById('paginationBar').innerHTML = '';
 
-      isLoading = true;
-      const refreshBtn = document.getElementById('refreshBtn');
-      if (refreshBtn) {
-        refreshBtn.classList.add('loading');
-        refreshBtn.disabled = true;
-      }
-
       const callback = 'pdfCallback_' + Date.now();
       const script = document.createElement('script');
-      script.src = `${WEB_APP_URL}?action=getTrackingDocs&callback=${callback}`;
+      script.src = `${WEB_APP_URL}?action=getStatus&view=approval&callback=${callback}`;
 
       window[callback] = function(response) {
-        isLoading = false;
-        const refreshBtn = document.getElementById('refreshBtn');
-        if (refreshBtn) {
-          refreshBtn.classList.remove('loading');
-          refreshBtn.disabled = false;
-        }
-
         if (!response || !response.success) {
           showToast('⚠️ ไม่สามารถโหลดเอกสารได้', 'error');
           grid.innerHTML = `
@@ -714,40 +671,48 @@
           return;
         }
 
-        // แปลงข้อมูลจาก tracking API
-        const trackingDocs = response.documents || [];
-        allDocuments = trackingDocs.map(doc => ({
-          id: doc.id,
-          title: `${doc.employee} - ${getFullTypeLabel(doc.type)}`,
-          type: doc.type,
-          date: doc.createdDate,
-          employee: doc.employee,
-          status: doc.status,
-          steps: doc.steps || []
+        // ดึงเฉพาะเอกสาร Approved พร้อม PDF URL
+        const approvedDocs = (response.data || []).filter(doc => {
+          const status = (doc.status || doc.finalStatus || '').toLowerCase();
+          return status === 'approved';
+        });
+
+        // แปลงข้อมูล
+        allDocuments = approvedDocs.map(doc => ({
+          id: doc.id || doc.requestNo || doc.docNo || '',
+          requester: doc.requester || doc.requesterName || '-',
+          dept: doc.dept || doc.requesterDept || '-',
+          pdfUrl: doc.pdfUrl || doc.finalPdfUrl || '',
+          date: doc.lastUpdated || doc.requestTime || '',
+          status: 'approved'
         }));
 
-        // เรียงจากใหม่ไปเก่า (default)
-        sortDocuments('newest');
-        
-        // Reset pagination
+        // เรียงจากใหม่ไปเก่า
+        allDocuments.sort((a, b) => {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          return db - da;
+        });
+
         currentPage = 1;
         applyFilters();
 
         if (allDocuments.length > 0) {
-          showToast(`✅ โหลดเอกสารสำเร็จ (${allDocuments.length} รายการ)`, 'success');
+          showToast(`✅ โหลดเอกสาร Final PDF สำเร็จ (${allDocuments.length} รายการ)`, 'success');
+        } else {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📄</div>
+              <div class="empty-title">ยังไม่มี Final PDF</div>
+              <div class="empty-text">เอกสาร Final PDF จะปรากฏขึ้นตรงนี้เมื่อได้รับการอนุมัติแล้ว</div>
+            </div>
+          `;
         }
 
         try { delete window[callback]; } catch (e) {}
       };
 
       script.onerror = function() {
-        isLoading = false;
-        const refreshBtn = document.getElementById('refreshBtn');
-        if (refreshBtn) {
-          refreshBtn.classList.remove('loading');
-          refreshBtn.disabled = false;
-        }
-
         showToast('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
         grid.innerHTML = `
           <div class="empty-state">
@@ -763,36 +728,11 @@
     }
 
     // ========================================
-    // SORT DOCUMENTS
-    // ========================================
-    function sortDocuments(sortBy) {
-      if (sortBy === 'newest') {
-        allDocuments.sort((a, b) => {
-          const da = new Date(a.date).getTime();
-          const db = new Date(b.date).getTime();
-          return db - da;
-        });
-      } else if (sortBy === 'oldest') {
-        allDocuments.sort((a, b) => {
-          const da = new Date(a.date).getTime();
-          const db = new Date(b.date).getTime();
-          return da - db;
-        });
-      } else if (sortBy === 'name') {
-        allDocuments.sort((a, b) => a.title.localeCompare(b.title, 'th'));
-      }
-    }
-
-    // ========================================
     // SETUP FILTERS
     // ========================================
     function setupFilters() {
       document.getElementById('searchInput').addEventListener('input', applyFilters);
-      document.getElementById('typeFilter').addEventListener('change', applyFilters);
-      document.getElementById('sortFilter').addEventListener('change', (e) => {
-        sortDocuments(e.target.value);
-        applyFilters();
-      });
+      document.getElementById('sortFilter').addEventListener('change', applyFilters);
     }
 
     // ========================================
@@ -800,23 +740,40 @@
     // ========================================
     function applyFilters() {
       const search = document.getElementById('searchInput').value.toLowerCase();
-      const type = document.getElementById('typeFilter').value;
+      const sort = document.getElementById('sortFilter').value;
 
       filteredDocuments = allDocuments.filter(doc => {
         return (
-          (doc.title.toLowerCase().includes(search) || 
-           doc.id.toLowerCase().includes(search) ||
-           doc.employee.toLowerCase().includes(search)) &&
-          (!type || doc.type === type)
+          doc.id.toLowerCase().includes(search) || 
+          doc.requester.toLowerCase().includes(search) ||
+          doc.dept.toLowerCase().includes(search)
         );
       });
+
+      // Sort
+      if (sort === 'oldest') {
+        filteredDocuments.sort((a, b) => {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          return da - db;
+        });
+      } else if (sort === 'name') {
+        filteredDocuments.sort((a, b) => a.requester.localeCompare(b.requester, 'th'));
+      } else {
+        // newest (default)
+        filteredDocuments.sort((a, b) => {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          return db - da;
+        });
+      }
 
       currentPage = 1;
       displayPDFs();
     }
 
     // ========================================
-    // DISPLAY PDFs WITH PAGINATION
+    // DISPLAY PDFs
     // ========================================
     function displayPDFs() {
       const grid = document.getElementById('pdfGrid');
@@ -842,19 +799,18 @@
         <div class="pdf-card">
           <div class="pdf-preview">📄</div>
           <div class="pdf-content">
-            <div class="pdf-title">${doc.title}</div>
-            <div class="pdf-info">${getTypeLabel(doc.type)}</div>
+            <div class="pdf-title">${doc.requester}</div>
             <div class="pdf-info">📌 ${doc.id}</div>
+            <div class="pdf-info">🏢 ${doc.dept}</div>
             <div class="pdf-date">${formatDate(doc.date)}</div>
             <div class="pdf-actions">
-              <button class="btn btn-view" onclick="viewPDF('${doc.id}', '${doc.title.replace(/'/g, "\\'")}')">👁️ ดู</button>
-              <button class="btn btn-download" onclick="downloadPDF('${doc.id}', '${doc.title.replace(/'/g, "\\'")}')">⬇️ ดาวน์โหลด</button>
+              <button class="btn btn-view" onclick="openPDF('${doc.pdfUrl}', '${doc.requester.replace(/'/g, "\\'")}')" ${!doc.pdfUrl ? 'disabled' : ''}>👁️ ดู</button>
             </div>
           </div>
         </div>
       `).join('');
 
-      // Pagination bar
+      // Pagination
       if (filteredDocuments.length > PAGE_SIZE) {
         renderPagination(totalPages);
       } else {
@@ -882,7 +838,6 @@
             </button>
       `;
 
-      // แสดงเลขหน้า (ปัจจุบัน ± 2 หน้า)
       const pageRange = 2;
       const startPage = Math.max(1, currentPage - pageRange);
       const endPage = Math.min(totalPages, currentPage + pageRange);
@@ -936,89 +891,29 @@
     }
 
     // ========================================
+    // OPEN PDF (เปิดลิ้ง)
+    // ========================================
+    function openPDF(pdfUrl, title) {
+      if (!pdfUrl) {
+        showToast('❌ ไม่มี PDF URL สำหรับเอกสารนี้', 'error');
+        return;
+      }
+      window.open(pdfUrl, '_blank');
+      showToast(`👁️ กำลังเปิดเอกสาร ${title}...`, 'success');
+    }
+
+    // ========================================
     // REFRESH ARCHIVE
     // ========================================
     function refreshArchive() {
       document.getElementById('searchInput').value = '';
-      document.getElementById('typeFilter').value = '';
       document.getElementById('sortFilter').value = 'newest';
       loadPDFList();
     }
 
     // ========================================
-    // VIEW PDF (เปิดใน Modal)
-    // ========================================
-    function viewPDF(docNo, title) {
-      const modal = document.getElementById('pdfModal');
-      const iframe = document.getElementById('pdfFrame');
-      const modalTitle = document.getElementById('modalTitle');
-
-      modalTitle.textContent = `📄 ${title}`;
-      const pdfUrl = `https://drive.google.com/file/d/${docNo}/preview`;
-      
-      iframe.src = pdfUrl;
-      modal.classList.add('show');
-
-      showToast(`👁️ กำลังเปิดไฟล์ ${docNo}...`, 'success');
-    }
-
-    // ========================================
-    // DOWNLOAD PDF
-    // ========================================
-    function downloadPDF(docNo, title) {
-      const downloadUrl = `https://drive.google.com/uc?id=${docNo}&export=download`;
-      
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `${title}.pdf`;
-      link.click();
-
-      showToast(`⬇️ กำลังดาวน์โหลด ${title}...`, 'success');
-    }
-
-    // ========================================
-    // CLOSE MODAL
-    // ========================================
-    function closePDFModal() {
-      const modal = document.getElementById('pdfModal');
-      const iframe = document.getElementById('pdfFrame');
-      modal.classList.remove('show');
-      iframe.src = '';
-    }
-
-    // ========================================
     // HELPERS
     // ========================================
-    function getTypeLabel(type) {
-      const labels = {
-        appoint: '🎯 แต่งตั้ง',
-        transfer: '🔄 โอนย้าย',
-        employmentchange: '📋 เปลี่ยนสภาพการจ้างงาน',
-        promotion: '📈 เลื่อนตำแหน่ง',
-        passprobation: '✅ ผ่านการทดลองงาน',
-        termination: '🚪 ให้ออกจากงานโดยไม่สมัครใจ/ลาออก',
-        salaryup: '💰 ขึ้นค่าจ้าง',
-        salarydown: '💸 ตัดค่าจ้าง',
-        other: '📌 อื่นๆ'
-      };
-      return labels[type] || type || '-';
-    }
-
-    function getFullTypeLabel(type) {
-      const labels = {
-        appoint: 'แต่งตั้ง',
-        transfer: 'โอนย้าย',
-        employmentchange: 'เปลี่ยนสภาพการจ้างงาน',
-        promotion: 'เลื่อนตำแหน่ง',
-        passprobation: 'ผ่านการทดลองงาน',
-        termination: 'ให้ออกจากงาน',
-        salaryup: 'ขึ้นค่าจ้าง',
-        salarydown: 'ตัดค่าจ้าง',
-        other: 'อื่นๆ'
-      };
-      return labels[type] || type || '-';
-    }
-
     function formatDate(dateStr) {
       if (!dateStr) return '-';
       try {
@@ -1047,13 +942,6 @@
         toast.style.display = 'none';
       }, 3000);
     }
-
-    // ปิด modal เมื่อกดนอกพื้นที่
-    document.getElementById('pdfModal')?.addEventListener('click', function(e) {
-      if (e.target === this) {
-        closePDFModal();
-      }
-    });
   </script>
 </body>
 </html>
