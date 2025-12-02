@@ -678,12 +678,12 @@
 
       const callback = 'pdfCallback_' + Date.now();
       const script = document.createElement('script');
-      // ใช้ getStatus&view=approval แบบเดียวกับ IT Request form
-      script.src = `${WEB_APP_URL}?action=getStatus&view=approval&callback=${callback}`;
+      // ดึงใบดำเนินการที่สำเร็จแล้ว (HR Document Tracking)
+      script.src = `${WEB_APP_URL}?action=getTrackingDocs&callback=${callback}`;
 
       window[callback] = function(response) {
         console.log('API Response received:', response);
-        console.log('Documents:', response.data);
+        console.log('Documents:', response.documents);
         
         if (!response || !response.success) {
           showToast('⚠️ ไม่สามารถโหลดเอกสารได้', 'error');
@@ -697,39 +697,46 @@
           return;
         }
 
-        console.log('All documents count:', response.data ? response.data.length : 0);
+        console.log('All documents count:', response.documents ? response.documents.length : 0);
         
-        // ดึงเฉพาะเอกสารที่ approved (อนุมัติสำเร็จแล้ว) และมี PDF URL
-        const approvedDocs = (response.data || []).filter(doc => {
-          const status = (doc.status || doc.finalStatus || '').toLowerCase();
-          const hasPdfUrl = doc.pdfUrl || doc.finalPdfUrl || '';
+        // ดึงเฉพาะเอกสารที่ completed (สำเร็จแล้ว) และมี PDF URL
+        const completedDocs = (response.documents || []).filter(doc => {
+          const status = (doc.status || '').toLowerCase();
+          const hasPdfUrl = doc.finalPdfUrl || 
+                           doc.pdfUrl ||
+                           (doc.signatureApprover && doc.signatureApprover.finalPdfUrl);
           
-          console.log(`Doc ${doc.requestId || doc.id}: status=${status}, hasPdfUrl=${!!hasPdfUrl}`);
+          console.log(`Doc ${doc.id}: status=${status}, hasPdfUrl=${!!hasPdfUrl}`);
           
-          return status === 'approved' && hasPdfUrl;
+          return status === 'completed' && hasPdfUrl;
         });
 
-        console.log('Approved docs with PDF:', approvedDocs.length);
+        console.log('Completed docs with PDF:', completedDocs.length);
 
         // แปลงข้อมูล
-        allDocuments = approvedDocs.map(doc => {
+        allDocuments = completedDocs.map(doc => {
           const typeLabel = getTypeLabel(doc.type);
           
-          // ดึง PDF URL
-          let pdfUrl = doc.pdfUrl || doc.finalPdfUrl || '';
+          // ดึง PDF URL จากหลายที่
+          let pdfUrl = doc.finalPdfUrl || doc.pdfUrl || '';
           
           // ถ้า PDF URL มี __ ที่หน้า-หลัง ให้ตัดออก
           if (pdfUrl && pdfUrl.includes('__')) {
             pdfUrl = pdfUrl.replace(/^__/, '').replace(/__$/, '').trim();
           }
           
+          // ถ้ายังไม่มี PDF URL ลองหาจาก signatureApprover
+          if (!pdfUrl && doc.signatureApprover && doc.signatureApprover.finalPdfUrl) {
+            pdfUrl = doc.signatureApprover.finalPdfUrl;
+          }
+          
           return {
-            id: doc.requestId || doc.requestNo || doc.id || '',
-            requester: doc.requester || doc.requesterName || '-',
+            id: doc.id || doc.docNo || '',
+            requester: doc.employee || doc.requesterName || '-',
             type: typeLabel,
             pdfUrl: pdfUrl,
-            date: doc.lastUpdated || doc.requestTime || new Date().toISOString(),
-            status: 'approved'
+            date: doc.createdDate || doc.lastUpdated || new Date().toISOString(),
+            status: 'completed'
           };
         });
 
@@ -746,13 +753,13 @@
         applyFilters();
 
         if (allDocuments.length > 0) {
-          showToast(`✅ โหลดเอกสาร Final PDF สำเร็จ (${allDocuments.length} รายการ)`, 'success');
+          showToast(`✅ โหลดเอกสาร ใบดำเนินการ สำเร็จ (${allDocuments.length} รายการ)`, 'success');
         } else {
           grid.innerHTML = `
             <div class="empty-state">
               <div class="empty-icon">📄</div>
-              <div class="empty-title">ยังไม่มี Final PDF</div>
-              <div class="empty-text">เอกสาร Final PDF จะปรากฏขึ้นตรงนี้เมื่อได้รับการอนุมัติแล้ว</div>
+              <div class="empty-title">ยังไม่มีเอกสาร</div>
+              <div class="empty-text">เอกสาร ใบดำเนินการ จะปรากฏขึ้นตรงนี้เมื่อได้รับการอนุมัติแล้ว</div>
             </div>
           `;
         }
