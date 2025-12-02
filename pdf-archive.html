@@ -678,8 +678,8 @@
 
       const callback = 'pdfCallback_' + Date.now();
       const script = document.createElement('script');
-      // ดึงใบดำเนินการที่สำเร็จแล้ว (HR Document Tracking)
-      script.src = `${WEB_APP_URL}?action=getTrackingDocs&callback=${callback}`;
+      // ดึงจาก Google Sheet โดยตรง (รวม Final PDF URL)
+      script.src = `${WEB_APP_URL}?action=getTrackingDocsWithPDF&callback=${callback}`;
 
       window[callback] = function(response) {
         console.log('API Response received:', response);
@@ -699,20 +699,12 @@
 
         console.log('All documents count:', response.documents ? response.documents.length : 0);
         
-        // Log completed docs เพื่อดูว่ามี field อะไร
-        const completedSample = (response.documents || []).filter(doc => doc.status === 'completed')[0];
-        if (completedSample) {
-          console.log('Sample completed doc:', completedSample);
-          console.log('All fields in doc:', Object.keys(completedSample));
-        }
-        
         // ดึงเฉพาะเอกสารที่ completed (สำเร็จแล้ว) และมี Final PDF URL
         const completedDocs = (response.documents || []).filter(doc => {
           const status = (doc.status || '').toLowerCase();
-          // Final PDF URL อยู่ใน finalPdfUrl field
-          const hasPdfUrl = doc.finalPdfUrl || doc.pdfUrl || '';
+          const hasPdfUrl = doc.finalPdfUrl || '';
           
-          console.log(`Doc ${doc.id}: status=${status}, finalPdfUrl=${doc.finalPdfUrl ? 'YES' : 'NO'}`);
+          console.log(`Doc ${doc.id}: status=${status}, finalPdfUrl=${hasPdfUrl ? 'YES' : 'NO'}`);
           
           return status === 'completed' && hasPdfUrl;
         });
