@@ -20,6 +20,29 @@
     
     /* Header */
     .header { text-align: center; color: white; margin-bottom: 30px; animation: fadeInDown 0.6s ease-out; }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .btn-back {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateX(-2px);
+    }
     .header h1 { font-size: 32px; font-weight: 600; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
     .header p { font-size: 16px; opacity: 0.95; }
     @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
@@ -269,12 +292,24 @@
         grid-template-columns: 1.3fr 1.3fr 1fr;
         font-size: 13px;
       }
+      .btn-back {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+      }
+      .header-top {
+        margin-bottom: 0;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goBack()">← ย้อนกลับ</button>
+        <div></div>
+      </div>
       <h1>💻 ระบบฟอร์มขอเพิ่มเทคโนโลยีสารสนเทศ</h1>
       <p>The Carpetmaker Co., Ltd.</p>
     </div>
@@ -396,8 +431,16 @@
     // ========================================
     const CONFIG = {
       WEB_APP_URL: "https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec",
-      FORM_URL: "https://spank1122.github.io/hrd_project/form.html"
+      FORM_URL: "https://spank1122.github.io/hrd_project/form.html",
+      INDEX_URL: "index.html"
     };
+
+    // ========================================
+    // BACK BUTTON
+    // ========================================
+    function goBack() {
+      window.location.href = CONFIG.INDEX_URL;
+    }
 
     // ========= Helper สำหรับฟิลด์ + รูปแบบวันที่ =========
     function getRequestId(item) {
