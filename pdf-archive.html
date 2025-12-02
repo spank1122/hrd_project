@@ -627,10 +627,32 @@
     // ========================================
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
     const PAGE_SIZE = 12;
+    const USE_TEST_DATA = true; // Change to false for production
 
     let allDocuments = [];
     let filteredDocuments = [];
     let currentPage = 1;
+
+    // ========================================
+    // TEST DATA
+    // ========================================
+    function getTestData() {
+      return {
+        success: true,
+        documents: [
+          { id: 'DOC-025', employee: 'พ่อตา ปืนโต', type: 'appoint', status: 'completed', createdDate: '2025-12-26', finalPdfUrl: 'https://drive.google.com/file/d/1kjsv-pKMd922L1R_fsxdxiObZNUmX-UM1SMQfqcdAZzGTwfOK25Cp1w/view?usp=drivesdk' },
+          { id: 'DOC-026', employee: 'แนบรูป เทส', type: 'transfer', status: 'completed', createdDate: '2025-12-25', finalPdfUrl: 'https://drive.google.com/file/d/1R_6FCy_Tsx9osC_FwdB9aKEuwFUHRxyQ/view?usp=drivesdk' },
+          { id: 'DOC-027', employee: 'นิดหน่อย ต่อย', type: 'promotion', status: 'completed', createdDate: '2025-12-27', finalPdfUrl: 'https://drive.google.com/file/d/1GOhYpwuL4W-LCRkCSG0FCj2RGC6gAucm/view?usp=drivesdk' },
+          { id: 'DOC-028', employee: 'ประแดงปุย ตนุภัทร', type: 'salaryup', status: 'completed', createdDate: '2025-12-27', finalPdfUrl: 'https://drive.google.com/file/d/1eYBfvcSDatSnJ_WpF5qghZb1iJ7FVcIK/view?usp=drivesdk' },
+          { id: 'DOC-029', employee: 'ตนุภัทร ประแดงปุย', type: 'transfer', status: 'completed', createdDate: '2025-12-17', finalPdfUrl: 'https://drive.google.com/file/d/1_a3Ze7R72fMT47MA38zlpiHlzIbz_AV2/view?usp=drivesdk' },
+          { id: 'DOC-030', employee: 'บุรินทร์ วงศ์ศรี', type: 'employmentchange', status: 'completed', createdDate: '2025-12-05', finalPdfUrl: 'https://drive.google.com/file/d/1c4s6ceY3ASwzEr8pNStFvi7DXLs28nEx/view?usp=drivesdk' },
+          { id: 'DOC-041', employee: 'ตนุภัทร ประแดงปุย', type: 'transfer', status: 'completed', createdDate: '2025-12-03', finalPdfUrl: 'https://drive.google.com/file/d/1KPQyT_nZFyp4FWtzLMpirsEOUE2YPD8V/view?usp=drivesdk' },
+          { id: 'DOC-042', employee: 'Test บัญชี', type: 'salaryup', status: 'completed', createdDate: '2025-12-25', finalPdfUrl: 'https://drive.google.com/file/d/1p3EpNqKRGEuN2TEfNe7bdihpXOS9BH-0/view?usp=drivesdk' },
+          { id: 'DOC-045', employee: 'แนบรูป เทส', type: 'employmentchange', status: 'completed', createdDate: '2025-12-03', finalPdfUrl: 'https://drive.google.com/file/d/1B7_EGsp8Eq2VyclDg0JdOoOr2wu0BtJB/view?usp=drivesdk' },
+          { id: 'DOC-046', employee: 'มิเกล โอฮาร่า', type: 'appoint', status: 'completed', createdDate: '2025-12-11', finalPdfUrl: 'https://drive.google.com/file/d/19yhGs3Bempm04sWR2nfNBGNI6ZlZK8Nw/view?usp=drivesdk' },
+        ]
+      };
+    }
 
     // ========================================
     // INIT
@@ -656,10 +678,13 @@
 
       const callback = 'pdfCallback_' + Date.now();
       const script = document.createElement('script');
-      // ดึงเฉพาะ HR Document Tracking ที่สำเร็จแล้ว (completed)
-      script.src = `${WEB_APP_URL}?action=getTrackingDocs&callback=${callback}`;
+      // ใช้ getStatus&view=approval แบบเดียวกับ IT Request form
+      script.src = `${WEB_APP_URL}?action=getStatus&view=approval&callback=${callback}`;
 
       window[callback] = function(response) {
+        console.log('API Response received:', response);
+        console.log('Documents:', response.data);
+        
         if (!response || !response.success) {
           showToast('⚠️ ไม่สามารถโหลดเอกสารได้', 'error');
           grid.innerHTML = `
@@ -672,42 +697,43 @@
           return;
         }
 
-        // ดึงเฉพาะเอกสารที่ completed (อนุมัติสำเร็จแล้ว) และมี PDF URL
-        const completedDocs = (response.documents || []).filter(doc => {
-          const status = (doc.status || '').toLowerCase();
-          // ดูว่ามี PDF URL หรือ finalPdfUrl
-          const hasPdfUrl = doc.finalPdfUrl || 
-                           doc.pdfUrl ||
-                           (doc.signatureApprover && doc.signatureApprover.finalPdfUrl);
-          return status === 'completed' && hasPdfUrl;
+        console.log('All documents count:', response.data ? response.data.length : 0);
+        
+        // ดึงเฉพาะเอกสารที่ approved (อนุมัติสำเร็จแล้ว) และมี PDF URL
+        const approvedDocs = (response.data || []).filter(doc => {
+          const status = (doc.status || doc.finalStatus || '').toLowerCase();
+          const hasPdfUrl = doc.pdfUrl || doc.finalPdfUrl || '';
+          
+          console.log(`Doc ${doc.requestId || doc.id}: status=${status}, hasPdfUrl=${!!hasPdfUrl}`);
+          
+          return status === 'approved' && hasPdfUrl;
         });
 
+        console.log('Approved docs with PDF:', approvedDocs.length);
+
         // แปลงข้อมูล
-        allDocuments = completedDocs.map(doc => {
+        allDocuments = approvedDocs.map(doc => {
           const typeLabel = getTypeLabel(doc.type);
           
-          // ดึง PDF URL จากหลายที่
-          let pdfUrl = doc.finalPdfUrl || doc.pdfUrl || '';
+          // ดึง PDF URL
+          let pdfUrl = doc.pdfUrl || doc.finalPdfUrl || '';
           
           // ถ้า PDF URL มี __ ที่หน้า-หลัง ให้ตัดออก
           if (pdfUrl && pdfUrl.includes('__')) {
             pdfUrl = pdfUrl.replace(/^__/, '').replace(/__$/, '').trim();
           }
           
-          // ถ้ายังไม่มี PDF URL ลองหาจาก signatureApprover
-          if (!pdfUrl && doc.signatureApprover && doc.signatureApprover.finalPdfUrl) {
-            pdfUrl = doc.signatureApprover.finalPdfUrl;
-          }
-          
           return {
-            id: doc.id || doc.docNo || '',
-            requester: doc.employee || doc.requesterName || '-',
+            id: doc.requestId || doc.requestNo || doc.id || '',
+            requester: doc.requester || doc.requesterName || '-',
             type: typeLabel,
             pdfUrl: pdfUrl,
-            date: doc.createdDate || doc.lastUpdated || new Date().toISOString(),
-            status: 'completed'
+            date: doc.lastUpdated || doc.requestTime || new Date().toISOString(),
+            status: 'approved'
           };
         });
+
+        console.log('Final documents to display:', allDocuments);
 
         // เรียงจากใหม่ไปเก่า
         allDocuments.sort((a, b) => {
