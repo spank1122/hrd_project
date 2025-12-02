@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ติดตามสถานะ - The Carpetmaker</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ติดตามสถานะ - The Carpetmaker</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-<style>
+  <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --pink-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       --text-dark: #2d3748;
       --text-light: #718096;
+      --border: #e2e8f0;
       --success: #10b981;
       --warning: #f59e0b;
-      --border: #e2e8f0;
+      --error: #ef4444;
     }
 
     body {
@@ -30,7 +30,6 @@
       position: relative;
     }
 
-    /* Background animation */
     body::before {
       content: '';
       position: absolute;
@@ -53,11 +52,12 @@
       z-index: 1;
     }
 
-    .header { text-align: center; margin-bottom: 40px; }
+    .header { text-align: center; margin-bottom: 40px; animation: fadeInDown 0.8s ease-out; }
 
     .header-top {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
     }
 
@@ -69,12 +69,32 @@
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
-      transition: all .3s;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
     }
 
-    .btn-back:hover { background: rgba(255,255,255,0.35); }
+    .btn-back:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateX(-2px);
+    }
 
-    .header-title { color: white; font-size: 34px; font-weight: 700; }
+    .header-title {
+      color: white;
+      font-size: 34px;
+      font-weight: 700;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-subtitle {
+      color: rgba(255,255,255,0.95);
+      font-size: 16px;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     .filter-section {
       background: white;
@@ -82,32 +102,44 @@
       padding: 24px;
       margin-bottom: 32px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: fadeInUp 0.8s ease-out;
     }
 
     .filter-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
       gap: 16px;
     }
 
     .filter-section label {
       display: block;
       margin-bottom: 6px;
-      font-size: 14px;
-      color: #4a5568;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .filter-section input,
     .filter-section select {
       width: 100%;
-      padding: 8px 10px;
+      padding: 10px 12px;
       border-radius: 8px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
       font-family: 'Sarabun', sans-serif;
       font-size: 14px;
+      transition: all 0.3s ease;
     }
 
-    .documents-section { margin-top: 12px; }
+    .filter-section input:focus,
+    .filter-section select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .documents-section { margin-top: 12px; animation: fadeInUp 0.8s ease-out 0.1s both; }
 
     .document-item {
       background: white;
@@ -117,31 +149,35 @@
       margin-bottom: 16px;
       border-left: 4px solid #667eea;
       cursor: pointer;
-      transition: .3s;
+      transition: all 0.3s ease;
     }
 
-    .document-item:hover { transform: translateX(4px); }
+    .document-item:hover { 
+      transform: translateX(4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
 
-    .document-item.pink { border-left-color: #f5576c; }
+    .document-item.rejected { border-left-color: var(--error); }
+    .document-item.completed { border-left-color: var(--success); }
 
     .document-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
     .document-title {
       font-weight: 600;
       font-size: 16px;
-      color: #1a202c;
+      color: var(--text-dark);
     }
 
     .document-info {
-      font-size: 14px;
-      color: #4a5568;
+      font-size: 13px;
+      color: var(--text-light);
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+      grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
       gap: 4px 16px;
     }
 
@@ -150,19 +186,25 @@
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .pending { background: #fef3c7; color: #92400e; }
-    .completed { background: #d1fae5; color: #065f46; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-completed { background: #d1fae5; color: #065f46; }
+    .badge-rejected { background: #fee2e2; color: #991b1b; }
 
     .empty-state {
       text-align: center;
-      padding: 40px 20px;
-      color: white;
+      padding: 60px 20px;
+      background: white;
+      border-radius: 12px;
+      color: var(--text-light);
     }
 
-    .empty-icon { font-size: 40px; margin-bottom: 10px; }
-    .empty-title { font-size: 18px; font-weight: 600; }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
 
     /* Modal */
     .modal {
@@ -182,14 +224,41 @@
       background: white;
       padding: 32px;
       border-radius: 16px;
-      max-width: 520px;
+      max-width: 600px;
       width: 100%;
       max-height: 80vh;
       overflow-y: auto;
-      font-size: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
 
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: color 0.3s ease;
+    }
+
+    .modal-close:hover { color: var(--text-dark); }
+
     .timeline { padding-left: 30px; position: relative; }
+
     .timeline::before {
       content: '';
       position: absolute;
@@ -197,7 +266,7 @@
       top: 0;
       bottom: 0;
       width: 2px;
-      background: #ddd;
+      background: var(--border);
     }
 
     .timeline-item {
@@ -209,242 +278,513 @@
       content: '';
       position: absolute;
       left: -30px;
-      top: 4px;
-      width: 14px;
-      height: 14px;
-      background: #667eea;
-      border: 3px solid white;
+      top: 6px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border: 3px solid #667eea;
       border-radius: 50%;
     }
 
     .timeline-item.completed::before {
-      background: #10b981;
+      background: var(--success);
+      border-color: var(--success);
     }
 
-    .timeline-time {
+    .timeline-item.rejected::before {
+      background: var(--error);
+      border-color: var(--error);
+    }
+
+    .timeline-item.pending::before {
+      background: var(--warning);
+      border-color: var(--warning);
+    }
+
+    .timeline-role {
       font-weight: 600;
-      color: #1a202c;
+      color: var(--text-dark);
+      font-size: 14px;
     }
 
-    .timeline-text {
-      color: #4a5568;
+    .timeline-signer {
+      color: var(--text-light);
+      font-size: 13px;
+      margin-top: 2px;
     }
 
     .timeline-detail {
       font-size: 12px;
-      color: #718096;
+      color: var(--text-light);
+      margin-top: 4px;
     }
-</style>
+
+    .reject-reason {
+      background: #fef2f2;
+      border-left: 4px solid var(--error);
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #991b1b;
+    }
+
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-light);
+      gap: 16px;
+    }
+
+    .pagination-info {
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .pagination-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pagination-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Sarabun', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .loader {
+      border: 4px solid var(--border);
+      border-radius: 50%;
+      border-top: 4px solid #667eea;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 40px auto;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .header-title { font-size: 28px; }
+      .filter-grid { grid-template-columns: 1fr; }
+      .document-info { grid-template-columns: 1fr; }
+      .modal-content { padding: 20px; }
+      .pagination-bar { flex-direction: column; }
+    }
+  </style>
 </head>
 
 <body>
-<div class="container">
-  <!-- Header -->
-  <div class="header">
-    <div class="header-top">
-      <button class="btn-back" onclick="history.back()">← ย้อนกลับ</button>
-      <div></div>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goBack()">← ย้อนกลับ</button>
+        <div></div>
+      </div>
+      <h1 class="header-title">ติดตามสถานะ</h1>
+      <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
     </div>
-    <h1 class="header-title">ติดตามสถานะ</h1>
-  </div>
 
-  <!-- Filter -->
-  <div class="filter-section">
-    <div class="filter-grid">
-      <div>
-        <label>ค้นหา</label>
-        <input id="searchInput" type="text" placeholder="ค้นหาจากชื่อหรือรหัส...">
-      </div>
-
-      <div>
-        <label>สถานะ</label>
-        <select id="statusFilter">
-          <option value="">-- ทั้งหมด --</option>
-          <option value="pending">รออนุมัติ</option>
-          <option value="completed">สำเร็จแล้ว</option>
-        </select>
-      </div>
-
-      <div>
-        <label>ประเภท</label>
-        <select id="typeFilter">
-          <option value="">ทั้งหมด</option>
-          <option value="appoint">แต่งตั้ง</option>
-          <option value="transfer">โอนย้าย</option>
-          <option value="employmentchange">เปลี่ยนสภาพการจ้างงาน</option>
-          <option value="promotion">เลื่อนตำแหน่ง</option>
-          <option value="passprobation">ผ่านการทดลองงาน</option>
-          <option value="termination">ให้ออกจากงานโดยไม่สมัครใจ/ลาออก</option>
-          <option value="salaryup">ขึ้นค่าจ้าง / เงินเดือน</option>
-          <option value="salarydown">ตัดค่าจ้าง / เงินเดือน</option>
-          <option value="other">อื่นๆ</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- List -->
-  <div id="documentsList" class="documents-section"></div>
-</div>
-
-<!-- Modal -->
-<div id="timelineModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-bottom: 20px;">รายละเอียดขั้นตอน</h2>
-    <div id="timelineContent" class="timeline"></div>
-    <button onclick="closeModal()" style="margin-top:20px;padding:10px 20px;">ปิด</button>
-  </div>
-</div>
-
-<script>
-  /* ===============================
-    CONFIG
-    =============================== */
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec";
-
-  let documents = [];
-
-  document.addEventListener("DOMContentLoaded", () => {
-    setupFilters();
-    loadDocuments();
-  });
-
-  /* ===============================
-    โหลดข้อมูลจาก Google Apps Script (JSONP)
-    =============================== */
-  function loadDocuments() {
-    const callbackName = "trackingCallback_" + Date.now();
-
-    window[callbackName] = function (response) {
-      if (response && response.success) {
-        documents = response.documents || [];
-        displayDocuments(documents);
-      }
-      delete window[callbackName];
-    };
-
-    const script = document.createElement("script");
-    script.src =
-      WEB_APP_URL +
-      "?action=getTrackingDocs&callback=" +
-      callbackName;
-
-    document.body.appendChild(script);
-  }
-
-  /* ===============================
-    แสดงรายการเอกสาร
-    =============================== */
-  function displayDocuments(listData) {
-    const container = document.getElementById("documentsList");
-
-    if (!listData || listData.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">📭</div>
-          <div class="empty-title">ไม่พบข้อมูล</div>
-        </div>`;
-      return;
-    }
-
-    container.innerHTML = listData
-      .map(
-        (doc) => `
-        <div class="document-item ${doc.status === "pending" ? "pink" : ""}"
-             onclick="showTimeline('${doc.id}')">
-          <div class="document-header">
-            <div class="document-title">${doc.id} - ${doc.employee}</div>
-            <span class="status-badge ${
-              doc.status === "pending" ? "pending" : "completed"
-            }">
-              ${doc.status === "pending" ? "⏳ รออนุมัติ" : "✓ สำเร็จแล้ว"}
-            </span>
-          </div>
-
-          <div class="document-info">
-            <div><strong>ประเภท:</strong> ${getTypeLabel(doc.type)}</div>
-            <div><strong>วันที่สร้าง:</strong> ${doc.createdDate || "-"}</div>
-            <div><strong>ขั้นตอน:</strong> ${
-              (doc.steps || []).filter((s) => s.status === "completed").length
-            }/${(doc.steps || []).length}</div>
-          </div>
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-grid">
+        <div>
+          <label>ค้นหา</label>
+          <input id="searchInput" type="text" placeholder="ค้นหาจากชื่อหรือรหัส...">
         </div>
-      `
-      )
-      .join("");
-  }
 
-  /* ===============================
-    Filter
-    =============================== */
-  function setupFilters() {
-    document.getElementById("searchInput").addEventListener("input", applyFilters);
-    document.getElementById("statusFilter").addEventListener("change", applyFilters);
-    document.getElementById("typeFilter").addEventListener("change", applyFilters);
-  }
+        <div>
+          <label>สถานะ</label>
+          <select id="statusFilter">
+            <option value="">-- ทั้งหมด --</option>
+            <option value="pending">รออนุมัติ</option>
+            <option value="completed">สำเร็จแล้ว</option>
+            <option value="rejected">ไม่อนุมัติ</option>
+          </select>
+        </div>
 
-  function applyFilters() {
-    const search = document.getElementById("searchInput").value.toLowerCase();
-    const status = document.getElementById("statusFilter").value;
-    const type = document.getElementById("typeFilter").value;
+        <div>
+          <label>ประเภท</label>
+          <select id="typeFilter">
+            <option value="">ทั้งหมด</option>
+            <option value="appoint">แต่งตั้ง</option>
+            <option value="transfer">โอนย้าย</option>
+            <option value="employmentchange">เปลี่ยนสภาพการจ้างงาน</option>
+            <option value="promotion">เลื่อนตำแหน่ง</option>
+            <option value="passprobation">ผ่านการทดลองงาน</option>
+            <option value="termination">ให้ออกจากงาน</option>
+            <option value="salaryup">ขึ้นค่าจ้าง</option>
+            <option value="salarydown">ตัดค่าจ้าง</option>
+            <option value="other">อื่นๆ</option>
+          </select>
+        </div>
 
-    const filtered = documents.filter((doc) => {
-      const idMatch = (doc.id || "").toLowerCase().includes(search);
-      const empMatch = (doc.employee || "").toLowerCase().includes(search);
-      const statusMatch = !status || doc.status === status;
-      const typeMatch = !type || doc.type === type;
+        <div>
+          <label>เรียงลำดับ</label>
+          <select id="sortFilter">
+            <option value="newest">ใหม่สุด</option>
+            <option value="oldest">เก่าสุด</option>
+            <option value="name">ชื่อ (ก-ฮ)</option>
+          </select>
+        </div>
+      </div>
+    </div>
 
-      return (idMatch || empMatch) && statusMatch && typeMatch;
+    <!-- Loader -->
+    <div class="loader" id="loader"></div>
+
+    <!-- Documents List -->
+    <div id="documentsList" class="documents-section"></div>
+
+    <!-- Pagination -->
+    <div id="paginationBar"></div>
+  </div>
+
+  <!-- Modal Timeline -->
+  <div id="timelineModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">รายละเอียดขั้นตอน</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div id="timelineContent" class="timeline"></div>
+    </div>
+  </div>
+
+  <script>
+    // ========================================
+    // CONFIG
+    // ========================================
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+    const PAGE_SIZE = 15; // จำนวนรายการต่อหน้า
+
+    let allDocuments = [];
+    let currentPage = 1;
+    let filteredDocuments = [];
+
+    // ========================================
+    // INIT
+    // ========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      setupFilters();
+      loadDocuments();
     });
 
-    displayDocuments(filtered);
-  }
+    // ========================================
+    // LOAD DOCUMENTS FROM GAS
+    // ========================================
+    function loadDocuments() {
+      document.getElementById('loader').style.display = 'block';
+      
+      const callback = 'trackingCallback_' + Date.now();
+      const script = document.createElement('script');
+      script.src = `${WEB_APP_URL}?action=getTrackingDocs&callback=${callback}`;
 
-  function getTypeLabel(type) {
-    const map = {
-      appoint: "แต่งตั้ง",
-      transfer: "โอนย้าย",
-      employmentchange: "เปลี่ยนสภาพการจ้างงาน",
-      promotion: "เลื่อนตำแหน่ง",
-      passprobation: "ผ่านการทดลองงาน",
-      termination: "ให้ออกจากงานโดยไม่สมัครใจ/ลาออก",
-      salaryup: "ขึ้นค่าจ้าง / เงินเดือน",
-      salarydown: "ตัดค่าจ้าง / เงินเดือน",
-      other: "อื่นๆ",
-    };
-    return map[type] || type || "-";
-  }
+      window[callback] = function(response) {
+        document.getElementById('loader').style.display = 'none';
 
-  /* ===============================
-    Timeline Modal
-    =============================== */
-  function showTimeline(docId) {
-    const doc = documents.find((d) => d.id === docId);
-    if (!doc) return;
+        if (!response || !response.success) {
+          showEmptyState('❌ ไม่สามารถโหลดข้อมูลได้');
+          return;
+        }
 
-    const steps = doc.steps || [];
-    const html = steps
-      .map(
-        (step) => `
-        <div class="timeline-item ${step.status === "completed" ? "completed" : ""}">
-          <div class="timeline-time">${step.role || "-"}</div>
-          <div class="timeline-text">${step.signer || "-"}</div>
-          <div class="timeline-detail">${step.date || "-"} เวลา ${
-          step.time || "-"
-        }</div>
+        // ประมวลผลข้อมูลจาก tracking API
+        allDocuments = (response.documents || []).map(doc => {
+          // แปลง type เป็นแบบเดียวกับระบบเดิม
+          const typeMap = {
+            'appoint': 'appoint',
+            'transfer': 'transfer',
+            'employmentchange': 'employmentchange',
+            'promotion': 'promotion',
+            'passprobation': 'passprobation',
+            'termination': 'termination',
+            'salaryup': 'salaryup',
+            'salarydown': 'salarydown',
+            'other': 'other'
+          };
+
+          const status = doc.status || 'pending';
+          let normalizedStatus = 'pending';
+          if (status.toLowerCase() === 'completed') normalizedStatus = 'completed';
+          else if (status.toLowerCase() === 'rejected') normalizedStatus = 'rejected';
+
+          return {
+            id: doc.id,
+            employee: doc.employee,
+            type: typeMap[doc.type] || doc.type,
+            createdDate: doc.createdDate,
+            status: normalizedStatus,
+            steps: doc.steps || []
+          };
+        });
+
+        // เรียงจากใหม่ไปเก่า (default)
+        sortDocuments('newest');
+        currentPage = 1;
+        applyFilters();
+      };
+
+      script.onerror = () => {
+        document.getElementById('loader').style.display = 'none';
+        showEmptyState('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      };
+
+      document.head.appendChild(script);
+    }
+
+    // ========================================
+    // SETUP FILTERS
+    // ========================================
+    function setupFilters() {
+      document.getElementById('searchInput').addEventListener('input', applyFilters);
+      document.getElementById('statusFilter').addEventListener('change', applyFilters);
+      document.getElementById('typeFilter').addEventListener('change', applyFilters);
+      document.getElementById('sortFilter').addEventListener('change', (e) => {
+        sortDocuments(e.target.value);
+        applyFilters();
+      });
+    }
+
+    // ========================================
+    // APPLY FILTERS
+    // ========================================
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const type = document.getElementById('typeFilter').value;
+
+      filteredDocuments = allDocuments.filter(doc => {
+        const matchSearch = !search || 
+          doc.id.toLowerCase().includes(search) || 
+          doc.employee.toLowerCase().includes(search);
+        
+        const matchStatus = !status || doc.status === status;
+        const matchType = !type || doc.type === type;
+
+        return matchSearch && matchStatus && matchType;
+      });
+
+      currentPage = 1;
+      displayDocuments();
+    }
+
+    // ========================================
+    // SORT DOCUMENTS
+    // ========================================
+    function sortDocuments(sortBy) {
+      if (sortBy === 'newest') {
+        allDocuments.sort((a, b) => {
+          const da = new Date(a.createdDate).getTime();
+          const db = new Date(b.createdDate).getTime();
+          return db - da;
+        });
+      } else if (sortBy === 'oldest') {
+        allDocuments.sort((a, b) => {
+          const da = new Date(a.createdDate).getTime();
+          const db = new Date(b.createdDate).getTime();
+          return da - db;
+        });
+      } else if (sortBy === 'name') {
+        allDocuments.sort((a, b) => a.employee.localeCompare(b.employee, 'th'));
+      }
+    }
+
+    // ========================================
+    // DISPLAY DOCUMENTS
+    // ========================================
+    function displayDocuments() {
+      if (filteredDocuments.length === 0) {
+        showEmptyState('📭 ไม่พบข้อมูลตามเงื่อนไขที่ค้นหา');
+        document.getElementById('paginationBar').innerHTML = '';
+        return;
+      }
+
+      const totalPages = Math.ceil(filteredDocuments.length / PAGE_SIZE);
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const pageItems = filteredDocuments.slice(start, end);
+
+      let html = '';
+
+      pageItems.forEach(doc => {
+        const statusClass = doc.status === 'rejected' ? 'rejected' : (doc.status === 'completed' ? 'completed' : '');
+        const statusText = doc.status === 'rejected' ? '❌ ไม่อนุมัติ' : (doc.status === 'completed' ? '✓ สำเร็จแล้ว' : '⏳ รออนุมัติ');
+        const statusBadgeClass = doc.status === 'rejected' ? 'badge-rejected' : (doc.status === 'completed' ? 'badge-completed' : 'badge-pending');
+
+        const completedSteps = (doc.steps || []).filter(s => s.status === 'completed').length;
+        const totalSteps = (doc.steps || []).length;
+
+        html += `
+          <div class="document-item ${statusClass}" onclick="showTimeline('${doc.id}')">
+            <div class="document-header">
+              <div class="document-title">${doc.id} - ${doc.employee}</div>
+              <span class="status-badge ${statusBadgeClass}">${statusText}</span>
+            </div>
+
+            <div class="document-info">
+              <div><strong>ประเภท:</strong> ${getTypeLabel(doc.type)}</div>
+              <div><strong>วันที่:</strong> ${formatDate(doc.createdDate)}</div>
+              <div><strong>ขั้นตอน:</strong> ${completedSteps}/${totalSteps}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('documentsList').innerHTML = html;
+
+      // Pagination
+      let paginationHtml = '';
+      if (filteredDocuments.length > PAGE_SIZE) {
+        paginationHtml = `
+          <div class="pagination-bar">
+            <div class="pagination-buttons">
+              <button class="pagination-btn" onclick="changePage(-1)" ${currentPage <= 1 ? 'disabled' : ''}>
+                ◀ ก่อนหน้า
+              </button>
+              <button class="pagination-btn" onclick="changePage(1)" ${currentPage >= totalPages ? 'disabled' : ''}>
+                ถัดไป ▶
+              </button>
+            </div>
+            <div class="pagination-info">
+              หน้า ${currentPage} / ${totalPages} (ทั้งหมด ${filteredDocuments.length} รายการ)
+            </div>
+          </div>
+        `;
+      }
+      document.getElementById('paginationBar').innerHTML = paginationHtml;
+    }
+
+    // ========================================
+    // CHANGE PAGE
+    // ========================================
+    function changePage(delta) {
+      const totalPages = Math.ceil(filteredDocuments.length / PAGE_SIZE);
+      currentPage = Math.min(Math.max(1, currentPage + delta), totalPages);
+      displayDocuments();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ========================================
+    // TIMELINE MODAL
+    // ========================================
+    function showTimeline(docId) {
+      const doc = allDocuments.find(d => d.id === docId);
+      if (!doc) return;
+
+      document.getElementById('modalTitle').textContent = `📄 ${doc.id} - ${doc.employee}`;
+
+      const steps = doc.steps || [];
+      let html = '';
+
+      steps.forEach(step => {
+        const statusClass = step.status === 'completed' ? 'completed' : (step.status === 'rejected' ? 'rejected' : 'pending');
+        const dateFormatted = step.date || '-';
+        const timeFormatted = step.time || '-';
+
+        html += `
+          <div class="timeline-item ${statusClass}">
+            <div class="timeline-role">${step.role || '-'}</div>
+            <div class="timeline-signer">${step.signer || '-'}</div>
+            <div class="timeline-detail">${dateFormatted} เวลา ${timeFormatted}</div>
+        `;
+
+        // เพิ่มเหตุผลไม่อนุมัติ (ถ้ามี)
+        if (statusClass === 'rejected' && step.rejectReason) {
+          html += `<div class="reject-reason">🔴 เหตุผล: ${step.rejectReason}</div>`;
+        }
+
+        html += `</div>`;
+      });
+
+      document.getElementById('timelineContent').innerHTML = html;
+      document.getElementById('timelineModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('timelineModal').classList.remove('show');
+    }
+
+    // ========================================
+    // HELPERS
+    // ========================================
+    function getTypeLabel(type) {
+      const map = {
+        appoint: '🎯 แต่งตั้ง',
+        transfer: '🔄 โอนย้าย',
+        employmentchange: '📋 เปลี่ยนสภาพการจ้างงาน',
+        promotion: '📈 เลื่อนตำแหน่ง',
+        passprobation: '✅ ผ่านการทดลองงาน',
+        termination: '🚪 ให้ออกจากงาน',
+        salaryup: '💰 ขึ้นค่าจ้าง',
+        salarydown: '💸 ตัดค่าจ้าง',
+        other: '📌 อื่นๆ'
+      };
+      return map[type] || type || '-';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      try {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    function showEmptyState(message) {
+      document.getElementById('documentsList').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">${message.split(' ')[0]}</div>
+          <div class="empty-title">${message.substring(2)}</div>
         </div>
-      `
-      )
-      .join("");
+      `;
+    }
 
-    document.getElementById("timelineContent").innerHTML = html;
-    document.getElementById("timelineModal").classList.add("show");
-  }
+    function goBack() {
+      window.history.back();
+    }
 
-  function closeModal() {
-    document.getElementById("timelineModal").classList.remove("show");
-  }
-</script>
-
+    // Close modal when clicking outside
+    document.getElementById('timelineModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
 </body>
 </html>
