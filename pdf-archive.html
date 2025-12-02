@@ -699,14 +699,13 @@
 
         console.log('All documents count:', response.documents ? response.documents.length : 0);
         
-        // ดึงเฉพาะเอกสารที่ completed (สำเร็จแล้ว) และมี PDF URL
+        // ดึงเฉพาะเอกสารที่ completed (สำเร็จแล้ว) และมี Final PDF URL
         const completedDocs = (response.documents || []).filter(doc => {
           const status = (doc.status || '').toLowerCase();
-          const hasPdfUrl = doc.finalPdfUrl || 
-                           doc.pdfUrl ||
-                           (doc.signatureApprover && doc.signatureApprover.finalPdfUrl);
+          // Final PDF URL อยู่ใน finalPdfUrl field
+          const hasPdfUrl = doc.finalPdfUrl || doc.pdfUrl || '';
           
-          console.log(`Doc ${doc.id}: status=${status}, hasPdfUrl=${!!hasPdfUrl}`);
+          console.log(`Doc ${doc.id}: status=${status}, finalPdfUrl=${doc.finalPdfUrl ? 'YES' : 'NO'}`);
           
           return status === 'completed' && hasPdfUrl;
         });
@@ -717,17 +716,12 @@
         allDocuments = completedDocs.map(doc => {
           const typeLabel = getTypeLabel(doc.type);
           
-          // ดึง PDF URL จากหลายที่
+          // ดึง Final PDF URL
           let pdfUrl = doc.finalPdfUrl || doc.pdfUrl || '';
           
           // ถ้า PDF URL มี __ ที่หน้า-หลัง ให้ตัดออก
           if (pdfUrl && pdfUrl.includes('__')) {
             pdfUrl = pdfUrl.replace(/^__/, '').replace(/__$/, '').trim();
-          }
-          
-          // ถ้ายังไม่มี PDF URL ลองหาจาก signatureApprover
-          if (!pdfUrl && doc.signatureApprover && doc.signatureApprover.finalPdfUrl) {
-            pdfUrl = doc.signatureApprover.finalPdfUrl;
           }
           
           return {
