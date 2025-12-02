@@ -630,61 +630,261 @@
       return d.toLocaleString('th-TH');
     }
 
-    // แยก "จากเดิม ... เป็น ..." เฉพาะประเภทที่ต้องใช้
-    function applyActionDetailToLines(actionCode, actionType, actionDetail) {
-      if (!actionDetail) return;
-
-      const isTransfer =
-        actionCode === 'transfer' || actionType === 'โอนย้าย';
-      const isPromote =
-        actionCode === 'promote' || actionType === 'เลื่อนตำแหน่ง';
-      const isChange =
-        actionCode === 'change_status' || actionType === 'เปลี่ยนสภาพการจ้างงาน';
-      const isRaise =
-        actionCode === 'raise' || actionType === 'ขึ้นค่าจ้าง / เงินเดือน';
-      const isCut =
-        actionCode === 'cut' || actionType === 'ตัดค่าจ้าง / เงินเดือน';
-      const isTerminate =
-        actionCode === 'resign' || (actionType && actionType.indexOf('ให้ออกจากงาน') !== -1);
-
-      // ✅ เคส "ให้ออกจากงาน / ลาออก" ให้ใส่เหตุผลลง terminate_detail แล้วจบ
-      if (isTerminate) {
-        const td = document.getElementById('terminate_detail');
-        if (td && !td.textContent) td.textContent = actionDetail;
-        return;
+    function cleanupJSONP(cbName) {
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        if (scripts[i].src && scripts[i].src.includes(cbName)) {
+          scripts[i].parentNode.removeChild(scripts[i]);
+        }
       }
-
-      const m = actionDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
-      let fromText = '';
-      let toText   = '';
-
-      if (m) {
-        fromText = (m[1] || '').trim();
-        toText   = (m[2] || '').trim();
-      }
-
-      if (isTransfer) {
-        if (fromText) document.getElementById('transfer_from').textContent = fromText;
-        if (toText)   document.getElementById('transfer_to').textContent   = toText;
-      } else if (isPromote) {
-        if (fromText) document.getElementById('promote_from').textContent = fromText;
-        if (toText)   document.getElementById('promote_to').textContent   = toText;
-      } else if (isChange) {
-        if (fromText) document.getElementById('change_from').textContent = fromText;
-        if (toText)   document.getElementById('change_to').textContent   = toText;
-      } else if (isRaise) {
-        if (fromText) document.getElementById('raise_from').textContent = fromText;
-        if (toText)   document.getElementById('raise_to').textContent   = toText;
-      } else if (isCut) {
-        if (fromText) document.getElementById('cut_from').textContent = fromText;
-        if (toText)   document.getElementById('cut_to').textContent   = toText;
-      } else {
-        // ใช้กับ "อื่น ๆ" เท่านั้น
-        const od = document.getElementById('other_detail');
-        if (od && !od.textContent) od.textContent = actionDetail;
-      }
+      try { delete window[cbName]; } catch (e) {}
     }
 
+    // ===== ดึงข้อมูลจาก getDoc แล้ว map เข้า UI =====
+    function renderOperationData(data) {
+      console.log('employee render data (v2):', data);
+
+      // ---------- ข้อมูลพนักงาน ----------
+      const empName =
+        data['ชื่อพนักงาน'] ||
+        data['พนักงาน'] ||
+        data['employeeName'] ||
+        '-';
+      document.getElementById('empName').textContent = empName;
+      document.getElementById('employeeName').textContent = empName;
+
+      const empCode = data['รหัสพนักงาน'] || '';
+      const empPos  = data['ตำแหน่ง'] || '';
+      const codePos =
+        data['รหัสพนักงาน/ตำแหน่ง'] ||
+        data['empCodePosition'] ||
+        '';
+
+      document.getElementById('empCodePos').textContent =
+        codePos ||
+        (empCode && empPos
+          ? `${empCode} / ${empPos}`
+          : (empCode || empPos || '-'));
+
+      const deptOnly  = data['แผนก'] || '';
+      const divOnly   = data['ฝ่าย'] || '';
+      const deptCombo =
+        data['แผนก/ฝ่าย'] ||
+        data['department'] ||
+        '';
+
+      document.getElementById('dept').textContent =
+        deptCombo ||
+        (deptOnly || divOnly
+          ? [deptOnly, divOnly].filter(Boolean).join(' / ')
+          : '-');
+
+      const empStatus =
+        data['สภาพพนักงาน/วันเริ่มงาน'] ||
+        data['employmentStatus'] ||
+        data['สภาพจ้างงาน'] ||
+        '';
+      document.getElementById('employmentStatus').textContent =
+        empStatus || '-';
+
+      // ---------- ประเภทการดำเนินการ ----------
+      const actionType =
+        data['ประเภทการดำเนินการ'] ||
+        data['การดำเนินการ'] ||
+        data['actionType'] ||
+        '';
+
+      const actionCode =
+        data['รหัสการดำเนินการ (code)'] ||
+        data['actionCode'] ||
+        '';
+
+      const radioMap = {
+        'แต่งตั้ง': 'action_appoint',
+        'โอนย้าย': 'action_transfer',
+        'เปลี่ยนสภาพการจ้างงาน': 'action_change',
+        'เลื่อนตำแหน่ง': 'action_promote',
+        'ผ่านทดลองงาน': 'action_passProb',
+
+        'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก': 'action_terminate',
+        'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
+        'ให้ออกจากงานโดยไม่มีสมัครใจ/ลาออก': 'action_terminate',
+        'ให้ออกจากงาน / ลาออก': 'action_terminate',
+
+        'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
+        'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
+        'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
+        'ตัดค่าจ้าง/เงินเดือน': 'action_cut',
+        'อื่น ๆ': 'action_other',
+        'อื่นๆ': 'action_other'
+      };
+
+      const radioId = radioMap[actionType];
+      if (radioId) {
+        const r = document.getElementById(radioId);
+        if (r) r.checked = true;
+      }
+
+      const opDetail   = data['รายละเอียดการดำเนินการ'] || '';
+      const extraDetail =
+        data['รายละเอียดเพิ่มเติม'] ||
+        data['detail'] ||
+        '';
+
+      // ---------- From/To กลาง ----------
+      const globalFrom =
+        data['ค่าจากเดิม (From)'] ||
+        data['actionFrom'] ||
+        '';
+      const globalTo =
+        data['ค่าใหม่ (To)'] ||
+        data['actionTo'] ||
+        '';
+
+      // ---------- ใส่ค่าตามประเภท ----------
+      switch (actionType) {
+        case 'แต่งตั้ง':
+          document.getElementById('appoint_to').textContent =
+            globalTo ||
+            data['แต่งตั้ง_เป็น'] ||
+            opDetail ||
+            '';
+          break;
+
+        case 'โอนย้าย': {
+          const fromCol =
+            globalFrom ||
+            data['โอนย้าย_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['โอนย้าย_เป็น'] ||
+            '';
+
+          if (fromCol || toCol) {
+            document.getElementById('transfer_from').textContent = fromCol;
+            document.getElementById('transfer_to').textContent   = toCol;
+          } else if (opDetail) {
+            const m = opDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
+            document.getElementById('transfer_from').textContent =
+              m && m[1] ? m[1].trim() : opDetail;
+            document.getElementById('transfer_to').textContent =
+              m && m[2] ? m[2].trim() : '';
+          }
+          break;
+        }
+
+        case 'เปลี่ยนสภาพการจ้างงาน': {
+          const fromCol =
+            globalFrom ||
+            data['เปลี่ยนสภาพ_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['เปลี่ยนสภาพ_เป็น'] ||
+            '';
+
+          document.getElementById('change_from').textContent =
+            fromCol || opDetail || '';
+          document.getElementById('change_to').textContent = toCol;
+          break;
+        }
+
+        case 'เลื่อนตำแหน่ง': {
+          const fromCol =
+            globalFrom ||
+            data['เลื่อนตำแหน่ง_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['เลื่อนตำแหน่ง_เป็น'] ||
+            '';
+
+          document.getElementById('promote_from').textContent =
+            fromCol || opDetail || '';
+          document.getElementById('promote_to').textContent = toCol;
+          break;
+        }
+
+        case 'ผ่านทดลองงาน':
+          document.getElementById('passProb_to').textContent =
+            globalTo ||
+            data['ผ่านทดลองงาน_เป็น'] ||
+            opDetail ||
+            '';
+          break;
+
+        case 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก':
+        case 'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก':
+        case 'ให้ออกจากงานโดยไม่มีสมัครใจ/ลาออก':
+        case 'ให้ออกจากงาน / ลาออก':
+          document.getElementById('terminate_detail').textContent =
+            data['ให้ออกจากงาน_รายละเอียด'] ||
+            opDetail ||
+            extraDetail ||
+            '';
+          break;
+
+        case 'ขึ้นค่าจ้าง / เงินเดือน':
+        case 'ขึ้นค่าจ้าง/เงินเดือน': {
+          const fromCol =
+            globalFrom ||
+            data['ขึ้นค่าจ้าง_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['ขึ้นค่าจ้าง_เป็น'] ||
+            '';
+
+          document.getElementById('raise_from').textContent =
+            fromCol || opDetail || '';
+          document.getElementById('raise_to').textContent = toCol;
+          break;
+        }
+
+        case 'ตัดค่าจ้าง / เงินเดือน':
+        case 'ตัดค่าจ้าง/เงินเดือน': {
+          const fromCol =
+            globalFrom ||
+            data['ตัดค่าจ้าง_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['ตัดค่าจ้าง_เป็น'] ||
+            '';
+
+          document.getElementById('cut_from').textContent =
+            fromCol || opDetail || '';
+          document.getElementById('cut_to').textContent = toCol;
+          break;
+        }
+
+        case 'อื่น ๆ':
+        case 'อื่นๆ':
+          document.getElementById('other_detail').textContent =
+            data['อื่นๆ_รายละเอียด'] ||
+            opDetail ||
+            extraDetail ||
+            '';
+          break;
+      }
+
+      // กล่องรายละเอียดด้านล่าง
+      document.getElementById('detailText').textContent =
+        extraDetail || opDetail || '-';
+
+      // วันที่มีผล
+      const effRaw =
+        data['วันที่มีผล'] ||
+        data['มีผลบังคับตั้งแต่วันที่'] ||
+        data['effectiveDate'] ||
+        '';
+      const effDisplay = effRaw ? formatDateDisplay(effRaw) : '-';
+      document.getElementById('effectiveDate').textContent =
+        effDisplay || '-';
+    }
+
+    // ===== โหลดข้อมูลเอกสารจาก Web App =====
     function loadDocInfo() {
       const statusEl = document.getElementById('status');
 
@@ -777,154 +977,7 @@
       document.head.appendChild(script);
     }
 
-    function cleanupJSONP(cbName) {
-      const scripts = document.getElementsByTagName('script');
-      for (let i = scripts.length - 1; i >= 0; i--) {
-        if (scripts[i].src && scripts[i].src.includes(cbName)) {
-          scripts[i].parentNode.removeChild(scripts[i]);
-        }
-      }
-      try { delete window[cbName]; } catch (e) {}
-    }
-
-    function renderOperationData(data) {
-      console.log('employee render data:', data);
-
-      const empName =
-        data['ชื่อพนักงาน'] ||
-        data['พนักงาน'] ||
-        data['employeeName'] ||
-        '-';
-      document.getElementById('empName').textContent = empName;
-
-      const empCode = data['รหัสพนักงาน'] || '';
-      const empPos  = data['ตำแหน่ง'] || '';
-      const codePos =
-        data['รหัสพนักงาน/ตำแหน่ง'] ||
-        data['empCodePosition'] ||
-        '';
-
-      document.getElementById('empCodePos').textContent =
-        codePos ||
-        (empCode && empPos
-          ? `${empCode} / ${empPos}`
-          : (empCode || empPos || '-'));
-
-      const deptOnly  = data['แผนก'] || '';
-      const divOnly   = data['ฝ่าย'] || '';
-      const deptCombo =
-        data['แผนก/ฝ่าย'] ||
-        data['department'] ||
-        '';
-
-      document.getElementById('dept').textContent =
-        deptCombo ||
-        (deptOnly || divOnly
-          ? [deptOnly, divOnly].filter(Boolean).join(' / ')
-          : '-');
-
-      const empStatus =
-        data['สภาพพนักงาน/วันเริ่มงาน'] ||
-        data['employmentStatus'] ||
-        data['สภาพจ้างงาน'] ||
-        '';
-      document.getElementById('employmentStatus').textContent =
-        empStatus || '-';
-
-      document.getElementById('employeeName').textContent = empName;
-
-      const actionType =
-        data['ประเภทการดำเนินการ'] ||
-        data['การดำเนินการ'] ||
-        data['actionType'] ||
-        '';
-
-      const actionCode =
-        data['รหัสการดำเนินการ (code)'] ||
-        data['actionCode'] ||
-        '';
-
-      const map = {
-        'แต่งตั้ง': 'action_appoint',
-        'โอนย้าย': 'action_transfer',
-        'เปลี่ยนสภาพการจ้างงาน': 'action_change',
-        'เลื่อนตำแหน่ง': 'action_promote',
-        'ผ่านทดลองงาน': 'action_passProb',
-        'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก': 'action_terminate',
-        'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
-        'ให้ออกจากงานโดยไม่มีสมัครใจ/ลาออก': 'action_terminate',
-        'ให้ออกจากงาน / ลาออก': 'action_terminate',
-        'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
-        'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
-        'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
-        'ตัดค่าจ้าง/เงินเดือน': 'action_cut',
-        'อื่น ๆ': 'action_other',
-        'อื่นๆ': 'action_other'
-      };
-      const radioId = map[actionType];
-      if (radioId) {
-        const r = document.getElementById(radioId);
-        if (r) r.checked = true;
-      }
-
-      const actionDetail = data['รายละเอียดการดำเนินการ'] || '';
-      const extraDetail  = data['รายละเอียดเพิ่มเติม'] || '';
-
-      // ✅ ถ้าเป็นให้ออกจากงาน / ลาออก ใส่เหตุผลลง terminate_detail ไว้ก่อน
-      const isTerminate =
-        actionCode === 'resign' || (actionType && actionType.indexOf('ให้ออกจากงาน') !== -1);
-      if (isTerminate) {
-        const td = document.getElementById('terminate_detail');
-        if (td && !td.textContent) {
-          td.textContent = actionDetail || extraDetail || '-';
-        }
-      }
-
-      applyActionDetailToLines(actionCode, actionType, actionDetail);
-
-      // กล่องใหญ่ด้านล่าง: ใช้ "รายละเอียดเพิ่มเติม"
-      document.getElementById('detailText').textContent =
-        extraDetail || '-';
-
-      const effRaw =
-        data['วันที่มีผล'] ||
-        data['มีผลบังคับตั้งแต่วันที่'] ||
-        data['effectiveDate'] ||
-        '';
-      const effDisplay = effRaw ? formatDateDisplay(effRaw) : '-';
-      document.getElementById('effectiveDate').textContent =
-        effDisplay || '-';
-
-      document.getElementById('appoint_to').textContent      =
-        document.getElementById('appoint_to').textContent      || (data['แต่งตั้ง_เป็น'] || '');
-      document.getElementById('transfer_from').textContent   =
-        document.getElementById('transfer_from').textContent   || (data['โอนย้าย_จากเดิม'] || '');
-      document.getElementById('transfer_to').textContent     =
-        document.getElementById('transfer_to').textContent     || (data['โอนย้าย_เป็น'] || '');
-      document.getElementById('change_from').textContent     =
-        document.getElementById('change_from').textContent     || (data['เปลี่ยนสภาพ_จากเดิม'] || '');
-      document.getElementById('change_to').textContent       =
-        document.getElementById('change_to').textContent       || (data['เปลี่ยนสภาพ_เป็น'] || '');
-      document.getElementById('promote_from').textContent    =
-        document.getElementById('promote_from').textContent    || (data['เลื่อนตำแหน่ง_จากเดิม'] || '');
-      document.getElementById('promote_to').textContent      =
-        document.getElementById('promote_to').textContent      || (data['เลื่อนตำแหน่ง_เป็น'] || '');
-      document.getElementById('passProb_to').textContent     =
-        document.getElementById('passProb_to').textContent     || (data['ผ่านทดลองงาน_เป็น'] || '');
-      document.getElementById('terminate_detail').textContent=
-        document.getElementById('terminate_detail').textContent|| (data['ให้ออกจากงาน_รายละเอียด'] || '');
-      document.getElementById('raise_from').textContent      =
-        document.getElementById('raise_from').textContent      || (data['ขึ้นค่าจ้าง_จากเดิม'] || '');
-      document.getElementById('raise_to').textContent        =
-        document.getElementById('raise_to').textContent        || (data['ขึ้นค่าจ้าง_เป็น'] || '');
-      document.getElementById('cut_from').textContent        =
-        document.getElementById('cut_from').textContent        || (data['ตัดค่าจ้าง_จากเดิม'] || '');
-      document.getElementById('cut_to').textContent          =
-        document.getElementById('cut_to').textContent          || (data['ตัดค่าจ้าง_เป็น'] || '');
-      document.getElementById('other_detail').textContent    =
-        document.getElementById('other_detail').textContent    || (data['อื่นๆ_รายละเอียด'] || '');
-    }
-
+    // ===== ส่วนลายเซ็น =====
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width;
