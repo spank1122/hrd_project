@@ -672,21 +672,39 @@
           return;
         }
 
-        // ดึงเฉพาะเอกสารที่ completed (อนุมัติสำเร็จแล้ว)
+        // ดึงเฉพาะเอกสารที่ completed (อนุมัติสำเร็จแล้ว) และมี PDF URL
         const completedDocs = (response.documents || []).filter(doc => {
           const status = (doc.status || '').toLowerCase();
-          return status === 'completed' && doc.finalPdfUrl;
+          // ดูว่ามี PDF URL หรือ finalPdfUrl
+          const hasPdfUrl = doc.finalPdfUrl || 
+                           doc.pdfUrl ||
+                           (doc.signatureApprover && doc.signatureApprover.finalPdfUrl);
+          return status === 'completed' && hasPdfUrl;
         });
 
         // แปลงข้อมูล
         allDocuments = completedDocs.map(doc => {
           const typeLabel = getTypeLabel(doc.type);
+          
+          // ดึง PDF URL จากหลายที่
+          let pdfUrl = doc.finalPdfUrl || doc.pdfUrl || '';
+          
+          // ถ้า PDF URL มี __ ที่หน้า-หลัง ให้ตัดออก
+          if (pdfUrl && pdfUrl.includes('__')) {
+            pdfUrl = pdfUrl.replace(/^__/, '').replace(/__$/, '').trim();
+          }
+          
+          // ถ้ายังไม่มี PDF URL ลองหาจาก signatureApprover
+          if (!pdfUrl && doc.signatureApprover && doc.signatureApprover.finalPdfUrl) {
+            pdfUrl = doc.signatureApprover.finalPdfUrl;
+          }
+          
           return {
-            id: doc.id || '',
-            requester: doc.employee || '-',
+            id: doc.id || doc.docNo || '',
+            requester: doc.employee || doc.requesterName || '-',
             type: typeLabel,
-            pdfUrl: doc.finalPdfUrl || '',
-            date: doc.createdDate || '',
+            pdfUrl: pdfUrl,
+            date: doc.createdDate || doc.lastUpdated || new Date().toISOString(),
             status: 'completed'
           };
         });
