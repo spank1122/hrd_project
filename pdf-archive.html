@@ -20,6 +20,8 @@
       --text-dark: #2d3748;
       --text-light: #718096;
       --border: #e2e8f0;
+      --success: #10b981;
+      --error: #ef4444;
     }
 
     body {
@@ -30,7 +32,6 @@
       position: relative;
     }
 
-    /* Animated Background */
     body::before {
       content: '';
       position: absolute;
@@ -57,7 +58,6 @@
       z-index: 1;
     }
 
-    /* Header */
     .header {
       text-align: center;
       margin-bottom: 40px;
@@ -115,7 +115,6 @@
       }
     }
 
-    /* Filter Section */
     .filter-section {
       background: white;
       border-radius: 16px;
@@ -159,7 +158,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* Grid */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -178,14 +176,12 @@
       }
     }
 
-    /* Card */
     .pdf-card {
       background: white;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
-      cursor: pointer;
       display: flex;
       flex-direction: column;
     }
@@ -204,6 +200,24 @@
       justify-content: center;
       font-size: 48px;
       color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pdf-preview::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
 
     .pdf-card:nth-child(2) .pdf-preview,
@@ -260,13 +274,18 @@
       gap: 6px;
     }
 
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .btn-view {
       background: var(--purple-gradient);
       color: white;
       box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     }
 
-    .btn-view:hover {
+    .btn-view:hover:not(:disabled) {
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
@@ -277,12 +296,11 @@
       box-shadow: 0 2px 8px rgba(240, 147, 251, 0.3);
     }
 
-    .btn-download:hover {
+    .btn-download:hover:not(:disabled) {
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
     }
 
-    /* Empty State */
     .empty-state {
       text-align: center;
       padding: 60px 20px;
@@ -307,6 +325,132 @@
     .empty-text {
       color: var(--text-light);
       font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      grid-column: 1 / -1;
+    }
+
+    .spinner {
+      border: 4px solid var(--border);
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow: auto;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: white;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: color 0.3s ease;
+    }
+
+    .btn-close:hover {
+      color: var(--text-dark);
+    }
+
+    .modal-body {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .pdf-iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      border-radius: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 16px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      z-index: 2000;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--error);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
 
     @media (max-width: 768px) {
@@ -321,12 +465,15 @@
       .grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       }
+
+      .pdf-iframe {
+        height: 400px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <div class="header">
       <div class="header-top">
         <button class="btn-back" onclick="goBack()">← ย้อนกลับ</button>
@@ -336,7 +483,6 @@
       <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
     </div>
 
-    <!-- Filter Section -->
     <div class="filter-section">
       <div class="filter-grid">
         <div class="filter-input">
@@ -369,49 +515,130 @@
       </div>
     </div>
 
-    <!-- Grid -->
     <div class="grid" id="pdfGrid"></div>
   </div>
 
-  <script>
-    // Mock Data (ใช้ประเภทชุดเดียวกับหน้า tracking)
-    const documents = [
-      {
-        id: 'DOC-001',
-        title: 'สมชาย สมการ - แต่งตั้งหัวหน้าสายงาน',
-        type: 'appoint',
-        date: '2025-11-22',
-        employee: 'สมชาย สมการ'
-      },
-      {
-        id: 'DOC-002',
-        title: 'วิไล วิศวะ - เลื่อนตำแหน่งเป็น Senior Engineer',
-        type: 'promotion',
-        date: '2025-11-21',
-        employee: 'วิไล วิศวะ'
-      },
-      {
-        id: 'DOC-003',
-        title: 'สมหญิง สมดี - ขึ้นค่าจ้างประจำปี',
-        type: 'salaryup',
-        date: '2025-11-20',
-        employee: 'สมหญิง สมดี'
-      },
-      {
-        id: 'DOC-004',
-        title: 'สมชาย สมการ - โอนย้ายแผนก',
-        type: 'transfer',
-        date: '2025-11-19',
-        employee: 'สมชาย สมการ'
-      }
-    ];
+  <!-- Modal สำหรับดูไฟล์ PDF -->
+  <div class="modal" id="pdfModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">ดูไฟล์ PDF</h2>
+        <button class="btn-close" onclick="closePDFModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <iframe id="pdfFrame" class="pdf-iframe"></iframe>
+      </div>
+    </div>
+  </div>
 
-    // Initialize
+  <!-- Toast Notification -->
+  <div class="toast" id="toast" style="display: none;"></div>
+
+  <script>
+    // ========================================
+    // CONFIG: Google Drive PDF URLs
+    // ========================================
+    // รูปแบบ: https://drive.google.com/uc?id=FILE_ID&export=pdf
+    // เปลี่ยน FILE_ID ให้เป็นของคุณ
+    
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+
+    let documents = [];
+    let isLoading = false;
+
+    // ========================================
+    // INIT
+    // ========================================
     document.addEventListener('DOMContentLoaded', () => {
-      displayPDFs(documents);
+      loadPDFList();
       setupFilters();
     });
 
+    // ========================================
+    // LOAD PDF LIST FROM GAS API
+    // ========================================
+    function loadPDFList() {
+      const grid = document.getElementById('pdfGrid');
+      
+      grid.innerHTML = `
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <div style="color: var(--text-light);">กำลังโหลดเอกสาร...</div>
+        </div>
+      `;
+
+      isLoading = true;
+
+      // เรียก GAS API เพื่อดึงรายการไฟล์ PDF
+      const callback = 'pdfCallback_' + Date.now();
+      const script = document.createElement('script');
+      script.src = `${WEB_APP_URL}?action=getTrackingDocs&callback=${callback}`;
+
+      window[callback] = function(response) {
+        isLoading = false;
+
+        if (!response || !response.success) {
+          showToast('⚠️ ไม่สามารถโหลดเอกสารได้', 'error');
+          grid.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">❌</div>
+              <div class="empty-title">เกิดข้อผิดพลาด</div>
+              <div class="empty-text">ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง</div>
+            </div>
+          `;
+          return;
+        }
+
+        // แปลงข้อมูลจาก tracking API
+        const trackingDocs = response.documents || [];
+        documents = trackingDocs.map(doc => ({
+          id: doc.id,
+          title: `${doc.employee} - ${getFullTypeLabel(doc.type)}`,
+          type: doc.type,
+          date: doc.createdDate,
+          employee: doc.employee,
+          pdfUrl: '', // จะเพิ่มจาก tracking data
+          status: doc.status,
+          steps: doc.steps || []
+        }));
+
+        // ตรวจสอบจำนวน
+        if (documents.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📄</div>
+              <div class="empty-title">ยังไม่มีเอกสาร</div>
+              <div class="empty-text">จะมีเอกสาร PDF ปรากฏขึ้นตรงนี้เมื่อมีการสร้างใบดำเนินการ</div>
+            </div>
+          `;
+        } else {
+          displayPDFs(documents);
+          showToast(`✅ โหลดเอกสารสำเร็จ (${documents.length} รายการ)`, 'success');
+        }
+
+        // ลบ script
+        try { delete window[callback]; } catch (e) {}
+      };
+
+      script.onerror = function() {
+        isLoading = false;
+        showToast('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">❌</div>
+            <div class="empty-title">เกิดข้อผิดพลาด</div>
+            <div class="empty-text">ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง</div>
+          </div>
+        `;
+        try { delete window[callback]; } catch (e) {}
+      };
+
+      document.head.appendChild(script);
+    }
+
+    // ========================================
+    // DISPLAY PDFs
+    // ========================================
     function displayPDFs(docs) {
       const grid = document.getElementById('pdfGrid');
       
@@ -432,22 +659,29 @@
           <div class="pdf-content">
             <div class="pdf-title">${doc.title}</div>
             <div class="pdf-info">${getTypeLabel(doc.type)}</div>
-            <div class="pdf-date">${new Date(doc.date).toLocaleDateString('th-TH')}</div>
+            <div class="pdf-info">📌 ${doc.id}</div>
+            <div class="pdf-date">${formatDate(doc.date)}</div>
             <div class="pdf-actions">
-              <button class="btn btn-view" onclick="viewPDF('${doc.id}')">👁️ ดู</button>
-              <button class="btn btn-download" onclick="downloadPDF('${doc.id}')">⬇️ ดาวน์โหลด</button>
+              <button class="btn btn-view" onclick="viewPDF('${doc.id}', '${doc.title.replace(/'/g, "\\'")}')">👁️ ดู</button>
+              <button class="btn btn-download" onclick="downloadPDF('${doc.id}', '${doc.title.replace(/'/g, "\\'")}')">⬇️ ดาวน์โหลด</button>
             </div>
           </div>
         </div>
       `).join('');
     }
 
+    // ========================================
+    // SETUP FILTERS
+    // ========================================
     function setupFilters() {
       document.getElementById('searchInput').addEventListener('input', applyFilters);
       document.getElementById('typeFilter').addEventListener('change', applyFilters);
       document.getElementById('sortFilter').addEventListener('change', applyFilters);
     }
 
+    // ========================================
+    // APPLY FILTERS
+    // ========================================
     function applyFilters() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const type = document.getElementById('typeFilter').value;
@@ -455,16 +689,26 @@
 
       let filtered = documents.filter(doc => {
         return (
-          (doc.title.toLowerCase().includes(search) || doc.id.toLowerCase().includes(search)) &&
+          (doc.title.toLowerCase().includes(search) || 
+           doc.id.toLowerCase().includes(search) ||
+           doc.employee.toLowerCase().includes(search)) &&
           (!type || doc.type === type)
         );
       });
 
       // Sort
       if (sort === 'newest') {
-        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+        filtered.sort((a, b) => {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          return db - da;
+        });
       } else if (sort === 'oldest') {
-        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+        filtered.sort((a, b) => {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          return da - db;
+        });
       } else if (sort === 'name') {
         filtered.sort((a, b) => a.title.localeCompare(b.title, 'th'));
       }
@@ -472,34 +716,125 @@
       displayPDFs(filtered);
     }
 
+    // ========================================
+    // VIEW PDF (เปิดใน Modal)
+    // ========================================
+    function viewPDF(docNo, title) {
+      const modal = document.getElementById('pdfModal');
+      const iframe = document.getElementById('pdfFrame');
+      const modalTitle = document.getElementById('modalTitle');
+
+      // ใช้ Google Drive URL สำหรับดูไฟล์ (embed)
+      // รูปแบบ: https://drive.google.com/file/d/FILE_ID/preview
+      // แต่ปัจจุบันใช้ API เพื่อดึง PDF URL จากการบันทึก
+      
+      modalTitle.textContent = `📄 ${title}`;
+      
+      // ตัวอย่าง: ถ้ามี pdfUrl จาก tracking data ก็ใช้นั่น
+      // ส่วนตอนนี้ยังไม่มีลิงก์จริง ก็ใช้ placeholder
+      const pdfUrl = `https://drive.google.com/file/d/${docNo}/preview`;
+      
+      iframe.src = pdfUrl;
+      modal.classList.add('show');
+
+      showToast(`👁️ กำลังเปิดไฟล์ ${docNo}...`, 'success');
+    }
+
+    // ========================================
+    // DOWNLOAD PDF
+    // ========================================
+    function downloadPDF(docNo, title) {
+      // ตัวอย่าง: ดาวน์โหลด PDF จาก Google Drive
+      // รูปแบบ: https://drive.google.com/uc?id=FILE_ID&export=download
+      
+      const downloadUrl = `https://drive.google.com/uc?id=${docNo}&export=download`;
+      
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${title}.pdf`;
+      link.click();
+
+      showToast(`⬇️ กำลังดาวน์โหลด ${title}...`, 'success');
+    }
+
+    // ========================================
+    // CLOSE MODAL
+    // ========================================
+    function closePDFModal() {
+      const modal = document.getElementById('pdfModal');
+      const iframe = document.getElementById('pdfFrame');
+      modal.classList.remove('show');
+      iframe.src = '';
+    }
+
+    // ========================================
+    // HELPERS
+    // ========================================
     function getTypeLabel(type) {
+      const labels = {
+        appoint: '🎯 แต่งตั้ง',
+        transfer: '🔄 โอนย้าย',
+        employmentchange: '📋 เปลี่ยนสภาพการจ้างงาน',
+        promotion: '📈 เลื่อนตำแหน่ง',
+        passprobation: '✅ ผ่านการทดลองงาน',
+        termination: '🚪 ให้ออกจากงานโดยไม่สมัครใจ/ลาออก',
+        salaryup: '💰 ขึ้นค่าจ้าง',
+        salarydown: '💸 ตัดค่าจ้าง',
+        other: '📌 อื่นๆ'
+      };
+      return labels[type] || type || '-';
+    }
+
+    function getFullTypeLabel(type) {
       const labels = {
         appoint: 'แต่งตั้ง',
         transfer: 'โอนย้าย',
         employmentchange: 'เปลี่ยนสภาพการจ้างงาน',
         promotion: 'เลื่อนตำแหน่ง',
         passprobation: 'ผ่านการทดลองงาน',
-        termination: 'ให้ออกจากงานโดยไม่สมัครใจ/ลาออก',
-        salaryup: 'ขึ้นค่าจ้าง / เงินเดือน',
-        salarydown: 'ตัดค่าจ้าง / เงินเดือน',
+        termination: 'ให้ออกจากงาน',
+        salaryup: 'ขึ้นค่าจ้าง',
+        salarydown: 'ตัดค่าจ้าง',
         other: 'อื่นๆ'
       };
       return labels[type] || type || '-';
     }
 
-    function viewPDF(docId) {
-      alert(`📖 กำลังเปิด ${docId}...`);
-      // ของจริงค่อยเปลี่ยนเป็น window.open(url) หรือ embed viewer
-    }
-
-    function downloadPDF(docId) {
-      alert(`⬇️ ดาวน์โหลด ${docId}...`);
-      // ของจริงค่อยใส่ลิงก์ดาวน์โหลด PDF
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      try {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      } catch (e) {
+        return dateStr;
+      }
     }
 
     function goBack() {
       window.history.back();
     }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.style.display = 'block';
+
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+
+    // ปิด modal เมื่อกดนอกพื้นที่
+    document.getElementById('pdfModal')?.addEventListener('click', function(e) {
+      if (e.target === this) {
+        closePDFModal();
+      }
+    });
   </script>
 </body>
 </html>
