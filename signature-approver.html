@@ -239,7 +239,7 @@
       white-space: pre-wrap;
     }
 
-    /* ===== ฝั่งลายเซ็น ผู้อนุมัติ ===== */
+    /* ===== ฝั่งลายเซ็น ผู้อนุมัติ (ใหม่) ===== */
 
     .status-badge {
       display: inline-block;
@@ -252,6 +252,104 @@
       margin-bottom: 12px;
     }
 
+    .signature-section {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      background: #f9fafb;
+    }
+
+    .signature-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+    }
+
+    /* ===== ปุ่มอนุมัติ / ไม่อนุมัติ (บน) ===== */
+    .decision-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn-decision {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .btn-approve {
+      background: var(--success);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    .btn-approve:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+    }
+    .btn-approve.active {
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-reject {
+      background: var(--danger);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+    }
+    .btn-reject:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
+    }
+    .btn-reject.active {
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+    }
+
+    /* เหตุผลไม่อนุมัติ (แสดง/ซ่อนตามการเลือก) */
+    .reject-reason-section {
+      display: none;
+      border: 2px solid var(--danger);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fef2f2;
+      margin-bottom: 16px;
+    }
+
+    .reject-reason-section.show {
+      display: block;
+    }
+
+    .reject-reason-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--danger);
+      margin-bottom: 8px;
+    }
+
+    .reject-reason-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--danger);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    /* ===== Canvas (ลายเซ็น) ===== */
     .signature-pad {
       border: 2px dashed var(--border);
       border-radius: 10px;
@@ -259,13 +357,14 @@
       cursor: crosshair;
       display: block;
       width: 100%;
-      margin: 8px 0 12px;
+      margin: 12px 0;
     }
 
-    .btn-row {
+    /* ===== ปุ่มล้าง/บันทึก (ล่าง) ===== */
+    .signature-actions {
       display: flex;
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .btn {
@@ -288,7 +387,7 @@
       background: #e5e7eb;
       color: #374151;
     }
-    .btn-clear:hover {
+    .btn-clear:hover:not(:disabled) {
       background: #d1d5db;
     }
 
@@ -297,31 +396,9 @@
       color: #ffffff;
       box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
     }
-    .btn-save:hover {
+    .btn-save:hover:not(:disabled) {
       transform: translateY(-1px);
       box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
-    }
-
-    .btn-approve {
-      background: var(--success);
-      color: #ffffff;
-      flex: 1;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-    }
-    .btn-approve:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
-    }
-
-    .btn-reject {
-      background: var(--danger);
-      color: #ffffff;
-      flex: 1;
-      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
-    }
-    .btn-reject:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
     }
 
     .btn:disabled {
@@ -374,133 +451,44 @@
       font-size: 13px;
     }
 
-    .success-message.show { display: block; }
+    .success-message.show { 
+      display: block; 
+    }
 
-    /* ===== Modal Dialog ===== */
-    .modal {
+    .success-message.reject {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* การแสดงสถานะปุ่ม */
+    .decision-indicator {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #6b7280;
+      text-align: center;
+      margin-top: 8px;
       display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      animation: fadeIn 0.3s ease;
     }
 
-    .modal.show { display: flex; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .modal-content {
-      background-color: white;
-      margin: auto;
-      padding: 28px;
-      border-radius: 16px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(30px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .modal-header {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .modal-body {
-      margin-bottom: 20px;
-      color: var(--text-dark);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .modal-input-group {
-      margin-bottom: 16px;
-    }
-
-    .modal-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-dark);
-      margin-bottom: 6px;
+    .decision-indicator.show {
       display: block;
     }
 
-    .modal-textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 13px;
-      resize: vertical;
-      min-height: 80px;
+    .decision-indicator.approve {
+      background: #d1fae5;
+      color: #065f46;
     }
 
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-
-    .btn-modal {
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-cancel {
-      background: #e5e7eb;
-      color: #374151;
-    }
-    .btn-cancel:hover {
-      background: #d1d5db;
-    }
-
-    .btn-confirm {
-      background: var(--success);
-      color: white;
-    }
-    .btn-confirm:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-confirm.reject {
-      background: var(--danger);
-    }
-    .btn-confirm.reject:hover {
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    .decision-indicator.reject {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
     @media (max-width: 900px) {
       .content { grid-template-columns: 1fr; }
+      .decision-buttons { flex-direction: column; }
     }
   </style>
 </head>
@@ -719,25 +707,43 @@
         </div>
       </div>
 
-      <!-- ฝั่งขวา: ลายเซ็นผู้อนุมัติ -->
+      <!-- ฝั่งขวา: ลายเซ็นผู้อนุมัติ (ใหม่ layout) -->
       <div class="card">
         <div class="card-title">✍️ ลายเซ็นของคุณ</div>
 
         <div class="status-badge" id="statusBadge">⏳ รอการอนุมัติ</div>
 
-        <canvas id="signaturePad" class="signature-pad" height="170"></canvas>
-
-        <div class="btn-row">
-          <button type="button" class="btn btn-clear" id="btnClear">✕ ล้างลายเซ็น</button>
-          <button type="button" class="btn btn-save" id="btnSave">✓ บันทึกลายเซ็น</button>
+        <!-- === ปุ่มอนุมัติ / ไม่อนุมัติ (บน) === -->
+        <div class="decision-buttons">
+          <button type="button" class="btn-decision btn-approve" id="btnApprove">✅ อนุมัติ</button>
+          <button type="button" class="btn-decision btn-reject" id="btnReject">❌ ไม่อนุมัติ</button>
         </div>
 
-        <!-- ปุ่มอนุมัติ / ไม่อนุมัติ -->
-        <div class="btn-row">
-          <button type="button" class="btn btn-approve" id="btnApprove">✅ อนุมัติ</button>
-          <button type="button" class="btn btn-reject" id="btnReject">❌ ไม่อนุมัติ</button>
+        <div class="decision-indicator" id="decisionIndicator"></div>
+
+        <!-- === เหตุผลไม่อนุมัติ (แสดงเฉพาะเมื่อเลือกไม่อนุมัติ) === -->
+        <div class="reject-reason-section" id="rejectReasonSection">
+          <div class="reject-reason-label">🔴 เหตุผลไม่อนุมัติ</div>
+          <textarea 
+            id="rejectReasonInput" 
+            class="reject-reason-input"
+            placeholder="กรุณาระบุเหตุผลการไม่อนุมัติ..."
+          ></textarea>
         </div>
 
+        <!-- === Canvas สำหรับลายเซ็น + ปุ่มล้าง/บันทึก (ล่าง) === -->
+        <div class="signature-section">
+          <div class="signature-section-title">ลายเซ็นของคุณ</div>
+          
+          <canvas id="signaturePad" class="signature-pad" height="180"></canvas>
+
+          <div class="signature-actions">
+            <button type="button" class="btn btn-clear" id="btnClear" disabled>✕ ล้างลายเซ็น</button>
+            <button type="button" class="btn btn-save" id="btnSave" disabled>✓ บันทึกลายเซ็น</button>
+          </div>
+        </div>
+
+        <!-- === ข้อมูลเพิ่มเติม === -->
         <div class="info-item">
           <div class="info-label">บทบาท</div>
           <div>ประธานเจ้าหน้าที่บริหาร (ผู้อนุมัติ)</div>
@@ -754,49 +760,8 @@
         </div>
 
         <div class="success-message" id="successMessage">
-          ✓ บันทึกลายเซ็นเรียบร้อยแล้ว! ระบบจะส่งอีเมลให้พนักงานเซ็นรับทราบขั้นตอนสุดท้าย
+          ✓ บันทึกลายเซ็นเรียบร้อยแล้ว!
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal สำหรับการอนุมัติ -->
-  <div id="approveModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        ✅ ยืนยันการอนุมัติ
-      </div>
-      <div class="modal-body">
-        คุณกำลังอนุมัติใบดำเนินการสำหรับ <strong id="modalEmpName">-</strong> 
-        <br><br>
-        ลายเซ็นและข้อมูลจะถูกบันทึกเข้าระบบ
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-modal btn-cancel" id="btnApproveCancel">ยกเลิก</button>
-        <button type="button" class="btn-modal btn-confirm" id="btnApproveConfirm">อนุมัติ</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal สำหรับการไม่อนุมัติ -->
-  <div id="rejectModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        ❌ ไม่อนุมัติใบดำเนินการ
-      </div>
-      <div class="modal-body">
-        <p>คุณกำลังไม่อนุมัติใบดำเนินการสำหรับ <strong id="modalEmpNameReject">-</strong></p>
-        <p style="color: var(--danger); font-weight: 600; margin-top: 12px;">
-          ⚠️ การไม่อนุมัติจะส่งใบดำเนินการกลับไปหาผู้เสนอ
-        </p>
-      </div>
-      <div class="modal-input-group">
-        <label class="modal-label">เหตุผลการไม่อนุมัติ</label>
-        <textarea id="rejectReason" class="modal-textarea" placeholder="กรุณาระบุเหตุผลการไม่อนุมัติ..."></textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-modal btn-cancel" id="btnRejectCancel">ยกเลิก</button>
-        <button type="button" class="btn-modal btn-confirm reject" id="btnRejectConfirm">ยืนยันไม่อนุมัติ</button>
       </div>
     </div>
   </div>
@@ -853,8 +818,6 @@
         data['employeeName'] ||
         '-';
       document.getElementById('empName').textContent = empName;
-      document.getElementById('modalEmpName').textContent = empName;
-      document.getElementById('modalEmpNameReject').textContent = empName;
 
       const empCode = data['รหัสพนักงาน'] || '';
       const empPos  = data['ตำแหน่ง'] || '';
@@ -935,84 +898,63 @@
       switch (actionType) {
         case 'แต่งตั้ง':
           document.getElementById('appoint_to').textContent =
-            globalTo ||
-            data['แต่งตั้ง_เป็น'] ||
-            opDetail ||
-            '';
+            globalTo || data['แต่งตั้ง_เป็น'] || opDetail || '';
           break;
-
         case 'โอนย้าย': {
           const fromCol = globalFrom || data['โอนย้าย_จากเดิม'] || '';
           const toCol = globalTo || data['โอนย้าย_เป็น'] || '';
-
           if (fromCol || toCol) {
             document.getElementById('transfer_from').textContent = fromCol;
             document.getElementById('transfer_to').textContent   = toCol;
           } else if (opDetail) {
             const m = opDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
-            document.getElementById('transfer_from').textContent =
-              m && m[1] ? m[1].trim() : opDetail;
-            document.getElementById('transfer_to').textContent =
-              m && m[2] ? m[2].trim() : '';
+            document.getElementById('transfer_from').textContent = m && m[1] ? m[1].trim() : opDetail;
+            document.getElementById('transfer_to').textContent = m && m[2] ? m[2].trim() : '';
           }
           break;
         }
-
         case 'เปลี่ยนสภาพการจ้างงาน': {
           const fromCol = globalFrom || data['เปลี่ยนสภาพ_จากเดิม'] || '';
           const toCol = globalTo || data['เปลี่ยนสภาพ_เป็น'] || '';
-
           document.getElementById('change_from').textContent = fromCol || opDetail || '';
           document.getElementById('change_to').textContent = toCol;
           break;
         }
-
         case 'เลื่อนตำแหน่ง': {
           const fromCol = globalFrom || data['เลื่อนตำแหน่ง_จากเดิม'] || '';
           const toCol = globalTo || data['เลื่อนตำแหน่ง_เป็น'] || '';
-
           document.getElementById('promote_from').textContent = fromCol || opDetail || '';
           document.getElementById('promote_to').textContent = toCol;
           break;
         }
-
         case 'ผ่านทดลองงาน':
-          document.getElementById('passProb_to').textContent =
-            globalTo || data['ผ่านทดลองงาน_เป็น'] || opDetail || '';
+          document.getElementById('passProb_to').textContent = globalTo || data['ผ่านทดลองงาน_เป็น'] || opDetail || '';
           break;
-
         case 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก':
         case 'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก':
         case 'ให้ออกจากงานโดยไม่มีสมัครใจ/ลาออก':
         case 'ให้ออกจากงาน / ลาออก':
-          document.getElementById('terminate_detail').textContent =
-            opDetail || data['ให้ออกจากงาน_รายละเอียด'] || '';
+          document.getElementById('terminate_detail').textContent = opDetail || data['ให้ออกจากงาน_รายละเอียด'] || '';
           break;
-
         case 'ขึ้นค่าจ้าง / เงินเดือน':
         case 'ขึ้นค่าจ้าง/เงินเดือน': {
           const fromCol = globalFrom || data['ขึ้นค่าจ้าง_จากเดิม'] || '';
           const toCol = globalTo || data['ขึ้นค่าจ้าง_เป็น'] || '';
-
           document.getElementById('raise_from').textContent = fromCol || opDetail || '';
           document.getElementById('raise_to').textContent = toCol;
           break;
         }
-
         case 'ตัดค่าจ้าง / เงินเดือน':
         case 'ตัดค่าจ้าง/เงินเดือน': {
           const fromCol = globalFrom || data['ตัดค่าจ้าง_จากเดิม'] || '';
           const toCol = globalTo || data['ตัดค่าจ้าง_เป็น'] || '';
-
           document.getElementById('cut_from').textContent = fromCol || opDetail || '';
           document.getElementById('cut_to').textContent = toCol;
           break;
         }
-
         case 'อื่น ๆ':
         case 'อื่นๆ':
-          document.getElementById('other_detail').textContent =
-            opDetail || data['อื่นๆ_รายละเอียด'] || '';
+          document.getElementById('other_detail').textContent = opDetail || data['อื่นๆ_รายละเอียด'] || '';
           break;
       }
 
@@ -1039,8 +981,7 @@
         '';
 
       if (!DOC_NO) {
-        document.getElementById('headerSubtitle').textContent =
-          'ไม่พบเลขที่เอกสาร (docNo/id/row)';
+        document.getElementById('headerSubtitle').textContent = 'ไม่พบเลขที่เอกสาร (docNo/id/row)';
         if (statusEl) {
           statusEl.textContent = 'ไม่พบเลขที่เอกสารในลิงก์';
           statusEl.classList.add('error');
@@ -1048,8 +989,7 @@
         return;
       }
 
-      document.getElementById('headerSubtitle').textContent =
-        `เลขที่เอกสาร: ${DOC_NO}`;
+      document.getElementById('headerSubtitle').textContent = `เลขที่เอกสาร: ${DOC_NO}`;
 
       const cbName = 'docAp_' + Date.now();
       const script = document.createElement('script');
@@ -1067,11 +1007,7 @@
         }
 
         const doc = res.data || {};
-        const opData =
-          doc.operationData ||
-          doc.row ||
-          doc ||
-          {};
+        const opData = doc.operationData || doc.row || doc || {};
 
         renderOperationData(opData);
 
@@ -1082,7 +1018,6 @@
         }
 
         const steps = doc.steps || [];
-
         if (steps[0]) {
           document.getElementById('historyStep1').textContent =
             `ผู้เสนอ: ${steps[0].name || '-'} (${formatDateTime(steps[0].time)})`;
@@ -1096,8 +1031,7 @@
         if (approverFromParam) {
           document.getElementById('approverName').textContent = approverFromParam;
         } else if (steps[2]) {
-          document.getElementById('approverName').textContent =
-            steps[2].name || 'ประธานเจ้าหน้าที่บริหาร';
+          document.getElementById('approverName').textContent = steps[2].name || 'ประธานเจ้าหน้าที่บริหาร';
         }
 
         cleanupJSONP(cbName);
@@ -1122,7 +1056,7 @@
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width;
-      canvas.height = 170;
+      canvas.height = 180;
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.strokeStyle = '#111827';
@@ -1136,6 +1070,10 @@
     }
 
     function startDraw(e) {
+      if (!currentDecision) {
+        alert('⚠️ กรุณาเลือก "อนุมัติ" หรือ "ไม่อนุมัติ" ก่อน');
+        return;
+      }
       isDrawing = true;
       hasSignature = true;
       const pos = getPos(e);
@@ -1152,117 +1090,118 @@
 
     function stopDraw() {
       isDrawing = false;
+      updateSignatureButtons();
+    }
+
+    function updateSignatureButtons() {
+      const btnClear = document.getElementById('btnClear');
+      const btnSave = document.getElementById('btnSave');
+
+      if (hasSignature && currentDecision) {
+        btnClear.disabled = false;
+        btnSave.disabled = false;
+      } else {
+        btnClear.disabled = true;
+        btnSave.disabled = true;
+      }
     }
 
     function clearSignature() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       hasSignature = false;
+      updateSignatureButtons();
       const msg = document.getElementById('successMessage');
       if (msg) msg.classList.remove('show');
-      const badge = document.getElementById('statusBadge');
-      if (badge) badge.textContent = '⏳ รอการอนุมัติ';
     }
 
+    // ===== Decision Buttons (Approve/Reject) =====
+    function selectApprove() {
+      if (currentDecision === 'approve') {
+        currentDecision = null;
+        document.getElementById('btnApprove').classList.remove('active');
+        document.getElementById('decisionIndicator').classList.remove('show');
+      } else {
+        currentDecision = 'approve';
+        document.getElementById('btnApprove').classList.add('active');
+        document.getElementById('btnReject').classList.remove('active');
+        
+        // ซ่อนกล่องเหตุผล
+        document.getElementById('rejectReasonSection').classList.remove('show');
+        
+        const indicator = document.getElementById('decisionIndicator');
+        indicator.textContent = '✅ คุณเลือก: อนุมัติ';
+        indicator.className = 'decision-indicator show approve';
+      }
+      updateSignatureButtons();
+    }
+
+    function selectReject() {
+      if (currentDecision === 'reject') {
+        currentDecision = null;
+        document.getElementById('btnReject').classList.remove('active');
+        document.getElementById('decisionIndicator').classList.remove('show');
+        document.getElementById('rejectReasonSection').classList.remove('show');
+      } else {
+        currentDecision = 'reject';
+        document.getElementById('btnReject').classList.add('active');
+        document.getElementById('btnApprove').classList.remove('active');
+        
+        // แสดงกล่องเหตุผล
+        document.getElementById('rejectReasonSection').classList.add('show');
+        document.getElementById('rejectReasonInput').focus();
+        
+        const indicator = document.getElementById('decisionIndicator');
+        indicator.textContent = '❌ คุณเลือก: ไม่อนุมัติ';
+        indicator.className = 'decision-indicator show reject';
+      }
+      updateSignatureButtons();
+    }
+
+    // ===== Save Signature =====
     function handleSaveSignature() {
       if (!DOC_NO) {
         alert('ไม่พบเลขที่เอกสาร');
         return;
       }
+
+      if (!currentDecision) {
+        alert('⚠️ กรุณาเลือก "อนุมัติ" หรือ "ไม่อนุมัติ"');
+        return;
+      }
+
       if (!hasSignature) {
         alert('กรุณาวาดลายเซ็นก่อน');
         return;
       }
+
+      // ถ้าไม่อนุมัติต้องมีเหตุผล
+      if (currentDecision === 'reject') {
+        const reason = document.getElementById('rejectReasonInput').value.trim();
+        if (!reason) {
+          alert('⚠️ กรุณาระบุเหตุผลการไม่อนุมัติ');
+          return;
+        }
+      }
+
       if (isSubmitting) return;
       isSubmitting = true;
 
-      const btnSave  = document.getElementById('btnSave');
+      const btnSave = document.getElementById('btnSave');
       const btnClear = document.getElementById('btnClear');
-      if (btnSave)  btnSave.disabled  = true;
-      if (btnClear) btnClear.disabled = true;
+      btnSave.disabled = true;
+      btnClear.disabled = true;
 
       const dataUrl = canvas.toDataURL('image/png');
+      const reason = currentDecision === 'reject' ? document.getElementById('rejectReasonInput').value : '';
+      const approverName = document.getElementById('approverName')?.textContent || '';
 
       const formData = new URLSearchParams();
       formData.append('action', 'saveSignature');
       formData.append('docNo', DOC_NO);
       formData.append('role', ROLE);
       formData.append('signature', dataUrl);
-
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: formData
-      }).then(() => {
-        const successMessage = document.getElementById('successMessage');
-        if (successMessage) successMessage.classList.add('show');
-
-        const statusBadge = document.getElementById('statusBadge');
-        if (statusBadge) statusBadge.textContent = '✓ บันทึกลายเซ็นแล้ว';
-
-        setTimeout(() => {
-          alert('บันทึกลายเซ็นผู้อนุมัติเรียบร้อย');
-        }, 600);
-      }).catch(err => {
-        console.error(err);
-        alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
-      }).finally(() => {
-        isSubmitting = false;
-        if (btnSave)  btnSave.disabled  = false;
-        if (btnClear) btnClear.disabled = false;
-      });
-    }
-
-    // ===== Modal Functions =====
-    function showApproveModal() {
-      if (!hasSignature) {
-        alert('กรุณาวาดลายเซ็นก่อน');
-        return;
-      }
-      document.getElementById('approveModal').classList.add('show');
-    }
-
-    function hideApproveModal() {
-      document.getElementById('approveModal').classList.remove('show');
-    }
-
-    function showRejectModal() {
-      if (!hasSignature) {
-        alert('กรุณาวาดลายเซ็นก่อน');
-        return;
-      }
-      document.getElementById('rejectModal').classList.add('show');
-    }
-
-    function hideRejectModal() {
-      document.getElementById('rejectModal').classList.remove('show');
-      document.getElementById('rejectReason').value = '';
-    }
-
-    function submitDecision(decision) {
-      if (!DOC_NO) {
-        alert('ไม่พบเลขที่เอกสาร');
-        return;
-      }
-      if (!hasSignature) {
-        alert('กรุณาวาดลายเซ็นก่อน');
-        return;
-      }
-      if (isSubmitting) return;
-      isSubmitting = true;
-
-      // ซ่อน modal
-      if (decision === 'approve') hideApproveModal();
-      if (decision === 'reject') hideRejectModal();
-
-      const dataUrl = canvas.toDataURL('image/png');
-      const reason = decision === 'reject' ? document.getElementById('rejectReason').value : '';
-
-      const formData = new URLSearchParams();
-      formData.append('action', 'saveSignature');
-      formData.append('docNo', DOC_NO);
-      formData.append('role', ROLE);
-      formData.append('signature', dataUrl);
-      formData.append('decision', decision);
+      formData.append('actorName', approverName);
+      formData.append('decision', currentDecision);
       formData.append('reason', reason);
 
       fetch(WEB_APP_URL, {
@@ -1270,35 +1209,31 @@
         mode: 'no-cors',
         body: formData
       }).then(() => {
+        const successMessage = document.getElementById('successMessage');
         const statusBadge = document.getElementById('statusBadge');
-        if (decision === 'approve') {
-          const successMessage = document.getElementById('successMessage');
-          if (successMessage) {
-            successMessage.textContent = '✅ อนุมัติเรียบร้อย! ระบบจะส่งอีเมลให้พนักงานเซ็นรับทราบ';
-            successMessage.classList.add('show');
-          }
+
+        if (currentDecision === 'approve') {
+          successMessage.classList.remove('reject');
+          successMessage.textContent = '✅ อนุมัติเรียบร้อย! ระบบจะส่งอีเมลให้พนักงานเซ็นรับทราบ';
           if (statusBadge) statusBadge.textContent = '✓ อนุมัติแล้ว';
         } else {
-          const successMessage = document.getElementById('successMessage');
-          if (successMessage) {
-            successMessage.textContent = '✅ ไม่อนุมัติเรียบร้อย! ระบบจะส่งอีเมลแจ้งให้ผู้เสนอทราบ';
-            successMessage.style.background = '#fee2e2';
-            successMessage.style.color = '#991b1b';
-            successMessage.classList.add('show');
-          }
+          successMessage.classList.add('reject');
+          successMessage.textContent = '✅ ไม่อนุมัติเรียบร้อย! ระบบจะส่งอีเมลให้ผู้เสนอทราบ';
           if (statusBadge) statusBadge.textContent = '✗ ไม่อนุมัติ';
-          if (statusBadge) statusBadge.style.background = '#fee2e2';
-          if (statusBadge) statusBadge.style.color = '#991b1b';
         }
 
+        successMessage.classList.add('show');
+
         setTimeout(() => {
-          alert(decision === 'approve' ? 'อนุมัติเรียบร้อยแล้ว' : 'ไม่อนุมัติเรียบร้อยแล้ว');
+          alert(currentDecision === 'approve' ? 'อนุมัติเรียบร้อยแล้ว' : 'ไม่อนุมัติเรียบร้อยแล้ว');
         }, 600);
       }).catch(err => {
         console.error(err);
         alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
       }).finally(() => {
         isSubmitting = false;
+        btnSave.disabled = false;
+        btnClear.disabled = false;
       });
     }
 
@@ -1319,25 +1254,8 @@
       document.getElementById('btnClear').addEventListener('click', clearSignature);
       document.getElementById('btnSave').addEventListener('click', handleSaveSignature);
 
-      // ปุ่มอนุมัติ / ไม่อนุมัติ
-      document.getElementById('btnApprove').addEventListener('click', showApproveModal);
-      document.getElementById('btnReject').addEventListener('click', showRejectModal);
-
-      // Modal Approve
-      document.getElementById('btnApproveCancel').addEventListener('click', hideApproveModal);
-      document.getElementById('btnApproveConfirm').addEventListener('click', () => submitDecision('approve'));
-
-      // Modal Reject
-      document.getElementById('btnRejectCancel').addEventListener('click', hideRejectModal);
-      document.getElementById('btnRejectConfirm').addEventListener('click', () => submitDecision('reject'));
-
-      // ปิด modal เมื่อคลิก modal backdrop
-      document.getElementById('approveModal').addEventListener('click', (e) => {
-        if (e.target.id === 'approveModal') hideApproveModal();
-      });
-      document.getElementById('rejectModal').addEventListener('click', (e) => {
-        if (e.target.id === 'rejectModal') hideRejectModal();
-      });
+      document.getElementById('btnApprove').addEventListener('click', selectApprove);
+      document.getElementById('btnReject').addEventListener('click', selectReject);
     });
 
     window.addEventListener('resize', resizeCanvas);
