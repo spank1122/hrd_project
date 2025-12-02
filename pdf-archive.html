@@ -596,7 +596,7 @@
       <div class="filter-grid">
         <div class="filter-input">
           <label>ค้นหา</label>
-          <input type="text" placeholder="ค้นหาเลขที่, ชื่อ หรือส่วนงาน..." id="searchInput">
+          <input type="text" placeholder="ค้นหาเลขที่, ชื่อ หรือประเภท..." id="searchInput">
         </div>
         <div class="filter-input">
           <label>เรียงลำดับ</label>
@@ -641,7 +641,7 @@
     });
 
     // ========================================
-    // LOAD FINAL PDF DOCUMENTS ONLY
+    // LOAD HR DOCUMENT FINAL PDF ONLY
     // ========================================
     function loadPDFList() {
       const grid = document.getElementById('pdfGrid');
@@ -656,7 +656,8 @@
 
       const callback = 'pdfCallback_' + Date.now();
       const script = document.createElement('script');
-      script.src = `${WEB_APP_URL}?action=getStatus&view=approval&callback=${callback}`;
+      // ดึงเฉพาะ HR Document Tracking ที่สำเร็จแล้ว (completed)
+      script.src = `${WEB_APP_URL}?action=getTrackingDocs&callback=${callback}`;
 
       window[callback] = function(response) {
         if (!response || !response.success) {
@@ -671,21 +672,24 @@
           return;
         }
 
-        // ดึงเฉพาะเอกสาร Approved พร้อม PDF URL
-        const approvedDocs = (response.data || []).filter(doc => {
-          const status = (doc.status || doc.finalStatus || '').toLowerCase();
-          return status === 'approved';
+        // ดึงเฉพาะเอกสารที่ completed (อนุมัติสำเร็จแล้ว)
+        const completedDocs = (response.documents || []).filter(doc => {
+          const status = (doc.status || '').toLowerCase();
+          return status === 'completed' && doc.finalPdfUrl;
         });
 
         // แปลงข้อมูล
-        allDocuments = approvedDocs.map(doc => ({
-          id: doc.id || doc.requestNo || doc.docNo || '',
-          requester: doc.requester || doc.requesterName || '-',
-          dept: doc.dept || doc.requesterDept || '-',
-          pdfUrl: doc.pdfUrl || doc.finalPdfUrl || '',
-          date: doc.lastUpdated || doc.requestTime || '',
-          status: 'approved'
-        }));
+        allDocuments = completedDocs.map(doc => {
+          const typeLabel = getTypeLabel(doc.type);
+          return {
+            id: doc.id || '',
+            requester: doc.employee || '-',
+            type: typeLabel,
+            pdfUrl: doc.finalPdfUrl || '',
+            date: doc.createdDate || '',
+            status: 'completed'
+          };
+        });
 
         // เรียงจากใหม่ไปเก่า
         allDocuments.sort((a, b) => {
@@ -728,6 +732,24 @@
     }
 
     // ========================================
+    // GET TYPE LABEL
+    // ========================================
+    function getTypeLabel(type) {
+      const labels = {
+        appoint: 'แต่งตั้ง',
+        transfer: 'โอนย้าย',
+        employmentchange: 'เปลี่ยนสภาพการจ้างงาน',
+        promotion: 'เลื่อนตำแหน่ง',
+        passprobation: 'ผ่านการทดลองงาน',
+        termination: 'ให้ออกจากงาน',
+        salaryup: 'ขึ้นค่าจ้าง',
+        salarydown: 'ตัดค่าจ้าง',
+        other: 'อื่นๆ'
+      };
+      return labels[type] || type || '-';
+    }
+
+    // ========================================
     // SETUP FILTERS
     // ========================================
     function setupFilters() {
@@ -746,7 +768,7 @@
         return (
           doc.id.toLowerCase().includes(search) || 
           doc.requester.toLowerCase().includes(search) ||
-          doc.dept.toLowerCase().includes(search)
+          doc.type.toLowerCase().includes(search)
         );
       });
 
@@ -800,8 +822,8 @@
           <div class="pdf-preview">📄</div>
           <div class="pdf-content">
             <div class="pdf-title">${doc.requester}</div>
+            <div class="pdf-info">📋 ${doc.type}</div>
             <div class="pdf-info">📌 ${doc.id}</div>
-            <div class="pdf-info">🏢 ${doc.dept}</div>
             <div class="pdf-date">${formatDate(doc.date)}</div>
             <div class="pdf-actions">
               <button class="btn btn-view" onclick="openPDF('${doc.pdfUrl}', '${doc.requester.replace(/'/g, "\\'")}')" ${!doc.pdfUrl ? 'disabled' : ''}>👁️ ดู</button>
