@@ -734,7 +734,6 @@ function renderOperationData(data) {
     'เลื่อนตำแหน่ง': 'action_promote',
     'ผ่านทดลองงาน': 'action_passProb',
 
-    // ✅ เพิ่มข้อความที่ตรงกับ JSON จริง
     'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก': 'action_terminate',
     'ให้ออกจากงาน / ลาออก': 'action_terminate',
     'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
@@ -753,16 +752,36 @@ function renderOperationData(data) {
     if (r) r.checked = true;
   }
 
+  // helper อ่านค่าจากคอลัมน์ From/To กลาง
+  const globalFrom =
+    data['ค่าจากเดิม (From)'] ||
+    data['actionFrom'] ||
+    '';
+  const globalTo =
+    data['ค่าใหม่ (To)'] ||
+    data['actionTo'] ||
+    '';
+
   // ---------- ใส่ข้อความลงแต่ละบรรทัดตามประเภท ----------
   switch (actionType) {
     case 'แต่งตั้ง':
       document.getElementById('appoint_to').textContent =
-        data['แต่งตั้ง_เป็น'] || opDetail || '';
+        globalTo ||
+        data['แต่งตั้ง_เป็น'] ||
+        opDetail ||
+        '';
       break;
 
     case 'โอนย้าย': {
-      const fromCol = data['โอนย้าย_จากเดิม'] || '';
-      const toCol   = data['โอนย้าย_เป็น'] || '';
+      const fromCol =
+        globalFrom ||
+        data['โอนย้าย_จากเดิม'] ||
+        '';
+      const toCol =
+        globalTo ||
+        data['โอนย้าย_เป็น'] ||
+        '';
+
       if (fromCol || toCol) {
         document.getElementById('transfer_from').textContent = fromCol;
         document.getElementById('transfer_to').textContent   = toCol;
@@ -777,8 +796,15 @@ function renderOperationData(data) {
     }
 
     case 'เปลี่ยนสภาพการจ้างงาน': {
-      const fromCol = data['เปลี่ยนสภาพ_จากเดิม'] || '';
-      const toCol   = data['เปลี่ยนสภาพ_เป็น'] || '';
+      const fromCol =
+        globalFrom ||
+        data['เปลี่ยนสภาพ_จากเดิม'] ||
+        '';
+      const toCol =
+        globalTo ||
+        data['เปลี่ยนสภาพ_เป็น'] ||
+        '';
+
       document.getElementById('change_from').textContent =
         fromCol || opDetail || '';
       document.getElementById('change_to').textContent = toCol;
@@ -786,8 +812,15 @@ function renderOperationData(data) {
     }
 
     case 'เลื่อนตำแหน่ง': {
-      const fromCol = data['เลื่อนตำแหน่ง_จากเดิม'] || '';
-      const toCol   = data['เลื่อนตำแหน่ง_เป็น'] || '';
+      const fromCol =
+        globalFrom ||
+        data['เลื่อนตำแหน่ง_จากเดิม'] ||
+        '';
+      const toCol =
+        globalTo ||
+        data['เลื่อนตำแหน่ง_เป็น'] ||
+        '';
+
       document.getElementById('promote_from').textContent =
         fromCol || opDetail || '';
       document.getElementById('promote_to').textContent = toCol;
@@ -796,20 +829,32 @@ function renderOperationData(data) {
 
     case 'ผ่านทดลองงาน':
       document.getElementById('passProb_to').textContent =
-        data['ผ่านทดลองงาน_เป็น'] || opDetail || '';
+        globalTo ||
+        data['ผ่านทดลองงาน_เป็น'] ||
+        opDetail ||
+        '';
       break;
 
     case 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก':
     case 'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก':
     case 'ให้ออกจากงาน / ลาออก':
       document.getElementById('terminate_detail').textContent =
-        data['ให้ออกจากงาน_รายละเอียด'] || opDetail || '';
+        opDetail ||
+        data['ให้ออกจากงาน_รายละเอียด'] ||
+        '';
       break;
 
     case 'ขึ้นค่าจ้าง / เงินเดือน':
     case 'ขึ้นค่าจ้าง/เงินเดือน': {
-      const fromCol = data['ขึ้นค่าจ้าง_จากเดิม'] || '';
-      const toCol   = data['ขึ้นค่าจ้าง_เป็น'] || '';
+      const fromCol =
+        globalFrom ||
+        data['ขึ้นค่าจ้าง_จากเดิม'] ||
+        '';
+      const toCol =
+        globalTo ||
+        data['ขึ้นค่าจ้าง_เป็น'] ||
+        '';
+
       document.getElementById('raise_from').textContent =
         fromCol || opDetail || '';
       document.getElementById('raise_to').textContent = toCol;
@@ -818,8 +863,15 @@ function renderOperationData(data) {
 
     case 'ตัดค่าจ้าง / เงินเดือน':
     case 'ตัดค่าจ้าง/เงินเดือน': {
-      const fromCol = data['ตัดค่าจ้าง_จากเดิม'] || '';
-      const toCol   = data['ตัดค่าจ้าง_เป็น'] || '';
+      const fromCol =
+        globalFrom ||
+        data['ตัดค่าจ้าง_จากเดิม'] ||
+        '';
+      const toCol =
+        globalTo ||
+        data['ตัดค่าจ้าง_เป็น'] ||
+        '';
+
       document.getElementById('cut_from').textContent =
         fromCol || opDetail || '';
       document.getElementById('cut_to').textContent = toCol;
@@ -829,7 +881,9 @@ function renderOperationData(data) {
     case 'อื่น ๆ':
     case 'อื่นๆ':
       document.getElementById('other_detail').textContent =
-        data['อื่นๆ_รายละเอียด'] || opDetail || '';
+        opDetail ||
+        data['อื่นๆ_รายละเอียด'] ||
+        '';
       break;
   }
 
@@ -849,6 +903,7 @@ function renderOperationData(data) {
   document.getElementById('effectiveDate').textContent =
     formatDateShort(effRaw);
 }
+
 
     // ================================
     // ส่วนลายเซ็น (ผู้ทบทวน)
