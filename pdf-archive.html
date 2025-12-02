@@ -126,8 +126,9 @@
 
     .filter-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 16px;
+      align-items: end;
     }
 
     .filter-input input,
@@ -158,11 +159,119 @@
       letter-spacing: 0.5px;
     }
 
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-refresh {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-refresh:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-refresh:active {
+      transform: translateY(0);
+    }
+
+    .btn-refresh.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .btn-refresh.loading span {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin-icon {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 24px;
       animation: fadeInUp 0.8s ease-out 0.1s both;
+      min-height: 400px;
+    }
+
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 32px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      flex-wrap: wrap;
+      gap: 16px;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .pagination-info {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .pagination-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .pagination-btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Sarabun', sans-serif;
+      transition: all 0.3s ease;
+      color: var(--text-dark);
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .pagination-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     @keyframes fadeInUp {
@@ -512,10 +621,16 @@
             <option value="name">ชื่อ (ก-ฮ)</option>
           </select>
         </div>
+        <div class="filter-buttons">
+          <button class="btn-refresh" id="refreshBtn" onclick="refreshArchive()">
+            <span style="display: inline-block;">🔄</span> รีเฟรช
+          </button>
+        </div>
       </div>
     </div>
 
     <div class="grid" id="pdfGrid"></div>
+    <div id="paginationBar"></div>
   </div>
 
   <!-- Modal สำหรับดูไฟล์ PDF -->
@@ -536,14 +651,14 @@
 
   <script>
     // ========================================
-    // CONFIG: Google Drive PDF URLs
+    // CONFIG
     // ========================================
-    // รูปแบบ: https://drive.google.com/uc?id=FILE_ID&export=pdf
-    // เปลี่ยน FILE_ID ให้เป็นของคุณ
-    
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxe3OSwY-ko4E3qvVSyFQQ1W7OCZjufP-VmFT3LxPqFMwf_y8LO9A8cxFJjMvHvdj7ksQ/exec';
+    const PAGE_SIZE = 12; // จำนวนรายการต่อหน้า
 
-    let documents = [];
+    let allDocuments = [];
+    let filteredDocuments = [];
+    let currentPage = 1;
     let isLoading = false;
 
     // ========================================
@@ -566,16 +681,26 @@
           <div style="color: var(--text-light);">กำลังโหลดเอกสาร...</div>
         </div>
       `;
+      document.getElementById('paginationBar').innerHTML = '';
 
       isLoading = true;
+      const refreshBtn = document.getElementById('refreshBtn');
+      if (refreshBtn) {
+        refreshBtn.classList.add('loading');
+        refreshBtn.disabled = true;
+      }
 
-      // เรียก GAS API เพื่อดึงรายการไฟล์ PDF
       const callback = 'pdfCallback_' + Date.now();
       const script = document.createElement('script');
       script.src = `${WEB_APP_URL}?action=getTrackingDocs&callback=${callback}`;
 
       window[callback] = function(response) {
         isLoading = false;
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+          refreshBtn.classList.remove('loading');
+          refreshBtn.disabled = false;
+        }
 
         if (!response || !response.success) {
           showToast('⚠️ ไม่สามารถโหลดเอกสารได้', 'error');
@@ -591,37 +716,38 @@
 
         // แปลงข้อมูลจาก tracking API
         const trackingDocs = response.documents || [];
-        documents = trackingDocs.map(doc => ({
+        allDocuments = trackingDocs.map(doc => ({
           id: doc.id,
           title: `${doc.employee} - ${getFullTypeLabel(doc.type)}`,
           type: doc.type,
           date: doc.createdDate,
           employee: doc.employee,
-          pdfUrl: '', // จะเพิ่มจาก tracking data
           status: doc.status,
           steps: doc.steps || []
         }));
 
-        // ตรวจสอบจำนวน
-        if (documents.length === 0) {
-          grid.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon">📄</div>
-              <div class="empty-title">ยังไม่มีเอกสาร</div>
-              <div class="empty-text">จะมีเอกสาร PDF ปรากฏขึ้นตรงนี้เมื่อมีการสร้างใบดำเนินการ</div>
-            </div>
-          `;
-        } else {
-          displayPDFs(documents);
-          showToast(`✅ โหลดเอกสารสำเร็จ (${documents.length} รายการ)`, 'success');
+        // เรียงจากใหม่ไปเก่า (default)
+        sortDocuments('newest');
+        
+        // Reset pagination
+        currentPage = 1;
+        applyFilters();
+
+        if (allDocuments.length > 0) {
+          showToast(`✅ โหลดเอกสารสำเร็จ (${allDocuments.length} รายการ)`, 'success');
         }
 
-        // ลบ script
         try { delete window[callback]; } catch (e) {}
       };
 
       script.onerror = function() {
         isLoading = false;
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+          refreshBtn.classList.remove('loading');
+          refreshBtn.disabled = false;
+        }
+
         showToast('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
         grid.innerHTML = `
           <div class="empty-state">
@@ -637,12 +763,65 @@
     }
 
     // ========================================
-    // DISPLAY PDFs
+    // SORT DOCUMENTS
     // ========================================
-    function displayPDFs(docs) {
+    function sortDocuments(sortBy) {
+      if (sortBy === 'newest') {
+        allDocuments.sort((a, b) => {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          return db - da;
+        });
+      } else if (sortBy === 'oldest') {
+        allDocuments.sort((a, b) => {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          return da - db;
+        });
+      } else if (sortBy === 'name') {
+        allDocuments.sort((a, b) => a.title.localeCompare(b.title, 'th'));
+      }
+    }
+
+    // ========================================
+    // SETUP FILTERS
+    // ========================================
+    function setupFilters() {
+      document.getElementById('searchInput').addEventListener('input', applyFilters);
+      document.getElementById('typeFilter').addEventListener('change', applyFilters);
+      document.getElementById('sortFilter').addEventListener('change', (e) => {
+        sortDocuments(e.target.value);
+        applyFilters();
+      });
+    }
+
+    // ========================================
+    // APPLY FILTERS
+    // ========================================
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const type = document.getElementById('typeFilter').value;
+
+      filteredDocuments = allDocuments.filter(doc => {
+        return (
+          (doc.title.toLowerCase().includes(search) || 
+           doc.id.toLowerCase().includes(search) ||
+           doc.employee.toLowerCase().includes(search)) &&
+          (!type || doc.type === type)
+        );
+      });
+
+      currentPage = 1;
+      displayPDFs();
+    }
+
+    // ========================================
+    // DISPLAY PDFs WITH PAGINATION
+    // ========================================
+    function displayPDFs() {
       const grid = document.getElementById('pdfGrid');
       
-      if (docs.length === 0) {
+      if (filteredDocuments.length === 0) {
         grid.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">📄</div>
@@ -650,10 +829,16 @@
             <div class="empty-text">ลองปรับเงื่อนไขการค้นหาใหม่</div>
           </div>
         `;
+        document.getElementById('paginationBar').innerHTML = '';
         return;
       }
 
-      grid.innerHTML = docs.map(doc => `
+      const totalPages = Math.ceil(filteredDocuments.length / PAGE_SIZE);
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const pageItems = filteredDocuments.slice(start, end);
+
+      grid.innerHTML = pageItems.map(doc => `
         <div class="pdf-card">
           <div class="pdf-preview">📄</div>
           <div class="pdf-content">
@@ -668,52 +853,96 @@
           </div>
         </div>
       `).join('');
+
+      // Pagination bar
+      if (filteredDocuments.length > PAGE_SIZE) {
+        renderPagination(totalPages);
+      } else {
+        document.getElementById('paginationBar').innerHTML = '';
+      }
     }
 
     // ========================================
-    // SETUP FILTERS
+    // RENDER PAGINATION
     // ========================================
-    function setupFilters() {
-      document.getElementById('searchInput').addEventListener('input', applyFilters);
-      document.getElementById('typeFilter').addEventListener('change', applyFilters);
-      document.getElementById('sortFilter').addEventListener('change', applyFilters);
-    }
+    function renderPagination(totalPages) {
+      const paginationBar = document.getElementById('paginationBar');
+      
+      let paginationHtml = `
+        <div class="pagination-bar">
+          <div class="pagination-info">
+            หน้า ${currentPage} / ${totalPages} (ทั้งหมด ${filteredDocuments.length} รายการ)
+          </div>
+          <div class="pagination-buttons">
+            <button class="pagination-btn" onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>
+              ◀◀ หน้าแรก
+            </button>
+            <button class="pagination-btn" onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+              ◀ ก่อนหน้า
+            </button>
+      `;
 
-    // ========================================
-    // APPLY FILTERS
-    // ========================================
-    function applyFilters() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const type = document.getElementById('typeFilter').value;
-      const sort = document.getElementById('sortFilter').value;
+      // แสดงเลขหน้า (ปัจจุบัน ± 2 หน้า)
+      const pageRange = 2;
+      const startPage = Math.max(1, currentPage - pageRange);
+      const endPage = Math.min(totalPages, currentPage + pageRange);
 
-      let filtered = documents.filter(doc => {
-        return (
-          (doc.title.toLowerCase().includes(search) || 
-           doc.id.toLowerCase().includes(search) ||
-           doc.employee.toLowerCase().includes(search)) &&
-          (!type || doc.type === type)
-        );
-      });
-
-      // Sort
-      if (sort === 'newest') {
-        filtered.sort((a, b) => {
-          const da = new Date(a.date).getTime();
-          const db = new Date(b.date).getTime();
-          return db - da;
-        });
-      } else if (sort === 'oldest') {
-        filtered.sort((a, b) => {
-          const da = new Date(a.date).getTime();
-          const db = new Date(b.date).getTime();
-          return da - db;
-        });
-      } else if (sort === 'name') {
-        filtered.sort((a, b) => a.title.localeCompare(b.title, 'th'));
+      if (startPage > 1) {
+        paginationHtml += `<button class="pagination-btn" onclick="goToPage(1)">1</button>`;
+        if (startPage > 2) {
+          paginationHtml += `<span style="padding: 0 8px; color: var(--text-light);">...</span>`;
+        }
       }
 
-      displayPDFs(filtered);
+      for (let i = startPage; i <= endPage; i++) {
+        paginationHtml += `
+          <button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">
+            ${i}
+          </button>
+        `;
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          paginationHtml += `<span style="padding: 0 8px; color: var(--text-light);">...</span>`;
+        }
+        paginationHtml += `<button class="pagination-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+      }
+
+      paginationHtml += `
+            <button class="pagination-btn" onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
+              ถัดไป ▶
+            </button>
+            <button class="pagination-btn" onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>
+              หน้าสุดท้าย ▶▶
+            </button>
+          </div>
+        </div>
+      `;
+
+      paginationBar.innerHTML = paginationHtml;
+    }
+
+    // ========================================
+    // GO TO PAGE
+    // ========================================
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredDocuments.length / PAGE_SIZE);
+      if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        displayPDFs();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // ========================================
+    // REFRESH ARCHIVE
+    // ========================================
+    function refreshArchive() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('typeFilter').value = '';
+      document.getElementById('sortFilter').value = 'newest';
+      loadPDFList();
     }
 
     // ========================================
@@ -724,14 +953,7 @@
       const iframe = document.getElementById('pdfFrame');
       const modalTitle = document.getElementById('modalTitle');
 
-      // ใช้ Google Drive URL สำหรับดูไฟล์ (embed)
-      // รูปแบบ: https://drive.google.com/file/d/FILE_ID/preview
-      // แต่ปัจจุบันใช้ API เพื่อดึง PDF URL จากการบันทึก
-      
       modalTitle.textContent = `📄 ${title}`;
-      
-      // ตัวอย่าง: ถ้ามี pdfUrl จาก tracking data ก็ใช้นั่น
-      // ส่วนตอนนี้ยังไม่มีลิงก์จริง ก็ใช้ placeholder
       const pdfUrl = `https://drive.google.com/file/d/${docNo}/preview`;
       
       iframe.src = pdfUrl;
@@ -744,9 +966,6 @@
     // DOWNLOAD PDF
     // ========================================
     function downloadPDF(docNo, title) {
-      // ตัวอย่าง: ดาวน์โหลด PDF จาก Google Drive
-      // รูปแบบ: https://drive.google.com/uc?id=FILE_ID&export=download
-      
       const downloadUrl = `https://drive.google.com/uc?id=${docNo}&export=download`;
       
       const link = document.createElement('a');
