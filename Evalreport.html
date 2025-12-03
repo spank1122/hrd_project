@@ -812,18 +812,19 @@
 
       // ส่ง POST request
       const payload = {
-        action: 'saveSignature',
-        rowIndex: rowIndex,
-        sessionId: sessionId,
-        evaluatorName: document.getElementById('applicantName').textContent,
-        evaluatorPosition: document.getElementById('applicantPosition').textContent,
-        signature: signatureBase64
-      };
+  action: 'saveEvalSignature',     // 👈 เปลี่ยนตรงนี้
+  rowIndex: rowIndex,
+  sessionId: sessionId,
+  evaluatorName: document.getElementById('applicantName').textContent,
+  evaluatorPosition: document.getElementById('applicantPosition').textContent,
+  signature: signatureBase64
+};
 
-      fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      })
+fetch(APPS_SCRIPT_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload)
+})  
       .then(response => response.json())
       .then(result => {
         console.log('✅ Response:', result);
