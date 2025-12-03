@@ -812,7 +812,7 @@
 
       // ส่ง POST request
       const payload = {
-  action: 'saveEvalSignature',     // 👈 เปลี่ยนตรงนี้
+  action: 'saveEvalSignature',
   rowIndex: rowIndex,
   sessionId: sessionId,
   evaluatorName: document.getElementById('applicantName').textContent,
@@ -822,32 +822,37 @@
 
 fetch(APPS_SCRIPT_URL, {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  // ❌ ไม่ต้องใส่ headers: { 'Content-Type': 'application/json' },
+  // browser จะตั้งเป็น text/plain ให้อัตโนมัติ → ไม่โดน preflight
   body: JSON.stringify(payload)
-})  
-      .then(response => response.json())
-      .then(result => {
-        console.log('✅ Response:', result);
+})
+  .then(response => response.json())
+  .then(result => {
+    console.log('✅ Response:', result);
 
-        if (result.success) {
-          showStatus('success', 
-            '✅ <strong>ลงลายเซ็นสำเร็จ!</strong><br><br>' +
-            'ระบบได้สร้าง PDF และส่งอีเมลแล้ว<br><br>' +
-            (result.pdfUrl ? '<a href="' + result.pdfUrl + '" target="_blank" class="pdf-link">📄 เปิดดู PDF</a>' : '')
-          );
-          
-          // ซ่อนปุ่ม
-          document.querySelector('.button-group').style.display = 'none';
-        } else {
-          showStatus('error', '❌ ' + (result.message || 'เกิดข้อผิดพลาด'));
-          submitBtn.disabled = false;
-        }
-      })
-      .catch(error => {
-        console.error('❌ Error:', error);
-        showStatus('error', '❌ เกิดข้อผิดพลาด: ' + error.message);
-        submitBtn.disabled = false;
-      });
+    if (result.success) {
+      showStatus(
+        'success',
+        '✅ <strong>ลงลายเซ็นสำเร็จ!</strong><br><br>' +
+          'ระบบได้สร้าง PDF และส่งอีเมลแล้ว<br><br>' +
+          (result.pdfUrl
+            ? '<a href="' +
+              result.pdfUrl +
+              '" target="_blank" class="pdf-link">📄 เปิดดู PDF</a>'
+            : '')
+      );
+      document.querySelector('.button-group').style.display = 'none';
+    } else {
+      showStatus('error', '❌ ' + (result.message || 'เกิดข้อผิดพลาด'));
+      submitBtn.disabled = false;
+    }
+  })
+  .catch(error => {
+    console.error('❌ Error:', error);
+    showStatus('error', '❌ เกิดข้อผิดพลาด: ' + error.message);
+    submitBtn.disabled = false;
+  });
+
     }
 
     // ========== INIT ==========
