@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ลงลายเซ็นยืนยันการประเมิน</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      max-width: 900px;
+      width: 100%;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #667eea;
+    }
+
+    .company-name {
+      color: #2c3e50;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      line-height: 1.5;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-size: 24px;
+      margin-top: 10px;
+      font-weight: 700;
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      border-left: 4px solid #667eea;
+    }
+
+    .info-row {
+      display: flex;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #34495e;
+      min-width: 180px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .info-value {
+      color: #2c3e50;
+      flex: 1;
+      font-weight: 500;
+    }
+
+    .evaluation-section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .eval-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .eval-table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .eval-table th {
+      padding: 12px 8px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      border: 1px solid #ddd;
+    }
+
+    .eval-table td {
+      padding: 10px 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .eval-table tbody tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    .eval-table tbody tr:hover {
+      background-color: #e9ecef;
+    }
+
+    .score-cell {
+      text-align: center;
+      font-weight: 700;
+      font-size: 16px;
+      color: #667eea;
+    }
+
+    .score-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+      color: white;
+      font-weight: 700;
+    }
+
+    .comments-box {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .comments-title {
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .comments-content {
+      color: #856404;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 15px;
+    }
+
+    .required {
+      color: #e74c3c;
+      margin-left: 3px;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s;
+      background: white;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    input[readonly] {
+      background-color: #f8f9fa;
+      color: #6c757d;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      margin-top: 10px;
+    }
+
+    #signatureCanvas {
+      border: 2px dashed #667eea;
+      border-radius: 10px;
+      cursor: crosshair;
+      touch-action: none;
+      display: block;
+      width: 100%;
+      background: #fafafa;
+      transition: all 0.3s;
+    }
+
+    #signatureCanvas:hover {
+      background: white;
+      border-color: #764ba2;
+    }
+
+    #signatureCanvas.drawing {
+      border-style: solid;
+      background: white;
+    }
+
+    .canvas-hint {
+      text-align: center;
+      color: #95a5a6;
+      font-size: 13px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-clear {
+      background: #95a5a6;
+      color: white;
+    }
+
+    .btn-clear:hover {
+      background: #7f8c8d;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(149, 165, 166, 0.3);
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+    }
+
+    .btn-submit:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    #status {
+      margin-top: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .status-icon {
+      display: inline-block;
+      margin-right: 8px;
+      font-size: 18px;
+    }
+
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      border-left: 4px solid #28a745;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      border-left: 4px solid #dc3545;
+    }
+
+    .loading {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+      border-left: 4px solid #ffc107;
+    }
+
+    .pdf-link {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #3498db;
+      color: white !important;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .pdf-link:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .info-row {
+        flex-direction: column;
+      }
+
+      .info-label {
+        margin-bottom: 5px;
+      }
+
+      .eval-table {
+        font-size: 12px;
+      }
+
+      .eval-table th,
+      .eval-table td {
+        padding: 8px 4px;
+      }
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .readonly-badge {
+      display: inline-block;
+      background: #e0e0e0;
+      color: #666;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="company-name">
+        บริษัท คาร์เปท เมกเกอร์(ประเทศไทย) จำกัด และ<br>
+        บริษัท คาร์เปท เมกเกอร์พี2ดับบลิว (ประเทศไทย) จำกัด
+      </div>
+      <h1>แบบประเมินผู้สมัครโดยผู้บริหาร</h1>
+    </div>
+
+    <!-- ข้อมูลผู้สมัคร -->
+    <div class="info-box">
+      <div class="info-row">
+        <div class="info-label">
+          <span>👤</span>
+          <span>ชื่อ-นามสกุลผู้สมัคร:</span>
+          <span class="readonly-badge">READ ONLY</span>
+        </div>
+        <div class="info-value" id="candidateName">-</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">
+          <span>💼</span>
+          <span>ตำแหน่งที่สมัคร:</span>
+          <span class="readonly-badge">READ ONLY</span>
+        </div>
+        <div class="info-value" id="candidatePosition">-</div>
+      </div>
+    </div>
+
+    <!-- ผลการประเมิน จาก Google Form -->
+    <div id="evaluationData">
+      <!-- จะถูกเติมข้อมูลด้วย JavaScript -->
+    </div>
+
+    <!-- ความคิดเห็นเพิ่มเติม -->
+    <div id="commentsSection">
+      <!-- จะถูกเติมข้อมูลด้วย JavaScript -->
+    </div>
+
+    <!-- เลือกชื่อผู้ลงลายเซ็น -->
+    <div class="evaluation-section">
+      <div class="section-title">
+        <span>✍️</span>
+        <span>ลงลายเซ็นยืนยันการประเมิน</span>
+      </div>
+
+      <div class="form-group">
+        <label for="evaluatorSelect">
+          เลือกชื่อของคุณ
+          <span class="required">*</span>
+        </label>
+        <select id="evaluatorSelect">
+          <option value="">-- กรุณาเลือกชื่อของคุณ --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="evaluatorPosition">
+          ตำแหน่ง
+        </label>
+        <input type="text" id="evaluatorPosition" readonly placeholder="จะแสดงอัตโนมัติเมื่อเลือกชื่อ">
+      </div>
+
+      <div class="form-group">
+        <label>
+          ลงลายเซ็น
+          <span class="required">*</span>
+        </label>
+        <div class="canvas-wrapper">
+          <canvas id="signatureCanvas" width="840" height="200"></canvas>
+          <div class="canvas-hint">
+            <span>✍️</span>
+            <span>ใช้เมาส์หรือนิ้วลากเพื่อลงลายเซ็น</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ปุ่มดำเนินการ -->
+    <div class="button-group">
+      <button class="btn-clear" onclick="clearSignature()">
+        <span>🗑️</span>
+        <span>ลบลายเซ็น</span>
+      </button>
+      <button class="btn-submit" id="submitBtn" onclick="submitSignature()">
+        <span>✅</span>
+        <span>บันทึกและส่ง PDF</span>
+      </button>
+    </div>
+
+    <!-- Status Message -->
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // ========== Data from Server ==========
+    const RESPONSE_ID = '<?= responseId ?>';
+    
+    var evalData = null;
+    var allEvaluators = [];
+
+    // ========== Canvas Setup ==========
+    const canvas = document.getElementById('signatureCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let hasDrawn = false;
+
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // ========== Mouse Events ==========
+    canvas.addEventListener('mousedown', function(e) {
+      startDrawing(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener('mousemove', function(e) {
+      if (!isDrawing) return;
+      draw(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // ========== Touch Events (Mobile) ==========
+    canvas.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      startDrawing(x, y);
+    });
+
+    canvas.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+      if (!isDrawing) return;
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      draw(x, y);
+    });
+
+    canvas.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      stopDrawing();
+    });
+
+    // ========== Drawing Functions ==========
+    function startDrawing(x, y) {
+      isDrawing = true;
+      canvas.classList.add('drawing');
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+
+    function draw(x, y) {
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      hasDrawn = true;
+    }
+
+    function stopDrawing() {
+      isDrawing = false;
+      canvas.classList.remove('drawing');
+    }
+
+    // ========== Clear Signature ==========
+    function clearSignature() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasDrawn = false;
+      hideStatus();
+    }
+
+    // ========== Load Evaluation Data ==========
+    window.addEventListener('load', function() {
+      console.log('🎨 Manager Signature Page Loaded');
+      console.log('Response ID:', RESPONSE_ID);
+      
+      loadEvaluationData();
+      loadEvaluators();
+    });
+
+    function loadEvaluationData() {
+      google.script.run
+        .withSuccessHandler(function(data) {
+          evalData = data;
+          displayEvaluationData(data);
+        })
+        .withFailureHandler(function(error) {
+          showStatus('error', '❌ ไม่สามารถโหลดข้อมูลการประเมินได้: ' + error.message);
+        })
+        .getManagerEvalData(RESPONSE_ID);
+    }
+
+    function loadEvaluators() {
+      google.script.run
+        .withSuccessHandler(function(evaluators) {
+          allEvaluators = evaluators || [];
+          populateEvaluatorSelect(evaluators);
+        })
+        .withFailureHandler(function(error) {
+          showStatus('error', '❌ ไม่สามารถโหลดรายชื่อผู้ประเมินได้: ' + error.message);
+        })
+        .getManagerEvaluators();
+    }
+
+    function populateEvaluatorSelect(evaluators) {
+      const select = document.getElementById('evaluatorSelect');
+      select.innerHTML = '<option value="">-- กรุณาเลือกชื่อของคุณ --</option>';
+
+      evaluators.forEach(function(eval) {
+        const option = document.createElement('option');
+        option.value = JSON.stringify(eval);
+        option.text = eval.name + ' - ' + eval.position;
+        select.appendChild(option);
+      });
+    }
+
+    function displayEvaluationData(data) {
+      const evalObj = data.data;
+      
+      // แสดงชื่อผู้สมัคร
+      document.getElementById('candidateName').textContent = 
+        evalObj['ชื่อ-นามสกุล'] || '-';
+      document.getElementById('candidatePosition').textContent = 
+        evalObj['ตำแหน่งที่สมัคร'] || '-';
+
+      // 📊 แสดงคะแนนประเมินทั้ง 10 หัวข้อ (ตามฟอร์มจริง)
+      const evalDataDiv = document.getElementById('evaluationData');
+      
+      // ชื่อคอลัมน์จริงจากฟอร์ม
+      const evaluationCriteria = [
+        {
+          name: 'บุคลิกลักษณะ รูปร่างหน้าตา กิริยามารยาทและการแต่งกาย',
+          key: 'ปัจจัยการประเมิน [บุคลิกลักษณะ รูปร่างหน้าตา กิริยามารยาทและการแต่งกาย]'
+        },
+        {
+          name: 'ความเหมาะสมของการศึกษาที่มีต่องาน',
+          key: 'ปัจจัยการประเมิน [ความเหมาะสมของการศึกษาที่มีต่องาน]'
+        },
+        {
+          name: 'ความเหมาะสมของประสบการณ์ที่มีต่องาน',
+          key: 'ปัจจัยการประเมิน [ความเหมาะสมของประสบการณ์ที่มีต่องาน]'
+        },
+        {
+          name: 'ความรอบรู้ในงานรวมทั้งเทคนิคที่เกี่ยวข้อง',
+          key: 'ปัจจัยการประเมิน [ความรอบรู้ ในงานรวมทั้งเทคนิคที่เกียวข้อง]'
+        },
+        {
+          name: 'การใช้ดุลยพินิจ ไหวพริบในการตอบคำถาม',
+          key: 'ปัจจัยการประเมิน [การใช้ดุลยพินิจ ไหวพริบในการตอบคำถาม]'
+        },
+        {
+          name: 'ลักษณะของการเป็นผู้นำความน่าเชื่อถือ',
+          key: 'ปัจจัยการประเมิน [ ลักษณะของการเป็นผู้นำความน่าเชื่อถือ]'
+        },
+        {
+          name: 'ความสามารถพิเศษที่เอื้อประโยชน์ในงาน',
+          key: 'ปัจจัยการประเมิน [ความสามารถพิเศษที่เอื้อประโยชน์ในงาน]'
+        },
+        {
+          name: 'ประวัติพื้นฐานทางครอบครัว',
+          key: 'ปัจจัยการประเมิน [ ประวัติพื้นฐานทางครอบครัว]'
+        },
+        {
+          name: 'ความคาดหวังในอนาคตหรือเป้าหมายการทำงาน',
+          key: 'ปัจจัยการประเมิน [ความคาดหวังในอนาคตหรือเป้าหมายการทงาน]'
+        },
+        {
+          name: 'ทัศนคติที่มีต่องาน เพื่อนร่วมงาน และบริษัท',
+          key: 'ปัจจัยการประเมิน [ทัศนคติที่มีต่องาน เพื่อนร่วมงาน และบริษัท]'
+        }
+      ];
+
+      // สร้างตารางแสดงคะแนน
+      let tableHTML = `
+        <div class="evaluation-section">
+          <div class="section-title">
+            <span>📊</span>
+            <span>ผลการประเมินจาก Google Form (คะแนน 10 หัวข้อ)</span>
+            <span class="readonly-badge">READ ONLY</span>
+          </div>
+          <table class="eval-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">ลำดับ</th>
+                <th>หัวข้อการประเมิน</th>
+                <th style="width: 150px;">คะแนน (1-10)</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      let totalScore = 0;
+      let scoreCount = 0;
+
+      evaluationCriteria.forEach(function(item, index) {
+        const rawValue = evalObj[item.key] || '';
+        
+        // แยกคะแนนจากข้อความ เช่น "ดีมาก      95-100%      10" → เอาเลข 10
+        let score = '-';
+        if (rawValue) {
+          const matches = String(rawValue).match(/(\d+)$/);
+          if (matches) {
+            score = parseInt(matches[1]);
+            totalScore += score;
+            scoreCount++;
+          }
+        }
+
+        // กำหนดสีตามคะแนน
+        let badgeColor = '#27ae60'; // เขียว (ดีมาก)
+        if (score !== '-') {
+          if (score >= 9) badgeColor = '#27ae60'; // เขียว
+          else if (score >= 8) badgeColor = '#3498db'; // ฟ้า (ดี)
+          else if (score >= 7) badgeColor = '#f39c12'; // ส้ม (พอใช้)
+          else badgeColor = '#e74c3c'; // แดง (ปรับปรุง)
+        }
+
+        tableHTML += `
+          <tr>
+            <td style="text-align: center; font-weight: 700;">${index + 1}</td>
+            <td>${item.name}</td>
+            <td class="score-cell">
+              <span class="score-badge" style="background: linear-gradient(135deg, ${badgeColor} 0%, ${badgeColor}cc 100%);">
+                ${score}
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+
+      tableHTML += `
+            </tbody>
+          </table>
+      `;
+
+      // คำนวณคะแนนเฉลี่ย
+      if (scoreCount > 0) {
+        const avgScore = (totalScore / scoreCount).toFixed(2);
+        tableHTML += `
+          <div style="text-align: right; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-weight: 600; color: #2c3e50;">
+            <span>คะแนนเฉลี่ย: </span>
+            <span style="font-size: 18px; color: #27ae60;">${avgScore}</span>
+            <span> / 10</span>
+          </div>
+        `;
+      }
+
+      tableHTML += `</div>`;
+
+      evalDataDiv.innerHTML = tableHTML;
+
+      // 📋 แสดงข้อมูลเพิ่มเติม
+      const additionalInfo = `
+        <div class="evaluation-section">
+          <div class="section-title">
+            <span>📋</span>
+            <span>ข้อมูลเพิ่มเติม</span>
+            <span class="readonly-badge">READ ONLY</span>
+          </div>
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            ${evalObj['สังกัดส่วน'] ? `
+              <div class="info-row">
+                <div class="info-label">🏢 สังกัดส่วน:</div>
+                <div class="info-value">${evalObj['สังกัดส่วน']}</div>
+              </div>
+            ` : ''}
+            ${evalObj['แผนก'] ? `
+              <div class="info-row">
+                <div class="info-label">📂 แผนก:</div>
+                <div class="info-value">${evalObj['แผนก']}</div>
+              </div>
+            ` : ''}
+            ${evalObj['ผลตอบแทน/ค่าจ้าง'] ? `
+              <div class="info-row">
+                <div class="info-label">💰 ผลตอบแทน/ค่าจ้าง:</div>
+                <div class="info-value">${evalObj['ผลตอบแทน/ค่าจ้าง']}</div>
+              </div>
+            ` : ''}
+            ${evalObj['ประสบการณ์ในการทำงาน'] ? `
+              <div class="info-row">
+                <div class="info-label">💼 ประสบการณ์ในการทำงาน:</div>
+                <div class="info-value">${evalObj['ประสบการณ์ในการทำงาน']}</div>
+              </div>
+            ` : ''}
+            ${evalObj['บุคลิกภาพ'] ? `
+              <div class="info-row">
+                <div class="info-label">👤 บุคลิกภาพ:</div>
+                <div class="info-value">${evalObj['บุคลิกภาพ']}</div>
+              </div>
+            ` : ''}
+            ${evalObj['ผู้สมัครท่านนี้จะถูกอยู่ในกลุ่ม'] ? `
+              <div class="info-row">
+                <div class="info-label">📊 กลุ่มผู้สมัคร:</div>
+                <div class="info-value">${evalObj['ผู้สมัครท่านนี้จะถูกอยู่ในกลุ่ม']}</div>
+              </div>
+            ` : ''}
+            ${evalObj['ควรรับเข้าทดลองงาน'] ? `
+              <div class="info-row">
+                <div class="info-label">✅ ควรรับเข้าทดลองงาน:</div>
+                <div class="info-value" style="font-weight: 700; color: ${evalObj['ควรรับเข้าทดลองงาน'] === 'ใช่' ? '#27ae60' : '#e74c3c'};">
+                  ${evalObj['ควรรับเข้าทดลองงาน']}
+                </div>
+              </div>
+            ` : ''}
+            ${evalObj['วันที่จะเริ่มต้นทดลองงาน'] ? `
+              <div class="info-row">
+                <div class="info-label">📅 วันที่เริ่มงาน:</div>
+                <div class="info-value">${evalObj['วันที่จะเริ่มต้นทดลองงาน']}</div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+
+      evalDataDiv.innerHTML += additionalInfo;
+
+      // 💬 แสดงความคิดเห็นเพิ่มเติม
+      const commentsDiv = document.getElementById('commentsSection');
+      
+      const comments = evalObj['ความคิดเห็นเพิ่มเติมของผู้สัมภาษณ์'] || '';
+      const otherComments = evalObj['ความคิดเห็น / เหตุผลอื่นๆ'] || '';
+      
+      let commentsHTML = '';
+      
+      if (comments && String(comments).trim() !== '') {
+        commentsHTML += `
+          <div class="comments-box">
+            <div class="comments-title">
+              💬 ความคิดเห็นเพิ่มเติมของผู้สัมภาษณ์:
+              <span class="readonly-badge">READ ONLY</span>
+            </div>
+            <div class="comments-content">${String(comments).replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      }
+
+      if (otherComments && String(otherComments).trim() !== '') {
+        commentsHTML += `
+          <div class="comments-box" style="background: #e8f4f8; border-color: #3498db;">
+            <div class="comments-title" style="color: #1565c0;">
+              📝 ความคิดเห็น / เหตุผลอื่นๆ:
+              <span class="readonly-badge">READ ONLY</span>
+            </div>
+            <div class="comments-content" style="color: #1565c0;">${String(otherComments).replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      }
+
+      commentsDiv.innerHTML = commentsHTML;
+
+      // แสดง Timestamp ถ้ามี
+      if (evalObj['Timestamp']) {
+        const timestamp = new Date(evalObj['Timestamp']);
+        const formattedTime = timestamp.toLocaleString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        const timestampDiv = document.createElement('div');
+        timestampDiv.style.cssText = 'text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 10px; padding: 8px; background: white; border-radius: 6px;';
+        timestampDiv.innerHTML = `⏰ ประเมินเมื่อ: ${formattedTime}`;
+        evalDataDiv.appendChild(timestampDiv);
+      }
+
+      console.log('✅ แสดงข้อมูลการประเมินสำเร็จ');
+      console.log('📊 ข้อมูลที่แสดง:', {
+        ชื่อ: evalObj['ชื่อ-นามสกุล'],
+        ตำแหน่ง: evalObj['ตำแหน่งที่สมัคร'],
+        จำนวนหัวข้อประเมิน: evaluationCriteria.length
+      });
+    }
+
+    // ========== Auto-fill Position ==========
+    document.getElementById('evaluatorSelect').addEventListener('change', function() {
+      const selected = this.value;
+      if (selected) {
+        try {
+          const data = JSON.parse(selected);
+          document.getElementById('evaluatorPosition').value = data.position;
+        } catch (e) {
+          console.error('Error parsing evaluator data:', e);
+        }
+      } else {
+        document.getElementById('evaluatorPosition').value = '';
+      }
+    });
+
+    // ========== Submit Signature ==========
+    function submitSignature() {
+      const submitBtn = document.getElementById('submitBtn');
+      
+      // Validation
+      const evaluatorData = document.getElementById('evaluatorSelect').value;
+      if (!evaluatorData) {
+        showStatus('error', '❌ กรุณาเลือกชื่อของคุณ');
+        return;
+      }
+
+      if (!hasDrawn) {
+        showStatus('error', '❌ กรุณาลงลายเซ็นก่อน');
+        return;
+      }
+
+      // Parse evaluator data
+      let evaluator;
+      try {
+        evaluator = JSON.parse(evaluatorData);
+      } catch (e) {
+        showStatus('error', '❌ ข้อมูลผู้ประเมินไม่ถูกต้อง');
+        return;
+      }
+
+      // Get signature as Base64
+      const signatureBase64 = canvas.toDataURL('image/png');
+
+      // Disable button
+      submitBtn.disabled = true;
+      showStatus('loading', 
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<div class="spinner"></div>' +
+        '<span>กำลังบันทึกลายเซ็นและสร้าง PDF กรุณารอสักครู่...</span>' +
+        '</div>'
+      );
+
+      // Send to server
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            showStatus('success', 
+              '<div class="status-icon">✅</div>' +
+              '<strong>บันทึกสำเร็จ!</strong><br><br>' +
+              result.message + '<br><br>' +
+              '<a href="' + result.pdfUrl + '" target="_blank" class="pdf-link">📄 เปิดดู PDF</a>'
+            );
+            submitBtn.style.display = 'none';
+            document.querySelector('.btn-clear').style.display = 'none';
+          } else {
+            showStatus('error', '<div class="status-icon">❌</div>' + result.message);
+            submitBtn.disabled = false;
+          }
+        })
+        .withFailureHandler(function(err) {
+          showStatus('error', '<div class="status-icon">❌</div>เกิดข้อผิดพลาด: ' + err.message);
+          submitBtn.disabled = false;
+        })
+        .saveManagerSignature(RESPONSE_ID, evaluator.name, evaluator.position, evaluator.email, signatureBase64);
+    }
+
+    // ========== Status Display ==========
+    function showStatus(type, message) {
+      const status = document.getElementById('status');
+      status.className = type;
+      status.innerHTML = message;
+      status.style.display = 'block';
+      
+      status.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideStatus() {
+      const status = document.getElementById('status');
+      status.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
