@@ -845,72 +845,79 @@
     }
 
     function displayReasons(reasons) {
-      const section = document.getElementById('reasonsSection');
-      
-      if (!reasons || typeof reasons !== 'object') {
-        return; // ไม่แสดงถ้าไม่มีข้อมูล
-      }
+  const section = document.getElementById('reasonsSection');
+  if (!reasons || typeof reasons !== 'object') return;
 
-      const html = `
-        <div class="reasons-section">
-          <div class="reasons-title">
-            <span>⚠️</span>
-            <span>เหตุผลที่ต้นสังกัดไม่เลือกรับผู้สมัครรายนี้ เนื่องจาก</span>
-          </div>
-          <div class="reasons-grid">
-            <!-- ผลตอบแทน / ค่าจ้าง -->
-            <div class="reason-category">
-              <div class="reason-category-title">ผลตอบแทน / ค่าจ้าง</div>
-              ${createReasonItem(
-  reasons.pay3_text 
-    ? 'อื่นๆ ' + reasons.pay3_text
-    : 'อื่นๆ ........................................................',
-  reasons.pay3
-)}
-            </div>
-
-            <!-- ประสบการณ์ในการทำงาน -->
-            <div class="reason-category">
-              <div class="reason-category-title">ประสบการณ์ในการทำงาน</div>
-              ${createReasonItem(
-  reasons.exp4_text 
-    ? 'อื่นๆ ' + reasons.exp4_text
-    : 'อื่นๆ ........................................................',
-  reasons.exp4
-)}
-            </div>
-
-            <!-- บุคลิกภาพ -->
-            <div class="reason-category">
-              <div class="reason-category-title">บุคลิกภาพ</div>
-              ${createReasonItem(
-  reasons.personality3_text 
-    ? 'อื่นๆ ' + reasons.personality3_text
-    : 'อื่นๆ ........................................................',
-  reasons.personality3
-)}
-            </div>
-
-            <!-- ความคิดเห็น / เหตุผลอื่นๆ -->
-            <div class="reason-category">
-              <div class="reason-category-title">ความคิดเห็น / เหตุผลอื่นๆ</div>
-              ${createReasonItem(
-  `ถ้าจัดกลุ่มผู้สมัครเป็น A-B-C-D ผู้สมัครท่านนี้อยู่ในกลุ่ม ${reasons.group || '.......'}`,
-  reasons.other1
-)}  
-${createReasonItem(
-  reasons.other4_text 
-    ? 'อื่นๆ ' + reasons.other4_text
-    : 'อื่นๆ ........................................................',
-  reasons.other4
-)}
-            </div>
-          </div>
+  const html = `
+    <div class="reasons-section">
+      <div class="reasons-title">
+        <span>⚠️</span>
+        <span>เหตุผลที่ต้นสังกัดไม่เลือกรับผู้สมัครรายนี้ เนื่องจาก</span>
+      </div>
+      <div class="reasons-grid">
+        <!-- ผลตอบแทน / ค่าจ้าง -->
+        <div class="reason-category">
+          <div class="reason-category-title">ผลตอบแทน / ค่าจ้าง</div>
+          ${createReasonItem('ฐานเงินเดือนเดิมสูงมาก', reasons.pay1)}
+          ${createReasonItem('เงินเดือนที่คาดหวังสูงเกินกว่าบริษัทจะให้ได้', reasons.pay2)}
+          ${createReasonItem(
+            reasons.pay3_text
+              ? 'อื่นๆ ' + reasons.pay3_text
+              : 'อื่นๆ ........................................................',
+            reasons.pay3
+          )}
         </div>
-      `;
 
-      section.innerHTML = html;
-    }
+        <!-- ประสบการณ์ในการทำงาน -->
+        <div class="reason-category">
+          <div class="reason-category-title">ประสบการณ์ในการทำงาน</div>
+          ${createReasonItem('ไม่ตรงกับตำแหน่งที่เปิดรับสมัคร', reasons.exp1)}
+          ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่น้อยเกินไป', reasons.exp2)}
+          ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่มากเกินไป', reasons.exp3)}
+          ${createReasonItem(
+            reasons.exp4_text
+              ? 'อื่นๆ ' + reasons.exp4_text
+              : 'อื่นๆ ........................................................',
+            reasons.exp4
+          )}
+        </div>
+
+        <!-- บุคลิกภาพ -->
+        <div class="reason-category">
+          <div class="reason-category-title">บุคลิกภาพ</div>
+          ${createReasonItem('ไม่เหมาะสมกับตำแหน่งที่ต้องการรับ', reasons.personality1)}
+          ${createReasonItem('ขาดปฏิภาณ ไหวพริบในการตอบคำถาม', reasons.personality2)}
+          ${createReasonItem(
+            reasons.personality3_text
+              ? 'อื่นๆ ' + reasons.personality3_text
+              : 'อื่นๆ ........................................................',
+            reasons.personality3
+          )}
+        </div>
+
+        <!-- ความคิดเห็น / เหตุผลอื่นๆ -->
+        <div class="reason-category">
+          <div class="reason-category-title">ความคิดเห็น / เหตุผลอื่นๆ</div>
+          ${createReasonItem(
+            `ถ้าจัดกลุ่มผู้สมัครเป็น A-B-C-D ผู้สมัครท่านนี้อยู่ในกลุ่ม ${reasons.group || '.......'}`,
+            reasons.other1
+          )}
+          ${createReasonItem('ขาดความตั้งใจในการเข้าร่วมงานกับองค์กร', reasons.other2)}
+          ${createReasonItem('ต้องการตรวจสอบประวัติการทำงานจากที่เดิมก่อน', reasons.other3)}
+          ${createReasonItem(
+            reasons.other4_text
+              ? 'อื่นๆ ' + reasons.other4_text
+              : 'อื่นๆ ........................................................',
+            reasons.other4
+          )}
+        </div>
+      </div>
+    </div>
+  `;
+
+  section.innerHTML = html;
+}
+
 
     // ใช้สร้างแต่ละบรรทัด (มี checkbox / ไม่มี)
     function createReasonItem(text, checked) {
