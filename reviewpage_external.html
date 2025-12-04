@@ -354,7 +354,7 @@
         </div>
 
         <div style="margin-top:16px;">
-          <div style="font-size:14px; margin-bottom:4px; color: var(--text-dark); font-weight: 500;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
+          <div style="font-size:14px; margin-bottom:4px; color: var(--text-dark); font-weight: 500;">ลายเซ็นผู้ทบทวน (จำเป็น)</div>
           <!-- ขนาดจริงของ canvas -->
           <canvas id="signCanvas" width="600" height="200"></canvas>
         </div>
@@ -425,7 +425,7 @@
           console.error('JSONP', action, 'timeout');
           cleanup();
           callback && callback({ success: false, message: 'timeout' });
-        }, 50000);
+        }, 50000    );
 
         document.body.appendChild(script);
       }
