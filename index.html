@@ -6,7 +6,7 @@
   <title>ระบบจัดการเอกสาร HR - The Carpetmaker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -15,23 +15,26 @@
     }
 
     :root {
-      --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --pink-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --text-dark: #2d3748;
-      --text-light: #718096;
-      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
-      --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
-      --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.2);
+      --navy-dark: #2C3E50;
+      --navy-medium: #34495E;
+      --navy-light: #3D5568;
+      --gold-accent: #B8A068;
+      --text-dark: #1A252F;
+      --text-light: #5A6C7D;
+      --text-light-on-navy: #C5D3E0;
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+      --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.2);
+      --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.25);
     }
 
     body {
       font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%);
       min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
+      flex-direction: column;
+      padding: 0;
+      margin: 0;
       position: relative;
       overflow-x: hidden;
     }
@@ -45,46 +48,57 @@
       right: 0;
       bottom: 0;
       background: 
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
-      animation: float 20s ease-in-out infinite;
+        radial-gradient(circle at 20% 50%, rgba(200, 200, 200, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(150, 150, 150, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(180, 180, 180, 0.06) 0%, transparent 50%);
+      animation: float 25s ease-in-out infinite;
       pointer-events: none;
     }
 
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
+      50% { transform: translateY(-15px); }
     }
 
-    .container {
-      max-width: 1200px;
-      width: 100%;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Header */
-    .header {
+    /* Header with Logo - Hero Section */
+    .header-top {
+      background: linear-gradient(135deg, #3D3B54 0%, #2F2D45 100%);
+      padding: 60px 40px 60px;
       text-align: center;
-      margin-bottom: 48px;
-      animation: fadeInDown 0.8s ease-out;
+      border-bottom: 4px solid var(--gold-accent);
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .header-title {
-      color: white;
-      font-size: 42px;
-      font-weight: 700;
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      margin-bottom: 8px;
-      letter-spacing: -0.5px;
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      animation: fadeInDown 0.9s ease-out;
     }
 
-    .header-subtitle {
-      color: rgba(255, 255, 255, 0.95);
-      font-size: 18px;
-      font-weight: 300;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    .logo-icon {
+      display: none;
+    }
+
+    .company-name {
+      color: #D4D4D4;
+      font-size: 48px;
+      font-weight: 400;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      line-height: 1.2;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .company-subtitle {
+      display: none;
     }
 
     @keyframes fadeInDown {
@@ -98,18 +112,54 @@
       }
     }
 
-    /* Grid */
+    .container {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 20px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Page Header */
+    .page-header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeInDown 0.8s ease-out 0.2s both;
+    }
+
+    .page-title {
+      color: var(--text-dark);
+      font-size: 28px;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .page-subtitle {
+      color: var(--text-light);
+      font-size: 14px;
+      font-weight: 400;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Cards Grid */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 32px;
       margin-bottom: 40px;
+      flex: 1;
     }
 
-    /* Card */
+    /* Card Styles */
     .system-card {
       background: white;
-      border-radius: 32px;
+      border-radius: 12px;
       padding: 48px 40px;
       box-shadow: var(--shadow-xl);
       text-align: center;
@@ -119,14 +169,17 @@
       animation: fadeInUp 0.8s ease-out;
       animation-fill-mode: both;
       cursor: pointer;
+      border-top: 4px solid transparent;
     }
 
     .system-card:nth-child(1) {
-      animation-delay: 0.1s;
+      animation-delay: 0.3s;
+      border-top-color: var(--navy-dark);
     }
 
     .system-card:nth-child(2) {
-      animation-delay: 0.2s;
+      animation-delay: 0.4s;
+      border-top-color: var(--gold-accent);
     }
 
     .system-card::before {
@@ -135,20 +188,17 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 6px;
-      background: var(--purple-gradient);
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(44, 62, 80, 0.05), rgba(184, 160, 104, 0.05));
       transform: scaleX(0);
       transform-origin: left;
       transition: transform 0.4s ease;
-    }
-
-    .system-card.pink::before {
-      background: var(--pink-gradient);
+      pointer-events: none;
     }
 
     .system-card:hover {
       transform: translateY(-8px);
-      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(102, 126, 234, 0.1);
+      box-shadow: var(--shadow-xl), 0 0 30px rgba(184, 160, 104, 0.15);
     }
 
     .system-card:hover::before {
@@ -170,23 +220,25 @@
     .card-icon {
       width: 100px;
       height: 100px;
-      background: var(--purple-gradient);
-      border-radius: 24px;
+      background: linear-gradient(135deg, var(--navy-dark), var(--navy-light));
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 52px;
       margin: 0 auto 24px;
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 6px 20px rgba(44, 62, 80, 0.25);
       transition: transform 0.3s ease;
+      position: relative;
+      z-index: 2;
     }
 
-    .system-card.pink .card-icon {
-      background: var(--pink-gradient);
+    .system-card:nth-child(2) .card-icon {
+      background: linear-gradient(135deg, var(--gold-accent), #C9B580);
     }
 
     .system-card:hover .card-icon {
-      transform: scale(1.1) rotate(5deg);
+      transform: scale(1.12) rotate(-5deg);
     }
 
     /* Status Badge */
@@ -194,21 +246,23 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 14px;
+      padding: 8px 16px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 600;
       margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .status-badge.active {
-      background: #d1fae5;
-      color: #065f46;
+      background: #D4EDDA;
+      color: #155724;
     }
 
     .status-badge.coming-soon {
-      background: #fef3c7;
-      color: #92400e;
+      background: #FFF3CD;
+      color: #856404;
     }
 
     .status-badge::before {
@@ -225,30 +279,34 @@
       50% { opacity: 0.3; }
     }
 
-    /* Title */
+    /* Card Content */
     .card-title {
-      font-size: 26px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--text-dark);
       margin-bottom: 12px;
       line-height: 1.3;
+      position: relative;
+      z-index: 2;
     }
 
     .card-description {
-      font-size: 15px;
+      font-size: 14px;
       color: var(--text-light);
       margin-bottom: 32px;
       line-height: 1.6;
-      min-height: 72px;
+      min-height: 60px;
+      position: relative;
+      z-index: 2;
     }
 
     /* Button */
     .btn {
       width: 100%;
-      padding: 18px 32px;
+      padding: 16px 32px;
       border: none;
-      border-radius: 14px;
-      font-size: 18px;
+      border-radius: 8px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       font-family: inherit;
@@ -258,18 +316,22 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 2;
     }
 
     .btn-primary {
-      background: var(--purple-gradient);
+      background: linear-gradient(135deg, var(--navy-dark), var(--navy-medium));
       color: white;
-      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(102, 126, 234, 0.5);
+      box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
+      background: linear-gradient(135deg, #1A252F, var(--navy-dark));
     }
 
     .btn-primary:active {
@@ -277,14 +339,15 @@
     }
 
     .btn-secondary {
-      background: var(--pink-gradient);
-      color: white;
-      box-shadow: 0 4px 16px rgba(240, 147, 251, 0.4);
+      background: linear-gradient(135deg, var(--gold-accent), #C9B580);
+      color: var(--text-dark);
+      box-shadow: 0 4px 12px rgba(184, 160, 104, 0.3);
     }
 
     .btn-secondary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(240, 147, 251, 0.5);
+      box-shadow: 0 6px 20px rgba(184, 160, 104, 0.4);
+      background: linear-gradient(135deg, #C9B580, #D4B896);
     }
 
     .btn-secondary:active {
@@ -292,8 +355,8 @@
     }
 
     .btn-disabled {
-      background: #e2e8f0;
-      color: #a0aec0;
+      background: #D1D8E0;
+      color: #8A95A4;
       cursor: not-allowed;
       box-shadow: none;
     }
@@ -311,7 +374,7 @@
       width: 0;
       height: 0;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.2);
       transform: translate(-50%, -50%);
       transition: width 0.6s, height 0.6s;
     }
@@ -328,22 +391,25 @@
 
     /* Footer */
     .footer {
+      background: linear-gradient(135deg, rgba(44, 62, 80, 0.9), rgba(52, 73, 94, 0.9));
+      border-top: 1px solid var(--gold-accent);
+      padding: 28px 20px;
       text-align: center;
-      animation: fadeIn 1s ease-out 0.5s both;
+      position: relative;
+      z-index: 2;
     }
 
     .footer-content {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 20px;
-      color: white;
-      font-size: 14px;
+      color: var(--text-light-on-navy);
+      font-size: 12px;
+      line-height: 1.6;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .footer-divider {
+      color: var(--gold-accent);
+      margin: 0 8px;
     }
 
     /* Notification */
@@ -352,29 +418,30 @@
       top: 20px;
       right: 20px;
       padding: 16px 24px;
-      background: #10b981;
-      color: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      background: linear-gradient(135deg, var(--navy-dark), var(--navy-medium));
+      color: var(--text-light-on-navy);
+      border-radius: 8px;
+      border-left: 4px solid var(--gold-accent);
+      box-shadow: var(--shadow-xl);
       z-index: 9999;
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 500;
       max-width: 400px;
       display: none;
     }
 
     .notification.show {
       display: block;
-      animation: slideInRight 0.3s ease-out;
+      animation: slideInRight 0.4s ease-out;
     }
 
     .notification.hide {
-      animation: slideOutRight 0.3s ease-out forwards;
+      animation: slideOutRight 0.4s ease-out forwards;
     }
 
     @keyframes slideInRight {
       from {
-        transform: translateX(400px);
+        transform: translateX(450px);
         opacity: 0;
       }
       to {
@@ -389,7 +456,7 @@
         opacity: 1;
       }
       to {
-        transform: translateX(400px);
+        transform: translateX(450px);
         opacity: 0;
       }
     }
@@ -401,26 +468,54 @@
         gap: 24px;
       }
 
-      .header-title {
-        font-size: 36px;
+      .page-title {
+        font-size: 26px;
       }
 
-      .header-subtitle {
-        font-size: 16px;
+      .header-top {
+        padding: 60px 30px 80px;
+      }
+
+      .company-name {
+        font-size: 40px;
+        letter-spacing: 4px;
       }
     }
 
     @media (max-width: 768px) {
-      body {
-        padding: 24px 16px;
+      .header-top {
+        padding: 40px 20px 40px;
       }
 
-      .header {
+      .logo-container {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .company-name {
+        font-size: 32px;
+        letter-spacing: 2px;
+      }
+
+      .logo-icon {
+        width: auto;
+        height: 48px;
+      }
+
+      .logo-icon img {
+        height: 48px;
+      }
+
+      .container {
+        padding: 32px 16px;
+      }
+
+      .page-header {
         margin-bottom: 32px;
       }
 
-      .header-title {
-        font-size: 32px;
+      .page-title {
+        font-size: 24px;
       }
 
       .system-card {
@@ -431,86 +526,121 @@
         width: 80px;
         height: 80px;
         font-size: 42px;
-        border-radius: 20px;
       }
 
       .card-title {
-        font-size: 22px;
+        font-size: 20px;
       }
 
       .card-description {
-        font-size: 14px;
+        font-size: 13px;
         min-height: auto;
       }
 
       .btn {
-        font-size: 16px;
-        padding: 16px 24px;
+        font-size: 14px;
+        padding: 14px 24px;
       }
     }
 
     @media (max-width: 480px) {
-      .header-title {
-        font-size: 28px;
+      .header-top {
+        padding: 32px 16px 32px;
       }
 
-      .header-subtitle {
-        font-size: 14px;
+      .logo-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .company-name {
+        font-size: 26px;
+        letter-spacing: 2px;
+      }
+
+      .logo-icon {
+        width: auto;
+        height: 42px;
+      }
+
+      .logo-icon img {
+        height: 42px;
+      }
+
+      .page-title {
+        font-size: 22px;
       }
 
       .system-card {
-        padding: 28px 24px;
+        padding: 28px 20px;
       }
 
       .card-icon {
         width: 72px;
         height: 72px;
         font-size: 36px;
+        margin-bottom: 16px;
       }
 
       .card-title {
-        font-size: 20px;
+        font-size: 18px;
+      }
+
+      .cards-grid {
+        gap: 16px;
+      }
+
+      .footer-content {
+        font-size: 11px;
       }
     }
   </style>
 </head>
 <body>
+  <!-- Header with Logo - Hero Section -->
+  <div class="header-top">
+    <div class="logo-container">
+      <h1 class="company-name">The Carpetmaker</h1>
+    </div>
+  </div>
+
+  <!-- Main Content -->
   <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1 class="header-title">ระบบจัดการเอกสาร HR</h1>
-      <p class="header-subtitle">The Carpetmaker Co., Ltd.</p>
+    <!-- Page Header -->
+    <div class="page-header">
+      <h2 class="page-title">ระบบจัดการเอกสาร HR</h2>
+      <p class="page-subtitle">ศูนย์บริหารเอกสารและการบุคลากร</p>
     </div>
 
     <!-- Cards Grid -->
     <div class="cards-grid">
       <!-- Card 1: IT Request -->
       <div class="system-card" onclick="openITRequest()">
-        <span class="status-badge active">ใช้งานได้</span>
+        <span class="status-badge active">✓ ใช้งานได้</span>
         
         <div class="card-icon">💻</div>
         
-        <h2 class="card-title">แบบฟอร์มขอเพิ่มเทคโนโลยีสารสนเทศ</h2>
+        <h3 class="card-title">แบบฟอร์มขออุปกรณ์ IT</h3>
         
         <p class="card-description">
-          ระบบขออุปกรณ์ IT สำหรับพนักงานใหม่ ครบถ้วนด้วยระบบอนุมัติ 3 ขั้นตอน
+          ระบบขออุปกรณ์เทคโนโลยีสารสนเทศสำหรับพนักงานใหม่พร้อมระบบอนุมัติ
         </p>
 
         <button class="btn btn-primary">
-          <span class="btn-text">🖊️ เปิดฟอร์มขอเพิ่ม IT</span>
+          <span class="btn-text">🖊️ เปิดฟอร์ม</span>
         </button>
       </div>
 
       <!-- Card 2: Action Form -->
-      <div class="system-card pink" onclick="openActionForm()">
-        <span class="status-badge active">ใช้งานได้</span>
+      <div class="system-card" onclick="openActionForm()">
+        <span class="status-badge active">✓ ใช้งานได้</span>
         
-        <div class="card-icon">📝</div>
+        <div class="card-icon">📋</div>
         
-        <h2 class="card-title">ใบดำเนินการ</h2>
+        <h3 class="card-title">ใบดำเนินการ HR</h3>
         
         <p class="card-description">
-          ระบบจัดการเอกสารดำเนินการต่างๆ สำหรับแผนก HR พร้อมระบบติดตามงาน
+          ระบบจัดการเอกสารดำเนินการต่างๆ สำหรับแผนก HR พร้อมติดตามงาน
         </p>
 
         <button class="btn btn-secondary">
@@ -518,7 +648,18 @@
         </button>
       </div>
     </div>
+  </div>
 
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-content">
+      <span>© 2024 The Carpetmaker Co., Ltd.</span>
+      <span class="footer-divider">•</span>
+      <span>Human Resources Department</span>
+      <span class="footer-divider">•</span>
+      <span>Document Management System v1.0</span>
+    </div>
+  </div>
 
   <!-- Notification -->
   <div id="notification" class="notification"></div>
@@ -554,20 +695,13 @@
     function showNotification(message, type = 'success') {
       const notification = document.getElementById('notification');
       notification.textContent = message;
-      
-      if (type === 'success') {
-        notification.style.background = '#10b981';
-      } else if (type === 'info') {
-        notification.style.background = '#3b82f6';
-      }
-      
       notification.classList.add('show');
       notification.classList.remove('hide');
       
       setTimeout(() => {
         notification.classList.add('hide');
         notification.classList.remove('show');
-        setTimeout(() => notification.classList.remove('hide'), 300);
+        setTimeout(() => notification.classList.remove('hide'), 400);
       }, 3000);
     }
 
