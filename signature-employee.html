@@ -6,23 +6,24 @@
   <title>ลายเซ็นพนักงาน - The Carpetmaker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --text-dark: #1f2933;
-      --text-light: #7b8794;
+      --purple-pearl: #3D3B54;
+      --purple-pearl-dark: #2F2D45;
+      --gold-accent: #B8A068;
+      --text-dark: #1A252F;
+      --text-light: #5A6C7D;
+      --text-light-on-navy: #D4D4D4;
       --border: #e1e7ef;
-      --section-border: #4f46e5;
-      --success: #10b981;
     }
 
     body {
       font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--purple-gradient);
+      background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%);
       min-height: 100vh;
       padding: 32px 16px;
     }
@@ -35,19 +36,21 @@
     .header {
       text-align: center;
       margin-bottom: 24px;
-      color: #fff;
+      color: var(--text-dark);
     }
 
     .header-title {
       font-size: 28px;
-      font-weight: 700;
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      font-weight: 400;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-family: 'Playfair Display', serif;
+      letter-spacing: 1px;
     }
 
     .header-subtitle {
       margin-top: 4px;
       font-size: 14px;
-      opacity: 0.9;
+      color: var(--text-light);
     }
 
     .content {
@@ -58,28 +61,24 @@
 
     .card {
       background: #fff;
-      border-radius: 20px;
+      border-radius: 12px;
       padding: 24px 28px 28px;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
+      border-top: 4px solid var(--purple-pearl);
     }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 6px;
-      background: var(--purple-gradient);
+    .card:nth-child(2) {
+      border-top-color: var(--gold-accent);
     }
 
     .card-title {
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--text-dark);
       margin-bottom: 16px;
+      font-family: 'Playfair Display', serif;
     }
 
     .section {
@@ -101,7 +100,7 @@
       width: 4px;
       height: 20px;
       border-radius: 999px;
-      background: var(--section-border);
+      background: var(--purple-pearl);
     }
 
     .section-title {
@@ -124,6 +123,7 @@
       font-size: 12px;
       color: var(--text-light);
       margin-bottom: 3px;
+      font-weight: 500;
     }
 
     .field-value-box {
@@ -142,22 +142,25 @@
     .status-msg {
       font-size: 13px;
       padding: 8px 10px;
-      border-radius: 999px;
+      border-radius: 8px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       margin-bottom: 12px;
       background: #eff6ff;
       color: #1d4ed8;
+      border-left: 4px solid #1d4ed8;
     }
 
     .status-msg.error {
       background: #fef2f2;
       color: #b91c1c;
+      border-left-color: #b91c1c;
     }
     .status-msg.success {
       background: #ecfdf5;
       color: #047857;
+      border-left-color: #047857;
     }
 
     /* การดำเนินการ */
@@ -186,6 +189,7 @@
 
     .operation-left input[type="radio"] {
       margin-top: 3px;
+      accent-color: var(--purple-pearl);
     }
 
     .operation-right {
@@ -226,10 +230,11 @@
     .operation-detail-label {
       margin-bottom: 4px;
       color: var(--text-light);
+      font-weight: 500;
     }
 
     .textarea-box {
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid var(--border);
       padding: 8px 10px;
       background: #ffffff;
@@ -244,7 +249,7 @@
     .status-badge {
       display: inline-block;
       padding: 6px 12px;
-      border-radius: 999px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
       background: #ecfeff;
@@ -254,12 +259,13 @@
 
     .signature-pad {
       border: 2px dashed var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       background: #ffffff;
       cursor: crosshair;
       display: block;
       width: 100%;
       margin: 8px 0 12px;
+      touch-action: none;
     }
 
     .btn-row {
@@ -271,13 +277,13 @@
     .btn {
       flex: 1;
       padding: 10px 14px;
-      border-radius: 999px;
+      border-radius: 8px;
       border: none;
       font-family: inherit;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -286,29 +292,31 @@
 
     .btn-clear {
       background: #e5e7eb;
-      color: #374151;
+      color: var(--text-dark);
     }
     .btn-clear:hover {
       background: #d1d5db;
+      transform: translateY(-1px);
     }
 
     .btn-save {
-      background: var(--success);
+      background: linear-gradient(135deg, var(--purple-pearl), var(--purple-pearl-dark));
       color: #ffffff;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 4px 12px rgba(61, 59, 84, 0.3);
     }
     .btn-save:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(61, 59, 84, 0.4);
     }
 
     .info-item {
       padding: 10px 12px;
-      border-radius: 10px;
+      border-radius: 8px;
       background: #f9fafb;
       border: 1px solid #edf2f7;
       font-size: 13px;
       margin-bottom: 8px;
+      color: var(--text-dark);
     }
 
     .info-label {
@@ -317,6 +325,7 @@
       letter-spacing: .04em;
       color: var(--text-light);
       margin-bottom: 2px;
+      font-weight: 600;
     }
 
     .signature-history {
@@ -327,7 +336,10 @@
       color: var(--text-light);
     }
 
-    .signature-item { margin-bottom: 6px; }
+    .signature-item { 
+      margin-bottom: 6px;
+      color: var(--text-dark);
+    }
     .signature-item strong { color: var(--text-dark); }
 
     .success-message {
