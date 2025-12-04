@@ -178,31 +178,85 @@
       font-size: 16px;
     }
 
-    .avg-score {
-      text-align: right;
-      margin-top: 20px;
-      padding: 20px;
-      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-      border-radius: 10px;
-      border-left: 5px solid #27ae60;
+    /* Reasons Section Styles */
+    .reasons-section {
+      background: #fffbeb;
+      border: 2px solid #fbbf24;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
     }
 
-    .avg-score-label {
-      color: #2c3e50;
-      font-weight: 600;
-      font-size: 16px;
-    }
-
-    .avg-score-value {
-      font-size: 28px;
-      color: #27ae60;
+    .reasons-title {
+      font-size: 18px;
       font-weight: 700;
-      margin-top: 5px;
+      color: #92400e;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .reasons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .reason-category {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #fcd34d;
+    }
+
+    .reason-category-title {
+      font-weight: 700;
+      color: #78350f;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #fbbf24;
+      font-size: 14px;
+    }
+
+    .reason-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #451a03;
+    }
+
+    .reason-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .reason-checkbox {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #d97706;
+      border-radius: 3px;
+      margin-right: 8px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .reason-checkbox.checked {
+      background: #d97706;
+      color: white;
+    }
+
+    .reason-text {
+      flex: 1;
+      line-height: 1.5;
     }
 
     .comments-box {
-      background: #fff3cd;
-      border: 2px solid #ffc107;
+      background: #e0f2fe;
+      border: 2px solid #0ea5e9;
       border-radius: 10px;
       padding: 20px;
       margin-bottom: 30px;
@@ -210,7 +264,7 @@
 
     .comments-title {
       font-weight: 700;
-      color: #856404;
+      color: #075985;
       margin-bottom: 12px;
       font-size: 16px;
       display: flex;
@@ -219,7 +273,7 @@
     }
 
     .comments-content {
-      color: #856404;
+      color: #0c4a6e;
       line-height: 1.7;
       white-space: pre-wrap;
       font-size: 15px;
@@ -463,8 +517,8 @@
         padding: 8px;
       }
 
-      .avg-score-value {
-        font-size: 24px;
+      .reasons-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -533,12 +587,11 @@
             <!-- จะถูกเติมด้วย JavaScript -->
           </tbody>
         </table>
+      </div>
 
-        <!-- คะแนนเฉลี่ย -->
-        <div class="avg-score">
-          <div class="avg-score-label">คะแนนเฉลี่ยโดยรวม</div>
-          <div class="avg-score-value" id="averageScore">-</div>
-        </div>
+      <!-- เหตุผลที่ต้นสังกัดไม่เลือกรับ -->
+      <div id="reasonsSection">
+        <!-- จะถูกเติมด้วย JavaScript -->
       </div>
 
       <!-- ความคิดเห็น -->
@@ -721,8 +774,8 @@
       // แสดงคะแนน
       displayScores(data.scores);
 
-      // คะแนนเฉลี่ย
-      document.getElementById('averageScore').textContent = data.averageScore + ' / 10';
+      // แสดงเหตุผล
+      displayReasons(data.reasons);
 
       // ความคิดเห็น
       displayComments(data.comments);
@@ -763,11 +816,75 @@
       });
     }
 
+    function displayReasons(reasons) {
+      const section = document.getElementById('reasonsSection');
+      
+      if (!reasons || typeof reasons !== 'object') {
+        return; // ไม่แสดงถ้าไม่มีข้อมูล
+      }
+
+      const html = `
+        <div class="reasons-section">
+          <div class="reasons-title">
+            <span>⚠️</span>
+            <span>เหตุผลที่ต้นสังกัดไม่เลือกรับผู้สมัครรายนี้ เนื่องจาก</span>
+          </div>
+          <div class="reasons-grid">
+            <!-- ผลตอบแทน / ค่าจ้าง -->
+            <div class="reason-category">
+              <div class="reason-category-title">ผลตอบแทน / ค่าจ้าง</div>
+              ${createReasonItem('ฐานเงินเดือนเดิมสูงมาก', reasons.pay1)}
+              ${createReasonItem('เงินเดือนที่คาดหวังสูงเกินกว่าบริษัทจะให้ได้', reasons.pay2)}
+              ${createReasonItem(reasons.pay3_text || 'อื่นๆ', reasons.pay3)}
+            </div>
+
+            <!-- ประสบการณ์ในการทำงาน -->
+            <div class="reason-category">
+              <div class="reason-category-title">ประสบการณ์ในการทำงาน</div>
+              ${createReasonItem('ไม่ตรงกับตำแหน่งที่เปิดรับสมัคร', reasons.exp1)}
+              ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่น้อยเกินไป', reasons.exp2)}
+              ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่มากเกินไป', reasons.exp3)}
+              ${createReasonItem(reasons.exp4_text || 'อื่นๆ', reasons.exp4)}
+            </div>
+
+            <!-- บุคลิกภาพ -->
+            <div class="reason-category">
+              <div class="reason-category-title">บุคลิกภาพ</div>
+              ${createReasonItem('ไม่เหมาะสมกับตำแหน่งที่ต้องการรับ', reasons.personality1)}
+              ${createReasonItem('ขาดปฏิภาณ ไหวพริบในการตอบคำถาม', reasons.personality2)}
+              ${createReasonItem(reasons.personality3_text || 'อื่นๆ', reasons.personality3)}
+            </div>
+
+            <!-- ความคิดเห็น / เหตุผลอื่นๆ -->
+            <div class="reason-category">
+              <div class="reason-category-title">ความคิดเห็น / เหตุผลอื่นๆ</div>
+              ${createReasonItem('กลุ่มผู้สมัคร A-B-C-D', reasons.other1)}
+              ${createReasonItem('ขาดความตั้งใจในการเข้าร่วมงานกับองค์กร', reasons.other2)}
+              ${createReasonItem('ต้องการตรวจสอบประวัติการทำงานจากที่เดิมก่อน', reasons.other3)}
+              ${createReasonItem(reasons.other4_text || 'อื่นๆ', reasons.other4)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      section.innerHTML = html;
+    }
+
+    function createReasonItem(text, checked) {
+      const checkmark = checked ? '<span class="reason-checkbox checked">✓</span>' : '<span class="reason-checkbox"></span>';
+      return `
+        <div class="reason-item">
+          ${checkmark}
+          <span class="reason-text">${text}</span>
+        </div>
+      `;
+    }
+
     function displayComments(comments) {
       const section = document.getElementById('commentsSection');
       section.innerHTML = '';
 
-      if (!comments || String(comments).trim() === '-') {
+      if (!comments || String(comments).trim() === '-' || String(comments).trim() === '') {
         return; // ไม่แสดงถ้าไม่มีความเห็น
       }
 
@@ -812,47 +929,40 @@
 
       // ส่ง POST request
       const payload = {
-  action: 'saveEvalSignature',
-  rowIndex: rowIndex,
-  sessionId: sessionId,
-  evaluatorName: document.getElementById('applicantName').textContent,
-  evaluatorPosition: document.getElementById('applicantPosition').textContent,
-  signature: signatureBase64
-};
+        action: 'saveEvalSignature',
+        rowIndex: rowIndex,
+        sessionId: sessionId,
+        evaluatorName: document.getElementById('applicantName').textContent,
+        evaluatorPosition: document.getElementById('applicantPosition').textContent,
+        signature: signatureBase64
+      };
 
-fetch(APPS_SCRIPT_URL, {
-  method: 'POST',
-  // ❌ ไม่ต้องใส่ headers: { 'Content-Type': 'application/json' },
-  // browser จะตั้งเป็น text/plain ให้อัตโนมัติ → ไม่โดน preflight
-  body: JSON.stringify(payload)
-})
-  .then(response => response.json())
-  .then(result => {
-    console.log('✅ Response:', result);
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+        .then(response => response.json())
+        .then(result => {
+          console.log('✅ Response:', result);
 
-    if (result.success) {
-      showStatus(
-        'success',
-        '✅ <strong>ลงลายเซ็นสำเร็จ!</strong><br><br>' +
-          'ระบบได้สร้าง PDF และส่งอีเมลแล้ว<br><br>' +
-          (result.pdfUrl
-            ? '<a href="' +
-              result.pdfUrl +
-              '" target="_blank" class="pdf-link">📄 เปิดดู PDF</a>'
-            : '')
-      );
-      document.querySelector('.button-group').style.display = 'none';
-    } else {
-      showStatus('error', '❌ ' + (result.message || 'เกิดข้อผิดพลาด'));
-      submitBtn.disabled = false;
-    }
-  })
-  .catch(error => {
-    console.error('❌ Error:', error);
-    showStatus('error', '❌ เกิดข้อผิดพลาด: ' + error.message);
-    submitBtn.disabled = false;
-  });
-
+          if (result.success) {
+            showStatus(
+              'success',
+              '✅ <strong>ลงลายเซ็นสำเร็จ!</strong><br><br>' +
+              'ระบบได้บันทึกลายเซ็นแล้ว'
+                
+            );
+            document.querySelector('.button-group').style.display = 'none';
+          } else {
+            showStatus('error', '❌ ' + (result.message || 'เกิดข้อผิดพลาด'));
+            submitBtn.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('❌ Error:', error);
+          showStatus('error', '❌ เกิดข้อผิดพลาด: ' + error.message);
+          submitBtn.disabled = false;
+        });
     }
 
     // ========== INIT ==========
