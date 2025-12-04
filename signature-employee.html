@@ -294,7 +294,7 @@
       background: #e5e7eb;
       color: var(--text-dark);
     }
-    .btn-clear:hover {
+    .btn-clear:hover:not(:disabled) {
       background: #d1d5db;
       transform: translateY(-1px);
     }
@@ -304,9 +304,14 @@
       color: #ffffff;
       box-shadow: 0 4px 12px rgba(61, 59, 84, 0.3);
     }
-    .btn-save:hover {
+    .btn-save:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(61, 59, 84, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .info-item {
@@ -355,6 +360,11 @@
     }
 
     .success-message.show { display: block; }
+
+    @keyframes spinBtn {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
     @media (max-width: 900px) {
       .content { grid-template-columns: 1fr; }
@@ -619,6 +629,7 @@
     let hasSignature = false;
     let canvas, ctx;
     let isDrawing = false;
+    let isSubmitting = false;
 
     function getQueryParam(name) {
       const url = new URL(window.location.href);
@@ -1007,6 +1018,7 @@
     }
 
     function startDraw(e) {
+      e.preventDefault();
       isDrawing = true;
       hasSignature = true;
       const pos = getPos(e);
@@ -1016,12 +1028,15 @@
 
     function draw(e) {
       if (!isDrawing) return;
+      e.preventDefault();
       const pos = getPos(e);
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
     }
 
-    function stopDraw() {
+    function stopDraw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
       isDrawing = false;
     }
 
@@ -1031,14 +1046,30 @@
     }
 
     function handleComplete() {
+      // ป้องกันการกดปุ่มซ้ำ
+      if (isSubmitting) {
+        alert('⚠️ ระบบกำลังประมวลผลข้อมูล กรุณารอสักครู่...');
+        return;
+      }
+
       if (!DOC_NO) {
-        alert('ไม่พบเลขที่เอกสาร');
+        alert('❌ ไม่พบเลขที่เอกสาร');
         return;
       }
       if (!hasSignature) {
-        alert('กรุณาวาดลายเซ็นก่อน');
+        alert('❌ กรุณาวาดลายเซ็นก่อน');
         return;
       }
+
+      isSubmitting = true;
+      const btnSave = document.getElementById('btnSave');
+      const btnClear = document.getElementById('btnClear');
+      
+      // Lock ปุ่ม
+      btnSave.disabled = true;
+      btnClear.disabled = true;
+      btnSave.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;"><span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top:2px solid white;border-radius:50%;animation:spinBtn 0.8s linear infinite;"></span><span>กำลังบันทึก...</span></span>';
+      btnSave.style.opacity = '0.8';
 
       const dataUrl = canvas.toDataURL('image/png');
       const formData = new URLSearchParams();
@@ -1051,13 +1082,23 @@
         method: 'POST',
         mode: 'no-cors',
         body: formData
+      }).then(() => {
+        document.getElementById('successMessage').classList.add('show');
+        document.getElementById('statusBadge').textContent = '✓ รับทราบเรียบร้อย';
+        
+        setTimeout(() => {
+          alert('✅ ขั้นตอนเสร็จสิ้น ระบบจะสร้าง PDF สุดท้ายและส่งอีเมลให้อัตโนมัติ');
+        }, 700);
+      }).catch(err => {
+        console.error(err);
+        alert('❌ เกิดข้อผิดพลาด: ' + err.message);
+      }).finally(() => {
+        isSubmitting = false;
+        btnSave.disabled = false;
+        btnClear.disabled = false;
+        btnSave.innerHTML = '✓ ยืนยันและจบขั้นตอน';
+        btnSave.style.opacity = '1';
       });
-
-      document.getElementById('successMessage').classList.add('show');
-      document.getElementById('statusBadge').textContent = '✓ รับทราบเรียบร้อย';
-      setTimeout(() => {
-        alert('ขั้นตอนเสร็จสิ้น ระบบจะสร้าง PDF สุดท้ายและส่งอีเมลให้อัตโนมัติ');
-      }, 700);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
