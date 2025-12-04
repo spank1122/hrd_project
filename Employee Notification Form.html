@@ -370,6 +370,70 @@
       transform: none;
     }
 
+    .btn-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .spinner-btn {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spinBtn 0.8s linear infinite;
+    }
+
+    @keyframes spinBtn {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .status-message {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      animation: fadeInStatus 0.3s ease-out;
+    }
+
+    .status-message.show {
+      display: block;
+    }
+
+    .status-message.success {
+      background: #d1fae5;
+      color: #065f46;
+      border-left: 4px solid #10b981;
+    }
+
+    .status-message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left: 4px solid #ef4444;
+    }
+
+    .status-message.loading {
+      background: #fef3c7;
+      color: #92400e;
+      border-left: 4px solid #fbbf24;
+    }
+
+    @keyframes fadeInStatus {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @media (max-width: 720px) {
       .field-row {
         grid-template-columns: minmax(0, 1fr);
@@ -400,6 +464,7 @@
 
     <div class="page-header">
       <h1 class="page-title">ใบดำเนินการ</h1>
+      <p class="page-subtitle">ไฟล์: HRD demo</p>
     </div>
 
     <!-- ================= ฟอร์มหลัก ================= -->
@@ -803,23 +868,58 @@
       </div>
 
       <div class="btn-row">
-        <button type="button" class="btn-secondary" onclick="document.getElementById('hrDocForm').reset(); clearSignature();">
+        <button type="button" class="btn-secondary" id="btnReset" onclick="document.getElementById('hrDocForm').reset(); clearSignature(); clearStatus();">
           ล้างฟอร์ม
         </button>
-        <button type="submit" class="btn-primary">
+        <button type="submit" class="btn-primary" id="submitBtn">
           บันทึกใบดำเนินการ
         </button>
       </div>
+
+      <!-- Status Message -->
+      <div id="statusMessage" class="status-message"></div>
     </form>
   </div>
 
   <script>
     // ================== CONFIG WEB APP ==================
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwAL1ISDOIC_0TVh4RZniHn34vP0O7x5yBHlyxGZ1-u8ctgEg9OtG9dNMAZwxH7sNww/exec';
+    let isSubmitting = false; // ป้องกันการกดปุ่มซ้ำ
 
     // ================== BACK BUTTON ==================
     function goBack() {
       window.history.back();
+    }
+
+    // ================== STATUS MESSAGES ==================
+    function showStatus(message, type) {
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.textContent = message;
+      statusEl.className = `status-message show ${type}`;
+      statusEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function clearStatus() {
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.className = 'status-message';
+      statusEl.textContent = '';
+    }
+
+    function setSubmitButtonLoading(loading) {
+      const btn = document.getElementById('submitBtn');
+      const resetBtn = document.getElementById('btnReset');
+      
+      if (loading) {
+        btn.disabled = true;
+        resetBtn.disabled = true;
+        btn.innerHTML = '<span class="btn-loading"><span class="spinner-btn"></span><span>กำลังบันทึก...</span></span>';
+        btn.style.opacity = '0.8';
+      } else {
+        btn.disabled = false;
+        resetBtn.disabled = false;
+        btn.innerHTML = 'บันทึกใบดำเนินการ';
+        btn.style.opacity = '1';
+      }
     }
 
     // ================== SUBMIT FORM ==================
@@ -830,69 +930,86 @@
     async function handleSubmit(e) {
       e.preventDefault();
 
-      // 1) เก็บลายเซ็นลง hidden field ก่อน
-      saveSignatureToInput();
-
-      const form = e.target;
-      const fd   = new FormData(form);
-      const raw  = Object.fromEntries(fd.entries());
-
-      // 2) เช็กว่ามีการเลือกพนักงานหรือยัง
-      const empSelect = document.getElementById('employeeName');
-      if (!empSelect.value) {
-        alert('กรุณาเลือกพนักงานก่อนบันทึกใบดำเนินการ');
+      // ป้องกันการกดปุ่มซ้ำ
+      if (isSubmitting) {
+        showStatus('⚠️ ระบบกำลังประมวลผลข้อมูล กรุณารอสักครู่...', 'loading');
         return;
       }
 
-      const selectedOption = empSelect.options[empSelect.selectedIndex] || null;
-      const empNameText = selectedOption
-        ? selectedOption.textContent.split('(')[0].trim()
-        : '';
-
-      // 3) แปลง proceedType → actionType/actionLabel/actionDetail/from/to
-      const actionInfo = buildActionInfo(raw);
-
-      // 4) ใช้ email ที่ HR กรอกเองเป็นหลัก ถ้าเว้นว่างค่อยใช้จาก hidden
-      const manualEmail = (document.getElementById('empEmailManual').value || '').trim();
-      const baseEmail   = (raw.empEmail || '').trim();
-      const finalEmail  = manualEmail || baseEmail;
-
-      if (!finalEmail) {
-        alert('กรุณากรอก Email พนักงาน ก่อนบันทึกใบดำเนินการ');
-        return;
-      }
-
-      // 5) เตรียม payload ส่งเข้า Apps Script → createDocument_
-      const payload = {
-        // ข้อมูลพนักงาน
-        empCode:        raw.empCode        || '',
-        empName:        empNameText        || '',
-        empPosition:    raw.empPosition    || '',
-        empDepartment:  raw.empDepartment  || '',
-        empDivision:    raw.empDivision    || '',
-        company:        raw.company        || '',
-        employmentType: raw.employmentType || '',
-        empEmail:       finalEmail         || '',
-
-        // รายละเอียด
-        effectiveDate:  raw.effectiveDate  || '',
-        details:        raw.details        || '',
-
-        // การดำเนินการ
-        actionType:   actionInfo.actionType,
-        actionLabel:  actionInfo.actionLabel,
-        actionDetail: actionInfo.actionDetail,
-        actionFrom:   actionInfo.actionFrom,
-        actionTo:     actionInfo.actionTo,
-
-        // ลายเซ็น (Base64 dataURL)
-        proposerSignature: raw.proposerSignature || ''
-      };
-
-      console.log('HR Document payload:', payload);
+      isSubmitting = true;
+      setSubmitButtonLoading(true);
+      clearStatus();
+      showStatus('⏳ กำลังเตรียมข้อมูลและบันทึกใบดำเนินการ...', 'loading');
 
       try {
-        await fetch(WEB_APP_URL, {
+        // 1) เก็บลายเซ็นลง hidden field ก่อน
+        saveSignatureToInput();
+
+        const form = e.target;
+        const fd   = new FormData(form);
+        const raw  = Object.fromEntries(fd.entries());
+
+        // 2) เช็กว่ามีการเลือกพนักงานหรือยัง
+        const empSelect = document.getElementById('employeeName');
+        if (!empSelect.value) {
+          showStatus('❌ กรุณาเลือกพนักงานก่อนบันทึกใบดำเนินการ', 'error');
+          isSubmitting = false;
+          setSubmitButtonLoading(false);
+          return;
+        }
+
+        const selectedOption = empSelect.options[empSelect.selectedIndex] || null;
+        const empNameText = selectedOption
+          ? selectedOption.textContent.split('(')[0].trim()
+          : '';
+
+        // 3) แปลง proceedType → actionType/actionLabel/actionDetail/from/to
+        const actionInfo = buildActionInfo(raw);
+
+        // 4) ใช้ email ที่ HR กรอกเองเป็นหลัก ถ้าเว้นว่างค่อยใช้จาก hidden
+        const manualEmail = (document.getElementById('empEmailManual').value || '').trim();
+        const baseEmail   = (raw.empEmail || '').trim();
+        const finalEmail  = manualEmail || baseEmail;
+
+        if (!finalEmail) {
+          showStatus('❌ กรุณากรอก Email พนักงาน ก่อนบันทึกใบดำเนินการ', 'error');
+          isSubmitting = false;
+          setSubmitButtonLoading(false);
+          return;
+        }
+
+        // 5) เตรียม payload ส่งเข้า Apps Script → createDocument_
+        const payload = {
+          // ข้อมูลพนักงาน
+          empCode:        raw.empCode        || '',
+          empName:        empNameText        || '',
+          empPosition:    raw.empPosition    || '',
+          empDepartment:  raw.empDepartment  || '',
+          empDivision:    raw.empDivision    || '',
+          company:        raw.company        || '',
+          employmentType: raw.employmentType || '',
+          empEmail:       finalEmail         || '',
+
+          // รายละเอียด
+          effectiveDate:  raw.effectiveDate  || '',
+          details:        raw.details        || '',
+
+          // การดำเนินการ
+          actionType:   actionInfo.actionType,
+          actionLabel:  actionInfo.actionLabel,
+          actionDetail: actionInfo.actionDetail,
+          actionFrom:   actionInfo.actionFrom,
+          actionTo:     actionInfo.actionTo,
+
+          // ลายเซ็น (Base64 dataURL)
+          proposerSignature: raw.proposerSignature || ''
+        };
+
+        console.log('HR Document payload:', payload);
+
+        showStatus('📤 กำลังส่งข้อมูลไปยังเซิร์ฟเวอร์...', 'loading');
+
+        const response = await fetch(WEB_APP_URL, {
           method: 'POST',
           mode: 'no-cors',
           headers: {
@@ -904,12 +1021,22 @@
           })
         });
 
-        alert('บันทึกใบดำเนินการเรียบร้อย (ตรวจผลในชีต "ใบดำเนินการ")');
-        form.reset();
-        clearSignature();
+        // แม้ว่า no-cors จะไม่ให้ response แต่เราถือว่าส่งสำเร็จ
+        showStatus('✅ บันทึกใบดำเนินการเรียบร้อย! (ตรวจผลในชีต "ใบดำเนินการ")', 'success');
+        
+        // รีเซตฟอร์มหลังจากบันทึกสำเร็จ
+        setTimeout(() => {
+          form.reset();
+          clearSignature();
+          clearStatus();
+        }, 2000);
+
       } catch (err) {
-        console.error(err);
-        alert('ส่งข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง หรือตรวจ Console');
+        console.error('Error:', err);
+        showStatus('❌ ส่งข้อมูลไม่สำเร็จ (' + err.message + ') กรุณาลองใหม่อีกครั้ง', 'error');
+      } finally {
+        isSubmitting = false;
+        setSubmitButtonLoading(false);
       }
     }
 
