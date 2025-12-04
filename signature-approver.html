@@ -44,7 +44,7 @@
     .header-title {
       font-size: 28px;
       font-weight: 400;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       font-family: 'Playfair Display', serif;
       letter-spacing: 1px;
     }
@@ -62,17 +62,21 @@
     }
 
     .card {
-      background: #fff;
+      background: #ffffff;
       border-radius: 12px;
       padding: 24px 28px 28px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
-      border-top: 4px solid var(--purple-pearl);
+      border-top: 4px solid var(--gold-accent);
+    }
+
+    .card:nth-child(1) {
+      border-top-color: var(--gold-accent);
     }
 
     .card:nth-child(2) {
-      border-top-color: var(--gold-accent);
+      border-top-color: var(--purple-pearl);
     }
 
     .card-title {
@@ -102,7 +106,7 @@
       width: 4px;
       height: 20px;
       border-radius: 999px;
-      background: var(--purple-pearl);
+      background: var(--gold-accent);
     }
 
     .section-title {
@@ -143,25 +147,25 @@
 
     .status-msg {
       font-size: 13px;
-      padding: 8px 10px;
+      padding: 10px 12px;
       border-radius: 8px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       margin-bottom: 12px;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-left: 4px solid #1d4ed8;
+      background: #dbeafe;
+      color: #1e40af;
+      border-left: 4px solid #1e40af;
     }
     .status-msg.error {
-      background: #fef2f2;
+      background: #fee2e2;
       color: #b91c1c;
       border-left-color: #b91c1c;
     }
     .status-msg.success {
-      background: #ecfdf5;
-      color: #047857;
-      border-left-color: #047857;
+      background: #dcfce7;
+      color: #166534;
+      border-left-color: #16a34a;
     }
 
     /* ===== การดำเนินการ ===== */
@@ -191,6 +195,7 @@
     .operation-left input[type="radio"] {
       margin-top: 3px;
       accent-color: var(--purple-pearl);
+      cursor: pointer;
     }
 
     .operation-right {
@@ -298,7 +303,7 @@
     }
 
     .btn-approve {
-      background: var(--success);
+      background: #10b981;
       color: #ffffff;
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
@@ -311,7 +316,7 @@
     }
 
     .btn-reject {
-      background: var(--danger);
+      background: #ef4444;
       color: #ffffff;
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
@@ -358,7 +363,7 @@
 
     /* ===== Canvas (ลายเซ็น) ===== */
     .signature-pad {
-      border: 2px dashed var(--border);
+      border: 2px dashed var(--purple-pearl);
       border-radius: 8px;
       background: #ffffff;
       cursor: crosshair;
@@ -398,6 +403,7 @@
     .btn-clear:hover:not(:disabled) {
       background: #d1d5db;
       transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .btn-save {
@@ -411,7 +417,7 @@
     }
 
     .btn:disabled {
-      opacity: 0.5;
+      opacity: 0.6;
       cursor: not-allowed;
     }
 
@@ -501,6 +507,75 @@
     @media (max-width: 900px) {
       .content { grid-template-columns: 1fr; }
       .decision-buttons { flex-direction: column; }
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .spinner-btn {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spinBtn 0.8s linear infinite;
+    }
+
+    @keyframes spinBtn {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .status-message {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      animation: fadeInStatus 0.3s ease-out;
+    }
+
+    .status-message.show {
+      display: block;
+    }
+
+    .status-message.success {
+      background: #dcfce7;
+      color: #166534;
+      border-left: 4px solid #16a34a;
+    }
+
+    .status-message.error {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-left: 4px solid #ef4444;
+    }
+
+    .status-message.loading {
+      background: #fef3c7;
+      color: #92400e;
+      border-left: 4px solid #fbbf24;
+    }
+
+    @keyframes fadeInStatus {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
@@ -753,6 +828,8 @@
             <button type="button" class="btn btn-clear" id="btnClear" disabled>✕ ล้างลายเซ็น</button>
             <button type="button" class="btn btn-save" id="btnSave" disabled>✓ บันทึกลายเซ็น</button>
           </div>
+
+          <div id="statusMessage" class="status-message"></div>
         </div>
 
         <!-- === ข้อมูลเพิ่มเติม === -->
@@ -1082,6 +1159,7 @@
     }
 
     function startDraw(e) {
+      e.preventDefault();
       if (!currentDecision) {
         alert('⚠️ กรุณาเลือก "อนุมัติ" หรือ "ไม่อนุมัติ" ก่อน');
         return;
@@ -1095,12 +1173,15 @@
 
     function draw(e) {
       if (!isDrawing) return;
+      e.preventDefault();
       const pos = getPos(e);
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
     }
 
-    function stopDraw() {
+    function stopDraw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
       isDrawing = false;
       updateSignatureButtons();
     }
@@ -1169,20 +1250,57 @@
       updateSignatureButtons();
     }
 
+    // ===== Status Message Functions =====
+    function showStatus(message, type) {
+      const statusEl = document.getElementById('statusMessage');
+      if (!statusEl) return;
+      statusEl.textContent = message;
+      statusEl.className = `status-message show ${type}`;
+      statusEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function clearStatus() {
+      const statusEl = document.getElementById('statusMessage');
+      if (statusEl) {
+        statusEl.className = 'status-message';
+        statusEl.textContent = '';
+      }
+    }
+
+    function setSubmitButtonLoading(loading) {
+      const btn = document.getElementById('btnSave');
+      
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-loading"><span class="spinner-btn"></span><span>กำลังบันทึก...</span></span>';
+        btn.style.opacity = '0.8';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '✓ บันทึกลายเซ็น';
+        btn.style.opacity = '1';
+      }
+    }
+
     // ===== Save Signature =====
     function handleSaveSignature() {
+      // ป้องกันการกดปุ่มซ้ำ
+      if (isSubmitting) {
+        showStatus('⚠️ ระบบกำลังประมวลผลข้อมูล กรุณารอสักครู่...', 'loading');
+        return;
+      }
+
       if (!DOC_NO) {
-        alert('ไม่พบเลขที่เอกสาร');
+        showStatus('❌ ไม่พบเลขที่เอกสาร', 'error');
         return;
       }
 
       if (!currentDecision) {
-        alert('⚠️ กรุณาเลือก "อนุมัติ" หรือ "ไม่อนุมัติ"');
+        showStatus('⚠️ กรุณาเลือก "อนุมัติ" หรือ "ไม่อนุมัติ"', 'error');
         return;
       }
 
       if (!hasSignature) {
-        alert('กรุณาวาดลายเซ็นก่อน');
+        showStatus('❌ กรุณาวาดลายเซ็นก่อน', 'error');
         return;
       }
 
@@ -1190,18 +1308,15 @@
       if (currentDecision === 'reject') {
         const reason = document.getElementById('rejectReasonInput').value.trim();
         if (!reason) {
-          alert('⚠️ กรุณาระบุเหตุผลการไม่อนุมัติ');
+          showStatus('⚠️ กรุณาระบุเหตุผลการไม่อนุมัติ', 'error');
           return;
         }
       }
 
-      if (isSubmitting) return;
       isSubmitting = true;
-
-      const btnSave = document.getElementById('btnSave');
-      const btnClear = document.getElementById('btnClear');
-      btnSave.disabled = true;
-      btnClear.disabled = true;
+      setSubmitButtonLoading(true);
+      clearStatus();
+      showStatus('⏳ กำลังบันทึกลายเซ็น...', 'loading');
 
       const dataUrl = canvas.toDataURL('image/png');
       const reason = currentDecision === 'reject' ? document.getElementById('rejectReasonInput').value : '';
@@ -1228,24 +1343,21 @@
           successMessage.classList.remove('reject');
           successMessage.textContent = '✅ อนุมัติเรียบร้อย! ระบบจะส่งอีเมลให้พนักงานเซ็นรับทราบ';
           if (statusBadge) statusBadge.textContent = '✓ อนุมัติแล้ว';
+          showStatus('✅ อนุมัติเรียบร้อยแล้ว', 'success');
         } else {
           successMessage.classList.add('reject');
           successMessage.textContent = '✅ ไม่อนุมัติเรียบร้อย! ระบบจะส่งอีเมลให้ผู้เสนอทราบ';
           if (statusBadge) statusBadge.textContent = '✗ ไม่อนุมัติ';
+          showStatus('✅ ไม่อนุมัติเรียบร้อยแล้ว', 'success');
         }
 
         successMessage.classList.add('show');
-
-        setTimeout(() => {
-          alert(currentDecision === 'approve' ? 'อนุมัติเรียบร้อยแล้ว' : 'ไม่อนุมัติเรียบร้อยแล้ว');
-        }, 600);
       }).catch(err => {
         console.error(err);
-        alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
+        showStatus('❌ เกิดข้อผิดพลาดในการส่งข้อมูล: ' + err.message, 'error');
       }).finally(() => {
         isSubmitting = false;
-        btnSave.disabled = false;
-        btnClear.disabled = false;
+        setSubmitButtonLoading(false);
       });
     }
 
