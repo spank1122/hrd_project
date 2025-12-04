@@ -6,24 +6,24 @@
   <title>ทบทวนใบดำเนินการ - The Carpetmaker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --text-dark: #1f2933;
-      --text-light: #7b8794;
+      --purple-pearl: #3D3B54;
+      --purple-pearl-dark: #2F2D45;
+      --gold-accent: #B8A068;
+      --text-dark: #1A252F;
+      --text-light: #5A6C7D;
+      --text-light-on-navy: #D4D4D4;
       --border: #e1e7ef;
-      --section-border: #4f46e5;
-      --success: #10b981;
-      --danger: #ef4444;
     }
 
     body {
       font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--purple-gradient);
+      background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%);
       min-height: 100vh;
       padding: 32px 16px;
     }
@@ -36,19 +36,21 @@
     .header {
       text-align: center;
       margin-bottom: 24px;
-      color: #fff;
+      color: var(--text-dark);
     }
 
     .header-title {
       font-size: 32px;
-      font-weight: 700;
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      font-weight: 400;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-family: 'Playfair Display', serif;
+      letter-spacing: 1px;
     }
 
     .header-subtitle {
       margin-top: 4px;
       font-size: 14px;
-      opacity: 0.9;
+      color: var(--text-light);
     }
 
     .content {
@@ -59,28 +61,24 @@
 
     .card {
       background: #fff;
-      border-radius: 20px;
+      border-radius: 12px;
       padding: 24px 28px 28px;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
+      border-top: 4px solid var(--purple-pearl);
     }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 6px;
-      background: var(--purple-gradient);
+    .card:nth-child(2) {
+      border-top-color: var(--gold-accent);
     }
 
     .card-title {
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--text-dark);
       margin-bottom: 16px;
+      font-family: 'Playfair Display', serif;
     }
 
     .section {
@@ -102,7 +100,7 @@
       width: 4px;
       height: 20px;
       border-radius: 999px;
-      background: var(--section-border);
+      background: var(--purple-pearl);
     }
 
     .section-title {
@@ -125,6 +123,7 @@
       font-size: 12px;
       color: var(--text-light);
       margin-bottom: 3px;
+      font-weight: 500;
     }
 
     .field-value-box {
@@ -143,21 +142,24 @@
     .status-msg {
       font-size: 13px;
       padding: 8px 10px;
-      border-radius: 999px;
+      border-radius: 8px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       margin-bottom: 12px;
       background: #eff6ff;
       color: #1d4ed8;
+      border-left: 4px solid #1d4ed8;
     }
     .status-msg.error {
       background: #fef2f2;
       color: #b91c1c;
+      border-left-color: #b91c1c;
     }
     .status-msg.success {
       background: #ecfdf5;
       color: #047857;
+      border-left-color: #047857;
     }
 
     .operation-note {
@@ -184,6 +186,7 @@
 
     .operation-left input[type="radio"] {
       margin-top: 3px;
+      accent-color: var(--purple-pearl);
     }
 
     .operation-right {
@@ -224,10 +227,11 @@
     .operation-detail-label {
       margin-bottom: 4px;
       color: var(--text-light);
+      font-weight: 500;
     }
 
     .textarea-box {
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid var(--border);
       padding: 8px 10px;
       background: #ffffff;
@@ -239,12 +243,13 @@
 
     .signature-pad {
       border: 2px dashed var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       background: #ffffff;
       cursor: crosshair;
       display: block;
       width: 100%;
       margin: 8px 0 12px;
+      touch-action: none;
     }
 
     .btn-row {
@@ -256,13 +261,13 @@
     .btn {
       flex: 1;
       padding: 10px 14px;
-      border-radius: 999px;
+      border-radius: 8px;
       border: none;
       font-family: inherit;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -271,29 +276,31 @@
 
     .btn-clear {
       background: #e5e7eb;
-      color: #374151;
+      color: var(--text-dark);
     }
     .btn-clear:hover {
       background: #d1d5db;
+      transform: translateY(-1px);
     }
 
     .btn-save {
-      background: var(--success);
+      background: linear-gradient(135deg, var(--purple-pearl), var(--purple-pearl-dark));
       color: #ffffff;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 4px 12px rgba(61, 59, 84, 0.3);
     }
     .btn-save:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(61, 59, 84, 0.4);
     }
 
     .info-item {
       padding: 10px 12px;
-      border-radius: 10px;
+      border-radius: 8px;
       background: #f9fafb;
       border: 1px solid #edf2f7;
       font-size: 13px;
       margin-bottom: 8px;
+      color: var(--text-dark);
     }
     .info-label {
       font-size: 11px;
@@ -301,6 +308,15 @@
       letter-spacing: .04em;
       color: var(--text-light);
       margin-bottom: 2px;
+      font-weight: 600;
+    }
+
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 11px;
+      color: var(--text-dark);
     }
 
     @media (max-width: 900px) {
@@ -531,7 +547,7 @@
 
         <div class="info-item">
           <div class="info-label">สถานะ</div>
-          <div>แบบฟอร์มนี้สำหรับ “เซ็นรับทราบ ” เท่านั้น</div>
+          <div>แบบฟอร์มนี้สำหรับ "เซ็นรับทราบ " เท่านั้น</div>
         </div>
 
         <canvas id="signaturePad" class="signature-pad" height="170"></canvas>
@@ -673,236 +689,236 @@
     // ================================
     // แสดงข้อมูลลงหน้า HTML (ใช้คีย์จากชีตใบดำเนินการ)
     // ================================
-function renderOperationData(data) {
-  console.log('render data:', data);
+    function renderOperationData(data) {
+      console.log('render data:', data);
 
-  // ---------- ข้อมูลพนักงาน ----------
-  const empName =
-    data['ชื่อพนักงาน'] ||
-    data['พนักงาน'] ||
-    data['employeeName'] ||
-    '-';
-  document.getElementById('empName').textContent = empName;
+      // ---------- ข้อมูลพนักงาน ----------
+      const empName =
+        data['ชื่อพนักงาน'] ||
+        data['พนักงาน'] ||
+        data['employeeName'] ||
+        '-';
+      document.getElementById('empName').textContent = empName;
 
-  const empCode = data['รหัสพนักงาน'] || '';
-  const empPos  = data['ตำแหน่ง'] || '';
-  const codePos =
-    data['รหัสพนักงาน/ตำแหน่ง'] ||
-    data['empCodePosition'] ||
-    '';
-
-  document.getElementById('empCodePos').textContent =
-    codePos ||
-    (empCode && empPos
-      ? `${empCode} / ${empPos}`
-      : (empCode || empPos || '-'));
-
-  const deptOnly = data['แผนก'] || '';
-  const divOnly  = data['ฝ่าย']  || '';
-  const deptCombo =
-    data['แผนก/ฝ่าย'] ||
-    data['department'] ||
-    '';
-
-  document.getElementById('dept').textContent =
-    deptCombo ||
-    (deptOnly || divOnly
-      ? [deptOnly, divOnly].filter(Boolean).join(' / ')
-      : '-');
-
-  const empStatus =
-    data['สภาพพนักงาน/วันเริ่มงาน'] ||
-    data['employmentStatus'] ||
-    data['สภาพจ้างงาน'] ||
-    '';
-  document.getElementById('employmentStatus').textContent =
-    empStatus || '-';
-
-  // ---------- ประเภทการดำเนินการ ----------
-  const actionType =
-    data['ประเภทการดำเนินการ'] ||
-    data['การดำเนินการ'] ||
-    data['actionType'] ||
-    '';
-
-  const opDetail = data['รายละเอียดการดำเนินการ'] || '';
-
-  const radioMap = {
-    'แต่งตั้ง': 'action_appoint',
-    'โอนย้าย': 'action_transfer',
-    'เปลี่ยนสภาพการจ้างงาน': 'action_change',
-    'เลื่อนตำแหน่ง': 'action_promote',
-    'ผ่านทดลองงาน': 'action_passProb',
-
-    'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก': 'action_terminate',
-    'ให้ออกจากงาน / ลาออก': 'action_terminate',
-    'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
-
-    'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
-    'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
-    'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
-    'ตัดค่าจ้าง/เงินเดือน': 'action_cut',
-    'อื่น ๆ': 'action_other',
-    'อื่นๆ': 'action_other'
-  };
-
-  const radioId = radioMap[actionType];
-  if (radioId) {
-    const r = document.getElementById(radioId);
-    if (r) r.checked = true;
-  }
-
-  // helper อ่านค่าจากคอลัมน์ From/To กลาง
-  const globalFrom =
-    data['ค่าจากเดิม (From)'] ||
-    data['actionFrom'] ||
-    '';
-  const globalTo =
-    data['ค่าใหม่ (To)'] ||
-    data['actionTo'] ||
-    '';
-
-  // ---------- ใส่ข้อความลงแต่ละบรรทัดตามประเภท ----------
-  switch (actionType) {
-    case 'แต่งตั้ง':
-      document.getElementById('appoint_to').textContent =
-        globalTo ||
-        data['แต่งตั้ง_เป็น'] ||
-        opDetail ||
-        '';
-      break;
-
-    case 'โอนย้าย': {
-      const fromCol =
-        globalFrom ||
-        data['โอนย้าย_จากเดิม'] ||
-        '';
-      const toCol =
-        globalTo ||
-        data['โอนย้าย_เป็น'] ||
+      const empCode = data['รหัสพนักงาน'] || '';
+      const empPos  = data['ตำแหน่ง'] || '';
+      const codePos =
+        data['รหัสพนักงาน/ตำแหน่ง'] ||
+        data['empCodePosition'] ||
         '';
 
-      if (fromCol || toCol) {
-        document.getElementById('transfer_from').textContent = fromCol;
-        document.getElementById('transfer_to').textContent   = toCol;
-      } else if (opDetail) {
-        const m = opDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
-        document.getElementById('transfer_from').textContent =
-          m && m[1] ? m[1].trim() : opDetail;
-        document.getElementById('transfer_to').textContent =
-          m && m[2] ? m[2].trim() : '';
+      document.getElementById('empCodePos').textContent =
+        codePos ||
+        (empCode && empPos
+          ? `${empCode} / ${empPos}`
+          : (empCode || empPos || '-'));
+
+      const deptOnly = data['แผนก'] || '';
+      const divOnly  = data['ฝ่าย']  || '';
+      const deptCombo =
+        data['แผนก/ฝ่าย'] ||
+        data['department'] ||
+        '';
+
+      document.getElementById('dept').textContent =
+        deptCombo ||
+        (deptOnly || divOnly
+          ? [deptOnly, divOnly].filter(Boolean).join(' / ')
+          : '-');
+
+      const empStatus =
+        data['สภาพพนักงาน/วันเริ่มงาน'] ||
+        data['employmentStatus'] ||
+        data['สภาพจ้างงาน'] ||
+        '';
+      document.getElementById('employmentStatus').textContent =
+        empStatus || '-';
+
+      // ---------- ประเภทการดำเนินการ ----------
+      const actionType =
+        data['ประเภทการดำเนินการ'] ||
+        data['การดำเนินการ'] ||
+        data['actionType'] ||
+        '';
+
+      const opDetail = data['รายละเอียดการดำเนินการ'] || '';
+
+      const radioMap = {
+        'แต่งตั้ง': 'action_appoint',
+        'โอนย้าย': 'action_transfer',
+        'เปลี่ยนสภาพการจ้างงาน': 'action_change',
+        'เลื่อนตำแหน่ง': 'action_promote',
+        'ผ่านทดลองงาน': 'action_passProb',
+
+        'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก': 'action_terminate',
+        'ให้ออกจากงาน / ลาออก': 'action_terminate',
+        'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
+
+        'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
+        'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
+        'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
+        'ตัดค่าจ้าง/เงินเดือน': 'action_cut',
+        'อื่น ๆ': 'action_other',
+        'อื่นๆ': 'action_other'
+      };
+
+      const radioId = radioMap[actionType];
+      if (radioId) {
+        const r = document.getElementById(radioId);
+        if (r) r.checked = true;
       }
-      break;
+
+      // helper อ่านค่าจากคอลัมน์ From/To กลาง
+      const globalFrom =
+        data['ค่าจากเดิม (From)'] ||
+        data['actionFrom'] ||
+        '';
+      const globalTo =
+        data['ค่าใหม่ (To)'] ||
+        data['actionTo'] ||
+        '';
+
+      // ---------- ใส่ข้อความลงแต่ละบรรทัดตามประเภท ----------
+      switch (actionType) {
+        case 'แต่งตั้ง':
+          document.getElementById('appoint_to').textContent =
+            globalTo ||
+            data['แต่งตั้ง_เป็น'] ||
+            opDetail ||
+            '';
+          break;
+
+        case 'โอนย้าย': {
+          const fromCol =
+            globalFrom ||
+            data['โอนย้าย_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['โอนย้าย_เป็น'] ||
+            '';
+
+          if (fromCol || toCol) {
+            document.getElementById('transfer_from').textContent = fromCol;
+            document.getElementById('transfer_to').textContent   = toCol;
+          } else if (opDetail) {
+            const m = opDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
+            document.getElementById('transfer_from').textContent =
+              m && m[1] ? m[1].trim() : opDetail;
+            document.getElementById('transfer_to').textContent =
+              m && m[2] ? m[2].trim() : '';
+          }
+          break;
+        }
+
+        case 'เปลี่ยนสภาพการจ้างงาน': {
+          const fromCol =
+            globalFrom ||
+            data['เปลี่ยนสภาพ_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['เปลี่ยนสภาพ_เป็น'] ||
+            '';
+
+          document.getElementById('change_from').textContent =
+            fromCol || opDetail || '';
+          document.getElementById('change_to').textContent = toCol;
+          break;
+        }
+
+        case 'เลื่อนตำแหน่ง': {
+          const fromCol =
+            globalFrom ||
+            data['เลื่อนตำแหน่ง_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['เลื่อนตำแหน่ง_เป็น'] ||
+            '';
+
+          document.getElementById('promote_from').textContent =
+            fromCol || opDetail || '';
+          document.getElementById('promote_to').textContent = toCol;
+          break;
+        }
+
+        case 'ผ่านทดลองงาน':
+          document.getElementById('passProb_to').textContent =
+            globalTo ||
+            data['ผ่านทดลองงาน_เป็น'] ||
+            opDetail ||
+            '';
+          break;
+
+        case 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก':
+        case 'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก':
+        case 'ให้ออกจากงาน / ลาออก':
+          document.getElementById('terminate_detail').textContent =
+            opDetail ||
+            data['ให้ออกจากงาน_รายละเอียด'] ||
+            '';
+          break;
+
+        case 'ขึ้นค่าจ้าง / เงินเดือน':
+        case 'ขึ้นค่าจ้าง/เงินเดือน': {
+          const fromCol =
+            globalFrom ||
+            data['ขึ้นค่าจ้าง_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['ขึ้นค่าจ้าง_เป็น'] ||
+            '';
+
+          document.getElementById('raise_from').textContent =
+            fromCol || opDetail || '';
+          document.getElementById('raise_to').textContent = toCol;
+          break;
+        }
+
+        case 'ตัดค่าจ้าง / เงินเดือน':
+        case 'ตัดค่าจ้าง/เงินเดือน': {
+          const fromCol =
+            globalFrom ||
+            data['ตัดค่าจ้าง_จากเดิม'] ||
+            '';
+          const toCol =
+            globalTo ||
+            data['ตัดค่าจ้าง_เป็น'] ||
+            '';
+
+          document.getElementById('cut_from').textContent =
+            fromCol || opDetail || '';
+          document.getElementById('cut_to').textContent = toCol;
+          break;
+        }
+
+        case 'อื่น ๆ':
+        case 'อื่นๆ':
+          document.getElementById('other_detail').textContent =
+            opDetail ||
+            data['อื่นๆ_รายละเอียด'] ||
+            '';
+          break;
+      }
+
+      // ---------- กล่องใหญ่ "รายละเอียดเพิ่มเติม" ----------
+      document.getElementById('detailText').textContent =
+        data['รายละเอียดเพิ่มเติม'] ||
+        data['detail'] ||
+        '-';
+
+      // ---------- วันที่มีผล ----------
+      const effRaw =
+        data['วันที่มีผล'] ||
+        data['มีผลบังคับตั้งแต่วันที่'] ||
+        data['effectiveDate'] ||
+        '';
+
+      document.getElementById('effectiveDate').textContent =
+        formatDateShort(effRaw);
     }
-
-    case 'เปลี่ยนสภาพการจ้างงาน': {
-      const fromCol =
-        globalFrom ||
-        data['เปลี่ยนสภาพ_จากเดิม'] ||
-        '';
-      const toCol =
-        globalTo ||
-        data['เปลี่ยนสภาพ_เป็น'] ||
-        '';
-
-      document.getElementById('change_from').textContent =
-        fromCol || opDetail || '';
-      document.getElementById('change_to').textContent = toCol;
-      break;
-    }
-
-    case 'เลื่อนตำแหน่ง': {
-      const fromCol =
-        globalFrom ||
-        data['เลื่อนตำแหน่ง_จากเดิม'] ||
-        '';
-      const toCol =
-        globalTo ||
-        data['เลื่อนตำแหน่ง_เป็น'] ||
-        '';
-
-      document.getElementById('promote_from').textContent =
-        fromCol || opDetail || '';
-      document.getElementById('promote_to').textContent = toCol;
-      break;
-    }
-
-    case 'ผ่านทดลองงาน':
-      document.getElementById('passProb_to').textContent =
-        globalTo ||
-        data['ผ่านทดลองงาน_เป็น'] ||
-        opDetail ||
-        '';
-      break;
-
-    case 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก':
-    case 'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก':
-    case 'ให้ออกจากงาน / ลาออก':
-      document.getElementById('terminate_detail').textContent =
-        opDetail ||
-        data['ให้ออกจากงาน_รายละเอียด'] ||
-        '';
-      break;
-
-    case 'ขึ้นค่าจ้าง / เงินเดือน':
-    case 'ขึ้นค่าจ้าง/เงินเดือน': {
-      const fromCol =
-        globalFrom ||
-        data['ขึ้นค่าจ้าง_จากเดิม'] ||
-        '';
-      const toCol =
-        globalTo ||
-        data['ขึ้นค่าจ้าง_เป็น'] ||
-        '';
-
-      document.getElementById('raise_from').textContent =
-        fromCol || opDetail || '';
-      document.getElementById('raise_to').textContent = toCol;
-      break;
-    }
-
-    case 'ตัดค่าจ้าง / เงินเดือน':
-    case 'ตัดค่าจ้าง/เงินเดือน': {
-      const fromCol =
-        globalFrom ||
-        data['ตัดค่าจ้าง_จากเดิม'] ||
-        '';
-      const toCol =
-        globalTo ||
-        data['ตัดค่าจ้าง_เป็น'] ||
-        '';
-
-      document.getElementById('cut_from').textContent =
-        fromCol || opDetail || '';
-      document.getElementById('cut_to').textContent = toCol;
-      break;
-    }
-
-    case 'อื่น ๆ':
-    case 'อื่นๆ':
-      document.getElementById('other_detail').textContent =
-        opDetail ||
-        data['อื่นๆ_รายละเอียด'] ||
-        '';
-      break;
-  }
-
-  // ---------- กล่องใหญ่ "รายละเอียดเพิ่มเติม" ----------
-  document.getElementById('detailText').textContent =
-    data['รายละเอียดเพิ่มเติม'] ||
-    data['detail'] ||
-    '-';
-
-  // ---------- วันที่มีผล ----------
-  const effRaw =
-    data['วันที่มีผล'] ||
-    data['มีผลบังคับตั้งแต่วันที่'] ||
-    data['effectiveDate'] ||
-    '';
-
-  document.getElementById('effectiveDate').textContent =
-    formatDateShort(effRaw);
-}
 
 
     // ================================
@@ -959,48 +975,48 @@ function renderOperationData(data) {
     }
 
     function saveSignature() {
-  // ใช้ docNo จาก URL เหมือนเดิม
-  const docNo =
-    getQueryParam('docNo') ||
-    getQueryParam('id') ||
-    getQueryParam('row') ||
-    '';
+      // ใช้ docNo จาก URL เหมือนเดิม
+      const docNo =
+        getQueryParam('docNo') ||
+        getQueryParam('id') ||
+        getQueryParam('row') ||
+        '';
 
-  if (!docNo) {
-    alert('ไม่พบรหัสเอกสาร (docNo/id) ในลิงก์');
-    return;
-  }
-  if (!hasStroke) {
-    alert('กรุณาเซ็นลายเซ็นก่อนบันทึก');
-    return;
-  }
+      if (!docNo) {
+        alert('ไม่พบรหัสเอกสาร (docNo/id) ในลิงก์');
+        return;
+      }
+      if (!hasStroke) {
+        alert('กรุณาเซ็นลายเซ็นก่อนบันทึก');
+        return;
+      }
 
-  // ถ้าในลิงก์มี ?reviewer=... จะเอาไว้เซฟชื่อผู้ทบทวนในชีตด้วย
-  const reviewerName = getQueryParam('reviewer') || '';
+      // ถ้าในลิงก์มี ?reviewer=... จะเอาไว้เซฟชื่อผู้ทบทวนในชีตด้วย
+      const reviewerName = getQueryParam('reviewer') || '';
 
-  const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = canvas.toDataURL('image/png');
 
-  const params = new URLSearchParams();
-  // ❗ เปลี่ยน action ให้ไปใช้ระบบใหม่
-  params.append('action', 'saveSignature');
-  params.append('docNo', docNo);
-  params.append('role', 'reviewer');        // บอกว่าเป็นผู้ทบทวน
-  params.append('signature', dataUrl);
-  params.append('actorName', reviewerName); // ชื่อผู้ทบทวน (optional)
+      const params = new URLSearchParams();
+      // ❗ เปลี่ยน action ให้ไปใช้ระบบใหม่
+      params.append('action', 'saveSignature');
+      params.append('docNo', docNo);
+      params.append('role', 'reviewer');        // บอกว่าเป็นผู้ทบทวน
+      params.append('signature', dataUrl);
+      params.append('actorName', reviewerName); // ชื่อผู้ทบทวน (optional)
 
-  fetch(WEB_APP_URL, {
-    method: 'POST',
-    mode: 'no-cors',   // จะใช้หรือเอาออกก็ได้ เราไม่ได้อ่าน response
-    body: params
-  })
-  .then(() => {
-    alert('บันทึกลายเซ็นผู้ทบทวนเรียบร้อย ระบบจะส่งอีเมลให้ผู้อนุมัติ');
-  })
-  .catch(err => {
-    console.error(err);
-    alert('เกิดข้อผิดพลาดในการบันทึกลายเซ็น: ' + err.message);
-  });
-}
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',   // จะใช้หรือเอาออกก็ได้ เราไม่ได้อ่าน response
+        body: params
+      })
+      .then(() => {
+        alert('บันทึกลายเซ็นผู้ทบทวนเรียบร้อย ระบบจะส่งอีเมลให้ผู้อนุมัติ');
+      })
+      .catch(err => {
+        console.error(err);
+        alert('เกิดข้อผิดพลาดในการบันทึกลายเซ็น: ' + err.message);
+      });
+    }
 
     // ================================
     // Init
