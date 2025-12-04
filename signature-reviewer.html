@@ -42,7 +42,7 @@
     .header-title {
       font-size: 32px;
       font-weight: 400;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       font-family: 'Playfair Display', serif;
       letter-spacing: 1px;
     }
@@ -60,17 +60,21 @@
     }
 
     .card {
-      background: #fff;
+      background: #ffffff;
       border-radius: 12px;
       padding: 24px 28px 28px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
-      border-top: 4px solid var(--purple-pearl);
+      border-top: 4px solid var(--gold-accent);
+    }
+
+    .card:nth-child(1) {
+      border-top-color: var(--gold-accent);
     }
 
     .card:nth-child(2) {
-      border-top-color: var(--gold-accent);
+      border-top-color: var(--purple-pearl);
     }
 
     .card-title {
@@ -100,7 +104,7 @@
       width: 4px;
       height: 20px;
       border-radius: 999px;
-      background: var(--purple-pearl);
+      background: var(--gold-accent);
     }
 
     .section-title {
@@ -141,25 +145,25 @@
 
     .status-msg {
       font-size: 13px;
-      padding: 8px 10px;
+      padding: 10px 12px;
       border-radius: 8px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       margin-bottom: 12px;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-left: 4px solid #1d4ed8;
+      background: #dbeafe;
+      color: #1e40af;
+      border-left: 4px solid #1e40af;
     }
     .status-msg.error {
-      background: #fef2f2;
+      background: #fee2e2;
       color: #b91c1c;
       border-left-color: #b91c1c;
     }
     .status-msg.success {
-      background: #ecfdf5;
-      color: #047857;
-      border-left-color: #047857;
+      background: #dcfce7;
+      color: #166534;
+      border-left-color: #16a34a;
     }
 
     .operation-note {
@@ -187,6 +191,7 @@
     .operation-left input[type="radio"] {
       margin-top: 3px;
       accent-color: var(--purple-pearl);
+      cursor: pointer;
     }
 
     .operation-right {
@@ -242,7 +247,7 @@
     }
 
     .signature-pad {
-      border: 2px dashed var(--border);
+      border: 2px dashed var(--purple-pearl);
       border-radius: 8px;
       background: #ffffff;
       cursor: crosshair;
@@ -274,13 +279,19 @@
       gap: 6px;
     }
 
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .btn-clear {
       background: #e5e7eb;
       color: var(--text-dark);
     }
-    .btn-clear:hover {
+    .btn-clear:hover:not(:disabled) {
       background: #d1d5db;
       transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .btn-save {
@@ -288,9 +299,73 @@
       color: #ffffff;
       box-shadow: 0 4px 12px rgba(61, 59, 84, 0.3);
     }
-    .btn-save:hover {
+    .btn-save:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(61, 59, 84, 0.4);
+    }
+
+    .btn-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .spinner-btn {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spinBtn 0.8s linear infinite;
+    }
+
+    @keyframes spinBtn {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .status-message {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      animation: fadeInStatus 0.3s ease-out;
+    }
+
+    .status-message.show {
+      display: block;
+    }
+
+    .status-message.success {
+      background: #dcfce7;
+      color: #166534;
+      border-left: 4px solid #16a34a;
+    }
+
+    .status-message.error {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-left: 4px solid #ef4444;
+    }
+
+    .status-message.loading {
+      background: #fef3c7;
+      color: #92400e;
+      border-left: 4px solid #fbbf24;
+    }
+
+    @keyframes fadeInStatus {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .info-item {
@@ -553,13 +628,15 @@
         <canvas id="signaturePad" class="signature-pad" height="170"></canvas>
 
         <div class="btn-row">
-          <button type="button" class="btn btn-clear" onclick="clearSignature()">
+          <button type="button" class="btn btn-clear" id="btnClearSign" onclick="clearSignature()">
             ✕ ล้างลายเซ็น
           </button>
-          <button type="button" class="btn btn-save" onclick="saveSignature()">
+          <button type="button" class="btn btn-save" id="btnSaveSign" onclick="saveSignature()">
             💾 บันทึกลายเซ็น
           </button>
         </div>
+
+        <div id="statusMessage" class="status-message"></div>
 
         <div class="info-item">
           <div class="info-label">รหัสเอกสาร</div>
@@ -586,6 +663,8 @@
     const WEB_APP_URL =
       'https://script.google.com/macros/s/AKfycbwAL1ISDOIC_0TVh4RZniHn34vP0O7x5yBHlyxGZ1-u8ctgEg9OtG9dNMAZwxH7sNww/exec';
 
+    let isSubmitting = false;
+
     function getQueryParam(name) {
       const url = new URL(window.location.href);
       return url.searchParams.get(name) || '';
@@ -606,7 +685,6 @@
     // โหลดข้อมูลจาก Google Sheet (JSONP)
     // ================================
     function loadOperationData() {
-      // รองรับทั้ง ?docNo=, ?id=, ?row=
       const id =
         getQueryParam('docNo') ||
         getQueryParam('id') ||
@@ -687,60 +765,32 @@
     }
 
     // ================================
-    // แสดงข้อมูลลงหน้า HTML (ใช้คีย์จากชีตใบดำเนินการ)
+    // แสดงข้อมูลลงหน้า HTML
     // ================================
     function renderOperationData(data) {
       console.log('render data:', data);
 
-      // ---------- ข้อมูลพนักงาน ----------
-      const empName =
-        data['ชื่อพนักงาน'] ||
-        data['พนักงาน'] ||
-        data['employeeName'] ||
-        '-';
+      const empName = data['ชื่อพนักงาน'] || data['พนักงาน'] || data['employeeName'] || '-';
       document.getElementById('empName').textContent = empName;
 
       const empCode = data['รหัสพนักงาน'] || '';
       const empPos  = data['ตำแหน่ง'] || '';
-      const codePos =
-        data['รหัสพนักงาน/ตำแหน่ง'] ||
-        data['empCodePosition'] ||
-        '';
+      const codePos = data['รหัสพนักงาน/ตำแหน่ง'] || data['empCodePosition'] || '';
 
       document.getElementById('empCodePos').textContent =
-        codePos ||
-        (empCode && empPos
-          ? `${empCode} / ${empPos}`
-          : (empCode || empPos || '-'));
+        codePos || (empCode && empPos ? `${empCode} / ${empPos}` : (empCode || empPos || '-'));
 
       const deptOnly = data['แผนก'] || '';
-      const divOnly  = data['ฝ่าย']  || '';
-      const deptCombo =
-        data['แผนก/ฝ่าย'] ||
-        data['department'] ||
-        '';
+      const divOnly  = data['ฝ่าย'] || '';
+      const deptCombo = data['แผนก/ฝ่าย'] || data['department'] || '';
 
       document.getElementById('dept').textContent =
-        deptCombo ||
-        (deptOnly || divOnly
-          ? [deptOnly, divOnly].filter(Boolean).join(' / ')
-          : '-');
+        deptCombo || (deptOnly || divOnly ? [deptOnly, divOnly].filter(Boolean).join(' / ') : '-');
 
-      const empStatus =
-        data['สภาพพนักงาน/วันเริ่มงาน'] ||
-        data['employmentStatus'] ||
-        data['สภาพจ้างงาน'] ||
-        '';
-      document.getElementById('employmentStatus').textContent =
-        empStatus || '-';
+      const empStatus = data['สภาพพนักงาน/วันเริ่มงาน'] || data['employmentStatus'] || data['สภาพจ้างงาน'] || '';
+      document.getElementById('employmentStatus').textContent = empStatus || '-';
 
-      // ---------- ประเภทการดำเนินการ ----------
-      const actionType =
-        data['ประเภทการดำเนินการ'] ||
-        data['การดำเนินการ'] ||
-        data['actionType'] ||
-        '';
-
+      const actionType = data['ประเภทการดำเนินการ'] || data['การดำเนินการ'] || data['actionType'] || '';
       const opDetail = data['รายละเอียดการดำเนินการ'] || '';
 
       const radioMap = {
@@ -749,11 +799,9 @@
         'เปลี่ยนสภาพการจ้างงาน': 'action_change',
         'เลื่อนตำแหน่ง': 'action_promote',
         'ผ่านทดลองงาน': 'action_passProb',
-
         'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก': 'action_terminate',
         'ให้ออกจากงาน / ลาออก': 'action_terminate',
         'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก': 'action_terminate',
-
         'ขึ้นค่าจ้าง / เงินเดือน': 'action_raise',
         'ขึ้นค่าจ้าง/เงินเดือน': 'action_raise',
         'ตัดค่าจ้าง / เงินเดือน': 'action_cut',
@@ -768,161 +816,78 @@
         if (r) r.checked = true;
       }
 
-      // helper อ่านค่าจากคอลัมน์ From/To กลาง
-      const globalFrom =
-        data['ค่าจากเดิม (From)'] ||
-        data['actionFrom'] ||
-        '';
-      const globalTo =
-        data['ค่าใหม่ (To)'] ||
-        data['actionTo'] ||
-        '';
+      const globalFrom = data['ค่าจากเดิม (From)'] || data['actionFrom'] || '';
+      const globalTo = data['ค่าใหม่ (To)'] || data['actionTo'] || '';
 
-      // ---------- ใส่ข้อความลงแต่ละบรรทัดตามประเภท ----------
       switch (actionType) {
         case 'แต่งตั้ง':
-          document.getElementById('appoint_to').textContent =
-            globalTo ||
-            data['แต่งตั้ง_เป็น'] ||
-            opDetail ||
-            '';
+          document.getElementById('appoint_to').textContent = globalTo || data['แต่งตั้ง_เป็น'] || opDetail || '';
           break;
-
         case 'โอนย้าย': {
-          const fromCol =
-            globalFrom ||
-            data['โอนย้าย_จากเดิม'] ||
-            '';
-          const toCol =
-            globalTo ||
-            data['โอนย้าย_เป็น'] ||
-            '';
-
+          const fromCol = globalFrom || data['โอนย้าย_จากเดิม'] || '';
+          const toCol = globalTo || data['โอนย้าย_เป็น'] || '';
           if (fromCol || toCol) {
             document.getElementById('transfer_from').textContent = fromCol;
-            document.getElementById('transfer_to').textContent   = toCol;
+            document.getElementById('transfer_to').textContent = toCol;
           } else if (opDetail) {
             const m = opDetail.match(/จากเดิม\s*(.+?)\s*เป็น\s*(.+)/);
-            document.getElementById('transfer_from').textContent =
-              m && m[1] ? m[1].trim() : opDetail;
-            document.getElementById('transfer_to').textContent =
-              m && m[2] ? m[2].trim() : '';
+            document.getElementById('transfer_from').textContent = m && m[1] ? m[1].trim() : opDetail;
+            document.getElementById('transfer_to').textContent = m && m[2] ? m[2].trim() : '';
           }
           break;
         }
-
         case 'เปลี่ยนสภาพการจ้างงาน': {
-          const fromCol =
-            globalFrom ||
-            data['เปลี่ยนสภาพ_จากเดิม'] ||
-            '';
-          const toCol =
-            globalTo ||
-            data['เปลี่ยนสภาพ_เป็น'] ||
-            '';
-
-          document.getElementById('change_from').textContent =
-            fromCol || opDetail || '';
+          const fromCol = globalFrom || data['เปลี่ยนสภาพ_จากเดิม'] || '';
+          const toCol = globalTo || data['เปลี่ยนสภาพ_เป็น'] || '';
+          document.getElementById('change_from').textContent = fromCol || opDetail || '';
           document.getElementById('change_to').textContent = toCol;
           break;
         }
-
         case 'เลื่อนตำแหน่ง': {
-          const fromCol =
-            globalFrom ||
-            data['เลื่อนตำแหน่ง_จากเดิม'] ||
-            '';
-          const toCol =
-            globalTo ||
-            data['เลื่อนตำแหน่ง_เป็น'] ||
-            '';
-
-          document.getElementById('promote_from').textContent =
-            fromCol || opDetail || '';
+          const fromCol = globalFrom || data['เลื่อนตำแหน่ง_จากเดิม'] || '';
+          const toCol = globalTo || data['เลื่อนตำแหน่ง_เป็น'] || '';
+          document.getElementById('promote_from').textContent = fromCol || opDetail || '';
           document.getElementById('promote_to').textContent = toCol;
           break;
         }
-
         case 'ผ่านทดลองงาน':
-          document.getElementById('passProb_to').textContent =
-            globalTo ||
-            data['ผ่านทดลองงาน_เป็น'] ||
-            opDetail ||
-            '';
+          document.getElementById('passProb_to').textContent = globalTo || data['ผ่านทดลองงาน_เป็น'] || opDetail || '';
           break;
-
         case 'ให้ออกจากงานโดยไม่สมัครใจ / ลาออก':
         case 'ให้ออกจากงานโดยไม่มีสมัครใจ / ลาออก':
         case 'ให้ออกจากงาน / ลาออก':
-          document.getElementById('terminate_detail').textContent =
-            opDetail ||
-            data['ให้ออกจากงาน_รายละเอียด'] ||
-            '';
+          document.getElementById('terminate_detail').textContent = opDetail || data['ให้ออกจากงาน_รายละเอียด'] || '';
           break;
-
         case 'ขึ้นค่าจ้าง / เงินเดือน':
         case 'ขึ้นค่าจ้าง/เงินเดือน': {
-          const fromCol =
-            globalFrom ||
-            data['ขึ้นค่าจ้าง_จากเดิม'] ||
-            '';
-          const toCol =
-            globalTo ||
-            data['ขึ้นค่าจ้าง_เป็น'] ||
-            '';
-
-          document.getElementById('raise_from').textContent =
-            fromCol || opDetail || '';
+          const fromCol = globalFrom || data['ขึ้นค่าจ้าง_จากเดิม'] || '';
+          const toCol = globalTo || data['ขึ้นค่าจ้าง_เป็น'] || '';
+          document.getElementById('raise_from').textContent = fromCol || opDetail || '';
           document.getElementById('raise_to').textContent = toCol;
           break;
         }
-
         case 'ตัดค่าจ้าง / เงินเดือน':
         case 'ตัดค่าจ้าง/เงินเดือน': {
-          const fromCol =
-            globalFrom ||
-            data['ตัดค่าจ้าง_จากเดิม'] ||
-            '';
-          const toCol =
-            globalTo ||
-            data['ตัดค่าจ้าง_เป็น'] ||
-            '';
-
-          document.getElementById('cut_from').textContent =
-            fromCol || opDetail || '';
+          const fromCol = globalFrom || data['ตัดค่าจ้าง_จากเดิม'] || '';
+          const toCol = globalTo || data['ตัดค่าจ้าง_เป็น'] || '';
+          document.getElementById('cut_from').textContent = fromCol || opDetail || '';
           document.getElementById('cut_to').textContent = toCol;
           break;
         }
-
         case 'อื่น ๆ':
         case 'อื่นๆ':
-          document.getElementById('other_detail').textContent =
-            opDetail ||
-            data['อื่นๆ_รายละเอียด'] ||
-            '';
+          document.getElementById('other_detail').textContent = opDetail || data['อื่นๆ_รายละเอียด'] || '';
           break;
       }
 
-      // ---------- กล่องใหญ่ "รายละเอียดเพิ่มเติม" ----------
-      document.getElementById('detailText').textContent =
-        data['รายละเอียดเพิ่มเติม'] ||
-        data['detail'] ||
-        '-';
+      document.getElementById('detailText').textContent = data['รายละเอียดเพิ่มเติม'] || data['detail'] || '-';
 
-      // ---------- วันที่มีผล ----------
-      const effRaw =
-        data['วันที่มีผล'] ||
-        data['มีผลบังคับตั้งแต่วันที่'] ||
-        data['effectiveDate'] ||
-        '';
-
-      document.getElementById('effectiveDate').textContent =
-        formatDateShort(effRaw);
+      const effRaw = data['วันที่มีผล'] || data['มีผลบังคับตั้งแต่วันที่'] || data['effectiveDate'] || '';
+      document.getElementById('effectiveDate').textContent = formatDateShort(effRaw);
     }
 
-
     // ================================
-    // ส่วนลายเซ็น (ผู้ทบทวน)
+    // ส่วนลายเซ็น
     // ================================
     const canvas = document.getElementById('signaturePad');
     const ctx = canvas.getContext('2d');
@@ -939,19 +904,27 @@
     }
 
     function startDraw(e) {
+      e.preventDefault();
       isDrawing = true;
       hasStroke = true;
       const pos = getPosition(e);
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
     }
+
     function draw(e) {
       if (!isDrawing) return;
+      e.preventDefault();
       const pos = getPosition(e);
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
     }
-    function stopDraw() { isDrawing = false; }
+
+    function stopDraw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      isDrawing = false;
+    }
 
     function getPosition(e) {
       const rect = canvas.getBoundingClientRect();
@@ -965,57 +938,105 @@
     canvas.addEventListener('mouseup', stopDraw);
     canvas.addEventListener('mouseleave', stopDraw);
 
-    canvas.addEventListener('touchstart', function(e) { e.preventDefault(); startDraw(e); }, {passive:false});
-    canvas.addEventListener('touchmove', function(e) { e.preventDefault(); draw(e); }, {passive:false});
-    canvas.addEventListener('touchend', function(e) { e.preventDefault(); stopDraw(e); }, {passive:false});
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDraw, { passive: false });
+    canvas.addEventListener('touchcancel', stopDraw, { passive: false });
 
     function clearSignature() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       hasStroke = false;
+      clearStatusMessage();
+    }
+
+    function clearStatusMessage() {
+      const statusEl = document.getElementById('statusMessage');
+      if (statusEl) {
+        statusEl.className = 'status-message';
+        statusEl.textContent = '';
+      }
+    }
+
+    function showStatus(message, type) {
+      const statusEl = document.getElementById('statusMessage');
+      if (!statusEl) return;
+      statusEl.textContent = message;
+      statusEl.className = `status-message show ${type}`;
+      statusEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function setSubmitButtonLoading(loading) {
+      const btn = document.getElementById('btnSaveSign');
+      const clearBtn = document.getElementById('btnClearSign');
+      
+      if (loading) {
+        btn.disabled = true;
+        clearBtn.disabled = true;
+        btn.innerHTML = '<span class="btn-loading"><span class="spinner-btn"></span><span>กำลังบันทึก...</span></span>';
+        btn.style.opacity = '0.8';
+      } else {
+        btn.disabled = false;
+        clearBtn.disabled = false;
+        btn.innerHTML = '💾 บันทึกลายเซ็น';
+        btn.style.opacity = '1';
+      }
     }
 
     function saveSignature() {
-      // ใช้ docNo จาก URL เหมือนเดิม
-      const docNo =
-        getQueryParam('docNo') ||
-        getQueryParam('id') ||
-        getQueryParam('row') ||
-        '';
+      // ป้องกันการกดปุ่มซ้ำ
+      if (isSubmitting) {
+        showStatus('⚠️ ระบบกำลังประมวลผลข้อมูล กรุณารอสักครู่...', 'loading');
+        return;
+      }
+
+      const docNo = getQueryParam('docNo') || getQueryParam('id') || getQueryParam('row') || '';
 
       if (!docNo) {
-        alert('ไม่พบรหัสเอกสาร (docNo/id) ในลิงก์');
+        showStatus('❌ ไม่พบรหัสเอกสาร (docNo/id) ในลิงก์', 'error');
         return;
       }
+      
       if (!hasStroke) {
-        alert('กรุณาเซ็นลายเซ็นก่อนบันทึก');
+        showStatus('❌ กรุณาเซ็นลายเซ็นก่อนบันทึก', 'error');
         return;
       }
 
-      // ถ้าในลิงก์มี ?reviewer=... จะเอาไว้เซฟชื่อผู้ทบทวนในชีตด้วย
-      const reviewerName = getQueryParam('reviewer') || '';
+      isSubmitting = true;
+      setSubmitButtonLoading(true);
+      clearStatusMessage();
+      showStatus('⏳ กำลังบันทึกลายเซ็น...', 'loading');
 
+      const reviewerName = getQueryParam('reviewer') || '';
       const dataUrl = canvas.toDataURL('image/png');
 
       const params = new URLSearchParams();
-      // ❗ เปลี่ยน action ให้ไปใช้ระบบใหม่
       params.append('action', 'saveSignature');
       params.append('docNo', docNo);
-      params.append('role', 'reviewer');        // บอกว่าเป็นผู้ทบทวน
+      params.append('role', 'reviewer');
       params.append('signature', dataUrl);
-      params.append('actorName', reviewerName); // ชื่อผู้ทบทวน (optional)
+      params.append('actorName', reviewerName);
 
       fetch(WEB_APP_URL, {
         method: 'POST',
-        mode: 'no-cors',   // จะใช้หรือเอาออกก็ได้ เราไม่ได้อ่าน response
+        mode: 'no-cors',
         body: params
       })
       .then(() => {
-        alert('บันทึกลายเซ็นผู้ทบทวนเรียบร้อย ระบบจะส่งอีเมลให้ผู้อนุมัติ');
+        showStatus('✅ บันทึกลายเซ็นผู้ทบทวนเรียบร้อย ระบบจะส่งอีเมลให้ผู้อนุมัติ', 'success');
       })
       .catch(err => {
         console.error(err);
-        alert('เกิดข้อผิดพลาดในการบันทึกลายเซ็น: ' + err.message);
+        showStatus('❌ เกิดข้อผิดพลาดในการบันทึกลายเซ็น: ' + err.message, 'error');
+      })
+      .finally(() => {
+        isSubmitting = false;
+        setSubmitButtonLoading(false);
       });
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasStroke = false;
     }
 
     // ================================
