@@ -3,47 +3,86 @@
   <head>
     <meta charset="UTF-8">
     <title>ทบทวนคำขอเพิ่ม IT (External)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --purple-pearl: #3D3B54;
+        --purple-pearl-dark: #2F2D45;
+        --gold-accent: #B8A068;
+        --text-dark: #1A252F;
+        --text-light: #5A6C7D;
+        --text-light-on-navy: #D4D4D4;
+      }
+
       body {
         font-family: "Sarabun", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: #f4f4fb;
+        background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%);
         margin: 0;
         padding: 24px;
+        min-height: 100vh;
       }
+      
       .page {
         max-width: 880px;
         margin: 0 auto;
       }
+      
       .card {
         background: #ffffff;
         border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         padding: 20px 24px;
         margin-bottom: 16px;
+        border-top: 4px solid transparent;
       }
+      
+      .card:first-child {
+        border-top-color: var(--purple-pearl);
+      }
+      
+      .card:nth-child(2) {
+        border-top-color: var(--gold-accent);
+      }
+      
+      .card:nth-child(3) {
+        border-top-color: var(--purple-pearl);
+      }
+      
       .header {
         font-size: 20px;
         font-weight: 600;
         margin-bottom: 8px;
+        color: var(--text-dark);
+        font-family: 'Playfair Display', serif;
+        letter-spacing: 0.5px;
       }
+      
       .sub {
         font-size: 13px;
-        color: #666;
+        color: var(--text-light);
       }
+      
       .row {
         display: flex;
         gap: 12px;
         margin: 4px 0;
         font-size: 14px;
       }
+      
       .row-label {
         width: 180px;
-        color: #555;
+        color: var(--text-light);
+        font-weight: 500;
       }
+      
       .row-value {
         flex: 1;
         font-weight: 500;
+        color: var(--text-dark);
       }
+      
       .badge {
         display: inline-block;
         padding: 4px 10px;
@@ -51,18 +90,31 @@
         font-size: 11px;
         font-weight: 600;
       }
-      .badge-pending  { background: #e0f2fe; color: #1d4ed8; }
-      .badge-approved { background: #dcfce7; color: #166534; }
-      .badge-rejected { background: #fee2e2; color: #b91c1c; }
+      
+      .badge-pending  { 
+        background: #e0f2fe; 
+        color: #1d4ed8; 
+      }
+      
+      .badge-approved { 
+        background: #dcfce7; 
+        color: #166534; 
+      }
+      
+      .badge-rejected { 
+        background: #fee2e2; 
+        color: #b91c1c; 
+      }
 
       /* ✅ ลายเซ็น: กว้างเต็ม card เหมือนหน้า approve */
       canvas {
         border: 2px dashed #d4d4d8;
         border-radius: 8px;
-        width: 100%;          /* กว้างเต็ม card */
+        width: 100%;
         background: #fff;
         margin: 10px 0 8px;
-        touch-action: none;   /* กัน scroll ตอนเซ็นด้วยนิ้ว */
+        touch-action: none;
+        display: block;
       }
 
       .btn {
@@ -72,26 +124,47 @@
         font-size: 14px;
         cursor: pointer;
         font-family: inherit;
+        font-weight: 600;
+        transition: all 0.3s ease;
       }
+      
       .btn-primary {
-        background: linear-gradient(135deg,#6366f1,#7c3aed);
+        background: linear-gradient(135deg, var(--purple-pearl), var(--purple-pearl-dark));
         color: #fff;
+        box-shadow: 0 4px 12px rgba(61, 59, 84, 0.3);
       }
+      
+      .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(61, 59, 84, 0.4);
+      }
+      
       .btn-primary:disabled {
         background: #c4c4d8;
         cursor: not-allowed;
+        box-shadow: none;
       }
+      
       .btn-secondary {
         background: #fff;
         border: 1px solid #d4d4d8;
-        color: #4b5563;
+        color: var(--text-dark);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       }
+      
+      .btn-secondary:hover {
+        background: #f9f9f9;
+        border-color: var(--purple-pearl);
+        color: var(--purple-pearl);
+      }
+      
       .actions {
         display: flex;
         justify-content: flex-start;
         gap: 8px;
         margin-top: 12px;
       }
+      
       textarea {
         width: 100%;
         min-height: 80px;
@@ -100,23 +173,86 @@
         padding: 8px 10px;
         font-family: inherit;
         font-size: 13px;
+        color: var(--text-dark);
       }
+      
+      textarea:focus {
+        outline: none;
+        border-color: var(--purple-pearl);
+        box-shadow: 0 0 0 2px rgba(61, 59, 84, 0.1);
+      }
+      
       .status {
         margin-top: 10px;
         font-size: 13px;
         padding: 10px;
         border-radius: 8px;
         display: none;
+        font-weight: 500;
       }
-      .status-info    { background:#eff6ff; color:#1d4ed8; }
-      .status-success { background:#dcfce7; color:#166534; }
-      .status-error   { background:#fee2e2; color:#b91c1c; }
+      
+      .status-info { 
+        background: #eff6ff; 
+        color: #1d4ed8;
+        border-left: 4px solid #1d4ed8;
+      }
+      
+      .status-success { 
+        background: #dcfce7; 
+        color: #166534;
+        border-left: 4px solid #166534;
+      }
+      
+      .status-error { 
+        background: #fee2e2; 
+        color: #b91c1c;
+        border-left: 4px solid #b91c1c;
+      }
 
       .radio-group {
         display: flex;
         gap: 16px;
         margin-top: 4px;
         font-size: 14px;
+        color: var(--text-dark);
+      }
+      
+      .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+      }
+      
+      .radio-group input[type="radio"] {
+        cursor: pointer;
+        accent-color: var(--purple-pearl);
+      }
+      
+      hr {
+        margin: 12px 0;
+        border: none;
+        border-top: 1px solid #eee;
+      }
+      
+      @media (max-width: 768px) {
+        body {
+          padding: 16px;
+        }
+        
+        .row {
+          flex-direction: column;
+        }
+        
+        .row-label {
+          width: auto;
+          margin-bottom: 2px;
+        }
+        
+        .radio-group {
+          flex-direction: column;
+          gap: 8px;
+        }
       }
     </style>
   </head>
@@ -147,7 +283,7 @@
           <div class="row-value" id="reqStatus"></div>
         </div>
 
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eee;">
+        <hr>
 
         <div class="row">
           <div class="row-label">EMAIL</div>
@@ -213,12 +349,12 @@
         </div>
 
         <div style="margin-top:12px;">
-          <div style="font-size:14px; margin-bottom:4px;">ความคิดเห็นเพิ่มเติม</div>
+          <div style="font-size:14px; margin-bottom:4px; color: var(--text-dark); font-weight: 500;">ความคิดเห็นเพิ่มเติม</div>
           <textarea id="comment" placeholder="ระบุหมายเหตุถ้ามี"></textarea>
         </div>
 
         <div style="margin-top:16px;">
-          <div style="font-size:14px; margin-bottom:4px;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
+          <div style="font-size:14px; margin-bottom:4px; color: var(--text-dark); font-weight: 500;">✍️ ลายเซ็นผู้ทบทวน (จำเป็น)</div>
           <!-- ขนาดจริงของ canvas -->
           <canvas id="signCanvas" width="600" height="200"></canvas>
         </div>
