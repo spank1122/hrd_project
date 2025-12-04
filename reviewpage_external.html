@@ -425,7 +425,7 @@
           console.error('JSONP', action, 'timeout');
           cleanup();
           callback && callback({ success: false, message: 'timeout' });
-        }, 15000);
+        }, 50000);
 
         document.body.appendChild(script);
       }
