@@ -594,6 +594,11 @@
         <!-- จะถูกเติมด้วย JavaScript -->
       </div>
 
+      <!-- สรุปผลการพิจารณา -->
+      <div id="summarySection">
+        <!-- จะถูกเติมด้วย JavaScript -->
+      </div>
+
       <!-- ความคิดเห็น -->
       <div id="commentsSection">
         <!-- จะถูกเติมด้วย JavaScript -->
@@ -766,18 +771,21 @@
       const data = response.data;
 
       // แสดงข้อมูลผู้สมัคร
-      document.getElementById('applicantName').textContent = data.applicantName || '-';
+      document.getElementById('applicantName').textContent     = data.applicantName     || '-';
       document.getElementById('applicantPosition').textContent = data.applicantPosition || '-';
-      document.getElementById('applicantSection').textContent = data.applicantSection || '-';
-      document.getElementById('applicantDept').textContent = data.applicantDept || '-';
+      document.getElementById('applicantSection').textContent  = data.applicantSection  || '-';
+      document.getElementById('applicantDept').textContent     = data.applicantDept     || '-';
 
       // แสดงคะแนน
       displayScores(data.scores);
 
-      // แสดงเหตุผล
+      // เหตุผลที่ต้นสังกัดไม่เลือกรับ
       displayReasons(data.reasons);
 
-      // ความคิดเห็น
+      // ✅ สรุปผลการพิจารณา (ให้ Apps Script ส่ง data.summary มาด้วย)
+      displaySummary(data.summary);
+
+      // ความคิดเห็นเพิ่มเติม
       displayComments(data.comments);
 
       // ซ่อน loading แสดง content
@@ -835,7 +843,7 @@
               <div class="reason-category-title">ผลตอบแทน / ค่าจ้าง</div>
               ${createReasonItem('ฐานเงินเดือนเดิมสูงมาก', reasons.pay1)}
               ${createReasonItem('เงินเดือนที่คาดหวังสูงเกินกว่าบริษัทจะให้ได้', reasons.pay2)}
-              ${createReasonItem(reasons.pay3_text || 'อื่นๆ', reasons.pay3)}
+              ${createReasonItem(reasons.pay3_text || 'อื่นๆ ........................................................', reasons.pay3)}
             </div>
 
             <!-- ประสบการณ์ในการทำงาน -->
@@ -844,7 +852,7 @@
               ${createReasonItem('ไม่ตรงกับตำแหน่งที่เปิดรับสมัคร', reasons.exp1)}
               ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่น้อยเกินไป', reasons.exp2)}
               ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่มากเกินไป', reasons.exp3)}
-              ${createReasonItem(reasons.exp4_text || 'อื่นๆ', reasons.exp4)}
+              ${createReasonItem(reasons.exp4_text || 'อื่นๆ ........................................................', reasons.exp4)}
             </div>
 
             <!-- บุคลิกภาพ -->
@@ -852,16 +860,19 @@
               <div class="reason-category-title">บุคลิกภาพ</div>
               ${createReasonItem('ไม่เหมาะสมกับตำแหน่งที่ต้องการรับ', reasons.personality1)}
               ${createReasonItem('ขาดปฏิภาณ ไหวพริบในการตอบคำถาม', reasons.personality2)}
-              ${createReasonItem(reasons.personality3_text || 'อื่นๆ', reasons.personality3)}
+              ${createReasonItem(reasons.personality3_text || 'อื่นๆ ........................................................', reasons.personality3)}
             </div>
 
             <!-- ความคิดเห็น / เหตุผลอื่นๆ -->
             <div class="reason-category">
               <div class="reason-category-title">ความคิดเห็น / เหตุผลอื่นๆ</div>
-              ${createReasonItem('กลุ่มผู้สมัคร A-B-C-D', reasons.other1)}
+              ${createReasonItem(
+                `ถ้าจัดกลุ่มผู้สมัครเป็น A-B-C-D ผู้สมัครท่านนี้อยู่ในกลุ่ม ${reasons.group || '.......'}`,
+                reasons.other1
+              )}
               ${createReasonItem('ขาดความตั้งใจในการเข้าร่วมงานกับองค์กร', reasons.other2)}
               ${createReasonItem('ต้องการตรวจสอบประวัติการทำงานจากที่เดิมก่อน', reasons.other3)}
-              ${createReasonItem(reasons.other4_text || 'อื่นๆ', reasons.other4)}
+              ${createReasonItem(reasons.other4_text || 'อื่นๆ ........................................................', reasons.other4)}
             </div>
           </div>
         </div>
@@ -870,14 +881,58 @@
       section.innerHTML = html;
     }
 
+    // ใช้สร้างแต่ละบรรทัด (มี checkbox / ไม่มี)
     function createReasonItem(text, checked) {
-      const checkmark = checked ? '<span class="reason-checkbox checked">✓</span>' : '<span class="reason-checkbox"></span>';
+      const checkmark = checked
+        ? '<span class="reason-checkbox checked">✓</span>'
+        : '<span class="reason-checkbox"></span>';
       return `
         <div class="reason-item">
           ${checkmark}
           <span class="reason-text">${text}</span>
         </div>
       `;
+    }
+
+    // แสดง "สรุปผลการพิจารณา"
+    // ให้ Apps Script ส่ง data.summary มาประมาณนี้:
+    // summary = {
+    //   trial: true/false,
+    //   trialDate: '01/01/2569',
+    //   compare: true/false,
+    //   otherPos: true/false,
+    //   otherPosText: 'ตำแหน่งอื่น',
+    //   reject: true/false
+    // };
+    function displaySummary(summary) {
+      const section = document.getElementById('summarySection');
+      section.innerHTML = '';
+
+      if (!summary || typeof summary !== 'object') {
+        return; // ไม่มีข้อมูล ไม่ต้องแสดง
+      }
+
+      const line1 = `ควรรับเข้าทดลองงาน เริ่มวันที่ ${summary.trialDate || '........../........../............'}`;
+      const line2 = 'รอเปรียบเทียบกับผู้สมัครรายอื่นๆ';
+      const line3 = `เหมาะสมกับตำแหน่งอื่น คือ ${summary.otherPosText || '........................................................'}`;
+      const line4 = 'ควรตอบปฏิเสธ';
+
+      const html = `
+        <div class="reasons-section">
+          <div class="reasons-title">
+            <span>✅</span>
+            <span>สรุปผลการพิจารณา</span>
+          </div>
+          <div class="reason-category" style="background:#fff;border-color:#fecaca;">
+            ${createReasonItem(line1,  !!summary.trial)}
+            ${createReasonItem(line2,  !!summary.compare)}
+            ${createReasonItem(line3,  !!summary.otherPos)}
+            ${createReasonItem(line4,  !!summary.reject)}
+          </div>
+        </div>
+      `;
+
+      section.innerHTML = html;
     }
 
     function displayComments(comments) {
@@ -920,10 +975,11 @@
 
       // Disable button
       submitBtn.disabled = true;
-      showStatus('loading', 
+      showStatus(
+        'loading', 
         '<div class="loading-spinner">' +
-        '<div class="spinner"></div>' +
-        '<span>กำลังบันทึกลายเซ็นและสร้าง PDF...</span>' +
+          '<div class="spinner"></div>' +
+          '<span>กำลังบันทึกลายเซ็นและสร้าง PDF...</span>' +
         '</div>'
       );
 
@@ -932,6 +988,7 @@
         action: 'saveEvalSignature',
         rowIndex: rowIndex,
         sessionId: sessionId,
+        // ถ้าจริง ๆ ต้องชื่อ / ตำแหน่ง "กรรมการ" ให้เปลี่ยนมาใช้ field ของกรรมการแทน
         evaluatorName: document.getElementById('applicantName').textContent,
         evaluatorPosition: document.getElementById('applicantPosition').textContent,
         signature: signatureBase64
@@ -948,9 +1005,7 @@
           if (result.success) {
             showStatus(
               'success',
-              '✅ <strong>ลงลายเซ็นสำเร็จ!</strong><br><br>' +
-              'ระบบได้บันทึกลายเซ็นแล้ว'
-                
+              '✅ <strong>ลงลายเซ็นสำเร็จ!</strong><br><br>ระบบได้บันทึกลายเซ็นแล้ว'
             );
             document.querySelector('.button-group').style.display = 'none';
           } else {
