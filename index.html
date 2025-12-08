@@ -344,6 +344,105 @@
       color: #DC3545;
     }
 
+    /* ========== ADMIN SETTINGS ICON ========== */
+    .admin-settings {
+      position: absolute;
+      top: 16px;
+      left: 24px;
+      display: none;
+      align-items: center;
+      gap: 0;
+      z-index: 100;
+      animation: fadeInDown 0.6s ease-out;
+    }
+
+    .admin-settings.active {
+      display: flex;
+    }
+
+    .admin-settings-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-accent), #C9B580);
+      border: none;
+      cursor: pointer;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .admin-settings-btn:hover {
+      transform: scale(1.1) rotate(10deg);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .admin-menu {
+      position: absolute;
+      top: 56px;
+      left: 0;
+      background: white;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      min-width: 220px;
+      z-index: 101;
+      display: none;
+      overflow: hidden;
+      animation: slideDownMenu 0.3s ease-out;
+    }
+
+    .admin-menu.show {
+      display: block;
+    }
+
+    @keyframes slideDownMenu {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .admin-menu-item {
+      padding: 12px 16px;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .admin-menu-item:last-child {
+      border-bottom: none;
+    }
+
+    .admin-menu-item:hover {
+      background: #f8f9fa;
+      color: var(--gold-accent);
+      padding-left: 20px;
+    }
+
+    .admin-menu-icon {
+      font-size: 16px;
+      min-width: 20px;
+    }
+
     @keyframes fadeInDown {
       from {
         opacity: 0;
@@ -354,8 +453,6 @@
         transform: translateY(0);
       }
     }
-
-    /* ========== ORIGINAL STYLES ========== */
     /* Header with Logo - Hero Section */
     .header-top {
       background: linear-gradient(135deg, #3D3B54 0%, #2F2D45 100%);
@@ -986,6 +1083,21 @@
     </form>
   </div>
 
+  <!-- Admin Settings (Top Left) -->
+  <div id="adminSettings" class="admin-settings">
+    <button class="admin-settings-btn" onclick="toggleAdminMenu()">🔧</button>
+    <div id="adminMenu" class="admin-menu">
+      <button class="admin-menu-item" onclick="openAppScript()">
+        <span class="admin-menu-icon">📊</span>
+        <span>Google Apps Script</span>
+      </button>
+      <button class="admin-menu-item" onclick="openGitHub()">
+        <span class="admin-menu-icon">🌐</span>
+        <span>GitHub Web Page</span>
+      </button>
+    </div>
+  </div>
+
   <!-- User Profile (Top Right) -->
   <div id="userProfile" class="user-profile">
     <div class="user-avatar" id="userAvatarInitial"></div>
@@ -1188,6 +1300,44 @@
       displayUserName.textContent = currentUser.fullName;
       displayUserRole.textContent = currentUser.role;
       userProfile.classList.add('active');
+
+      // แสดง Admin Settings ถ้าเป็น Admin
+      const adminSettings = document.getElementById('adminSettings');
+      if (currentUser.role === 'Admin') {
+        adminSettings.classList.add('active');
+      } else {
+        adminSettings.classList.remove('active');
+      }
+    }
+
+    // ========================================
+    // 🔧 Admin Settings Menu
+    // ========================================
+    function toggleAdminMenu() {
+      const adminMenu = document.getElementById('adminMenu');
+      adminMenu.classList.toggle('show');
+    }
+
+    // ปิด menu เมื่อคลิกที่ไหนก็ได้นอก menu
+    document.addEventListener('click', (e) => {
+      const adminSettings = document.getElementById('adminSettings');
+      const adminMenu = document.getElementById('adminMenu');
+      
+      if (adminSettings && !adminSettings.contains(e.target)) {
+        adminMenu.classList.remove('show');
+      }
+    });
+
+    function openAppScript() {
+      const appScriptUrl = 'https://script.google.com/u/0/home/projects/1l7psI_xZYdhHig9zQ1a1RbEhmEnk-VKI5A-c50Q14MUbJaIoHkwJ_gHA/edit';
+      window.open(appScriptUrl, '_blank');
+      document.getElementById('adminMenu').classList.remove('show');
+    }
+
+    function openGitHub() {
+      const githubUrl = 'https://github.com/spank1122/hrd_project';
+      window.open(githubUrl, '_blank');
+      document.getElementById('adminMenu').classList.remove('show');
     }
 
     // ========================================
