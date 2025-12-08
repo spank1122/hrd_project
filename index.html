@@ -443,6 +443,71 @@
       min-width: 20px;
     }
 
+    /* ========== CONNECTION STATUS INDICATOR ========== */
+    .connection-status {
+      position: absolute;
+      top: 16px;
+      right: 280px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: white;
+      border-radius: 6px;
+      box-shadow: var(--shadow-md);
+      z-index: 100;
+      animation: fadeInDown 0.6s ease-out;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #28a745;
+      box-shadow: 0 0 8px rgba(40, 167, 69, 0.6);
+    }
+
+    .status-indicator.online {
+      background: #28a745;
+      box-shadow: 0 0 8px rgba(40, 167, 69, 0.6);
+      animation: pulse-green 2s infinite;
+    }
+
+    .status-indicator.offline {
+      background: #dc3545;
+      box-shadow: 0 0 8px rgba(220, 53, 69, 0.6);
+      animation: pulse-red 2s infinite;
+    }
+
+    .status-indicator.checking {
+      background: #ffc107;
+      box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+      animation: pulse-yellow 2s infinite;
+    }
+
+    @keyframes pulse-green {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    @keyframes pulse-yellow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .status-text {
+      color: var(--text-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     /* ========== SYSTEM STATUS STYLES ========== */
     .status-container {
       max-width: 700px;
@@ -1249,6 +1314,12 @@
     </form>
   </div>
 
+  <!-- Connection Status Indicator -->
+  <div id="connectionStatus" class="connection-status">
+    <div class="status-indicator checking"></div>
+    <span class="status-text">Checking...</span>
+  </div>
+
   <!-- Admin Settings (Top Left) -->
   <div id="adminSettings" class="admin-settings">
     <button class="admin-settings-btn" onclick="toggleAdminMenu()">🔧</button>
@@ -1877,7 +1948,7 @@
 
     async function checkAppScriptConnection() {
       try {
-        const response = await fetch(APPSCRIPT_URL + '?action=testConnection', {
+        const response = await fetch(APPSCRIPT_URL + '?action=testConnection&callback=onTestConnection', {
           method: 'GET',
           mode: 'no-cors'
         });
@@ -1921,7 +1992,7 @@
             <button class="status-refresh-btn" onclick="refreshSystemStatus()">🔄 Refresh</button>
           </div>
 
-          <div class="status-item checking">
+          <div class="status-item checking" id="appscript-status">
             <div class="status-info">
               <div class="status-label">Google Apps Script</div>
               <div class="status-detail">Testing connection...</div>
@@ -1976,46 +2047,65 @@
 
     async function testAppScriptConnection() {
       try {
-        const response = await fetch(APPSCRIPT_URL + '?action=testConnection', {
-          method: 'GET',
-          mode: 'no-cors'
-        });
+        // ใช้ JSONP เพื่อข้ามปัญหา CORS
+        const timestamp = Date.now();
+        const callbackName = 'onTestConnection_' + timestamp;
+        
+        // สร้าง callback function
+        window[callbackName] = function(response) {
+          updateAppScriptStatus('online', '✓ Connected successfully');
+          // ลบ script tag
+          const script = document.getElementById('appscript-script-' + timestamp);
+          if (script) script.remove();
+          // ลบ callback function
+          delete window[callbackName];
+        };
 
-        // อัปเดต UI
-        const statusItems = document.querySelectorAll('.status-item.checking');
-        if (statusItems.length > 0) {
-          const item = statusItems[0];
-          item.classList.remove('checking');
-          item.classList.add('online');
-          
-          const badge = item.querySelector('.status-badge');
-          badge.classList.remove('checking');
-          badge.classList.add('online');
-          badge.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor; margin-right:6px;"></span>Online';
-          
-          const detail = item.querySelector('.status-detail');
-          detail.textContent = '✓ Connected successfully';
-        }
+        // สร้าง script tag สำหรับ JSONP
+        const script = document.createElement('script');
+        script.id = 'appscript-script-' + timestamp;
+        script.src = APPSCRIPT_URL + '?action=testConnection&callback=' + callbackName + '&_=' + timestamp;
+        script.onerror = function() {
+          updateAppScriptStatus('offline', '✗ Connection failed');
+          delete window[callbackName];
+        };
+        document.head.appendChild(script);
+
+        // ตั้ง timeout 5 วินาที
+        setTimeout(() => {
+          if (window[callbackName]) {
+            updateAppScriptStatus('offline', '✗ Connection timeout');
+            delete window[callbackName];
+          }
+        }, 5000);
+
       } catch (error) {
-        // อัปเดต UI เป็น offline
-        const statusItems = document.querySelectorAll('.status-item.checking');
-        if (statusItems.length > 0) {
-          const item = statusItems[0];
-          item.classList.remove('checking');
-          item.classList.add('offline');
-          
-          const badge = item.querySelector('.status-badge');
-          badge.classList.remove('checking');
-          badge.classList.add('offline');
-          badge.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor; margin-right:6px;"></span>Offline';
-          
-          const detail = item.querySelector('.status-detail');
-          detail.textContent = '✗ Connection failed: ' + error.message;
-        }
+        updateAppScriptStatus('offline', '✗ Connection failed: ' + error.message);
       }
 
       // อัปเดต timestamp
       document.getElementById('lastCheckedTime').textContent = new Date().toLocaleTimeString('th-TH');
+    }
+
+    function updateAppScriptStatus(status, message) {
+      const statusItem = document.getElementById('appscript-status');
+      if (!statusItem) return;
+
+      statusItem.classList.remove('checking', 'online', 'offline');
+      statusItem.classList.add(status);
+      
+      const badge = statusItem.querySelector('.status-badge');
+      badge.classList.remove('checking', 'online', 'offline');
+      badge.classList.add(status);
+      
+      if (status === 'online') {
+        badge.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor; margin-right:6px;"></span>Online';
+      } else {
+        badge.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor; margin-right:6px;"></span>Offline';
+      }
+      
+      const detail = statusItem.querySelector('.status-detail');
+      detail.textContent = message;
     }
 
     function refreshSystemStatus() {
@@ -2032,6 +2122,68 @@
         modal.remove();
       }
     }
+
+    // ========================================
+    // 🌐 Connection Status Monitor
+    // ========================================
+    function updateConnectionStatus(status, statusText) {
+      const statusIndicator = document.querySelector('.status-indicator');
+      const statusTextEl = document.querySelector('.status-text');
+      
+      if (!statusIndicator || !statusTextEl) return;
+
+      statusIndicator.classList.remove('online', 'offline', 'checking');
+      statusIndicator.classList.add(status);
+      
+      statusTextEl.textContent = statusText;
+    }
+
+    function checkAppScriptStatus() {
+      updateConnectionStatus('checking', 'Checking...');
+
+      try {
+        const timestamp = Date.now();
+        const callbackName = 'checkStatus_' + timestamp;
+        
+        window[callbackName] = function(response) {
+          updateConnectionStatus('online', 'AppScript Online');
+          const script = document.getElementById('check-script-' + timestamp);
+          if (script) script.remove();
+          delete window[callbackName];
+        };
+
+        const script = document.createElement('script');
+        script.id = 'check-script-' + timestamp;
+        script.src = APPSCRIPT_URL + '?action=testConnection&callback=' + callbackName + '&_=' + timestamp;
+        script.onerror = function() {
+          updateConnectionStatus('offline', 'AppScript Offline');
+          delete window[callbackName];
+        };
+        document.head.appendChild(script);
+
+        // Timeout 5 วินาที
+        setTimeout(() => {
+          if (window[callbackName]) {
+            updateConnectionStatus('offline', 'AppScript Offline');
+            delete window[callbackName];
+          }
+        }, 5000);
+
+      } catch (error) {
+        updateConnectionStatus('offline', 'AppScript Offline');
+      }
+    }
+
+    // เช็คสถานะทุก 30 วินาที
+    function startStatusMonitoring() {
+      checkAppScriptStatus();
+      setInterval(checkAppScriptStatus, 30000);
+    }
+
+    // เริ่มติดตาม status เมื่อหน้าโหลด
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(startStatusMonitoring, 1000);
+    });
   </script>
 </body>
 </html>
