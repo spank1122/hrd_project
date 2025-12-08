@@ -298,7 +298,7 @@
       justify-content: center;
       color: white;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 20px;
       box-shadow: 0 2px 8px rgba(44, 62, 80, 0.2);
     }
 
@@ -1064,7 +1064,7 @@
 
   <script>
     // ========================================
-    // 🔐 Authentication System User and Password
+    // 🔐 Authentication System
     // ========================================
 
     // ข้อมูลผู้ใช้ตัวอย่าง
@@ -1170,12 +1170,21 @@
       if (!currentUser) return;
 
       const userProfile = document.getElementById('userProfile');
-      const initial = currentUser.fullName.charAt(0);
       const displayUserName = document.getElementById('displayUserName');
       const displayUserRole = document.getElementById('displayUserRole');
       const userAvatarInitial = document.getElementById('userAvatarInitial');
 
-      userAvatarInitial.textContent = initial;
+      // เลือก avatar ตามบทบาท
+      let avatarText = '👤';
+      if (currentUser.role === 'Admin') {
+        avatarText = '👑';
+      } else if (currentUser.role === 'HR Staff') {
+        avatarText = '💼';
+      } else if (currentUser.role === 'User') {
+        avatarText = '👤';
+      }
+
+      userAvatarInitial.textContent = avatarText;
       displayUserName.textContent = currentUser.fullName;
       displayUserRole.textContent = currentUser.role;
       userProfile.classList.add('active');
