@@ -445,20 +445,32 @@
 
     /* ========== CONNECTION STATUS INDICATOR ========== */
     .connection-status {
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 16px 24px;
-      background: transparent;
-      border-radius: 0;
-      box-shadow: none;
-      z-index: 100;
-      font-size: 12px;
-      font-weight: 600;
+      display: none;
+    }
+
+    .status-indicator-footer {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-indicator-footer.online {
+      background: #28a745;
+      box-shadow: 0 0 6px rgba(40, 167, 69, 0.8);
+      animation: pulse-green 2s infinite;
+    }
+
+    .status-indicator-footer.offline {
+      background: #dc3545;
+      box-shadow: 0 0 6px rgba(220, 53, 69, 0.8);
+      animation: pulse-red 2s infinite;
+    }
+
+    .status-indicator-footer.checking {
+      background: #ffc107;
+      box-shadow: 0 0 6px rgba(255, 193, 7, 0.8);
+      animation: pulse-yellow 2s infinite;
     }
 
     .status-indicator {
@@ -1423,6 +1435,11 @@
       <span>Human Resources Department</span>
       <span class="footer-divider">•</span>
       <span>Document Management System v1.0</span>
+      <span class="footer-divider">•</span>
+      <span id="footerStatus" style="display: inline-flex; align-items: center; gap: 6px;">
+        <span class="status-indicator-footer checking" id="footerStatusIndicator"></span>
+        <span id="footerStatusText">Checking...</span>
+      </span>
     </div>
   </div>
 
@@ -2127,8 +2144,8 @@
     // 🌐 Connection Status Monitor
     // ========================================
     function updateConnectionStatus(status, statusText) {
-      const statusIndicator = document.querySelector('.status-indicator');
-      const statusTextEl = document.querySelector('.status-text');
+      const statusIndicator = document.getElementById('footerStatusIndicator');
+      const statusTextEl = document.getElementById('footerStatusText');
       
       if (!statusIndicator || !statusTextEl) return;
 
