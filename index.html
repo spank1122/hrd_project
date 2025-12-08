@@ -39,6 +39,10 @@
       overflow-x: hidden;
     }
 
+    body.modal-open {
+      overflow: hidden;
+    }
+
     /* Animated Background */
     body::before {
       content: '';
@@ -60,6 +64,298 @@
       50% { transform: translateY(-15px); }
     }
 
+    /* ========== LOGIN MODAL STYLES ========== */
+    .login-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 9998;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .login-modal-overlay.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .login-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 16px;
+      padding: 48px 40px;
+      box-shadow: var(--shadow-xl);
+      max-width: 420px;
+      width: 90%;
+      z-index: 9999;
+      display: none;
+      animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .login-modal.active {
+      display: block;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translate(-50%, -40%);
+        opacity: 0;
+      }
+      to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+      }
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .login-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      letter-spacing: 2px;
+    }
+
+    .login-subtitle {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 24px;
+    }
+
+    .demo-credentials {
+      background: #F0F4F8;
+      border-left: 4px solid var(--gold-accent);
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      font-size: 12px;
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    .demo-credentials strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--navy-dark);
+    }
+
+    .demo-item {
+      margin-bottom: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #E0E6ED;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      color: var(--text-dark);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--gold-accent);
+      box-shadow: 0 0 0 3px rgba(184, 160, 104, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: #A0AEC0;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--navy-dark), var(--navy-medium));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: inherit;
+      margin-top: 8px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
+      background: linear-gradient(135deg, #1A252F, var(--navy-dark));
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-error {
+      background: #F8D7DA;
+      color: #721C24;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      display: none;
+      border-left: 4px solid #DC3545;
+    }
+
+    .login-error.show {
+      display: block;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: all 0.3s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--text-dark);
+      transform: rotate(90deg);
+    }
+
+    /* ========== USER PROFILE STYLES ========== */
+    .user-profile {
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-md);
+      z-index: 100;
+      animation: fadeInDown 0.6s ease-out;
+    }
+
+    .user-profile.active {
+      display: flex;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-accent), var(--navy-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.2);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .user-role {
+      font-size: 11px;
+      color: var(--gold-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .logout-btn {
+      padding: 8px 16px;
+      background: #F0F4F8;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy-dark);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: inherit;
+      margin-left: 8px;
+      border-left: 2px solid var(--text-light);
+    }
+
+    .logout-btn:hover {
+      background: #E0E6ED;
+      color: #DC3545;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ========== ORIGINAL STYLES ========== */
     /* Header with Logo - Hero Section */
     .header-top {
       background: linear-gradient(135deg, #3D3B54 0%, #2F2D45 100%);
@@ -99,17 +395,6 @@
 
     .company-subtitle {
       display: none;
-    }
-
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     .container {
@@ -416,14 +701,15 @@
     .notification {
       position: fixed;
       top: 20px;
-      right: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       padding: 16px 24px;
       background: linear-gradient(135deg, var(--navy-dark), var(--navy-medium));
       color: var(--text-light-on-navy);
       border-radius: 8px;
       border-left: 4px solid var(--gold-accent);
       box-shadow: var(--shadow-xl);
-      z-index: 9999;
+      z-index: 9997;
       font-size: 14px;
       font-weight: 500;
       max-width: 400px;
@@ -432,31 +718,31 @@
 
     .notification.show {
       display: block;
-      animation: slideInRight 0.4s ease-out;
+      animation: slideInDown 0.4s ease-out;
     }
 
     .notification.hide {
-      animation: slideOutRight 0.4s ease-out forwards;
+      animation: slideOutUp 0.4s ease-out forwards;
     }
 
-    @keyframes slideInRight {
+    @keyframes slideInDown {
       from {
-        transform: translateX(450px);
+        transform: translate(-50%, -100px);
         opacity: 0;
       }
       to {
-        transform: translateX(0);
+        transform: translate(-50%, 0);
         opacity: 1;
       }
     }
 
-    @keyframes slideOutRight {
+    @keyframes slideOutUp {
       from {
-        transform: translateX(0);
+        transform: translate(-50%, 0);
         opacity: 1;
       }
       to {
-        transform: translateX(450px);
+        transform: translate(-50%, -100px);
         opacity: 0;
       }
     }
@@ -541,6 +827,33 @@
         font-size: 14px;
         padding: 14px 24px;
       }
+
+      .user-profile {
+        top: 12px;
+        right: 16px;
+        padding: 10px 16px;
+        gap: 10px;
+      }
+
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+      }
+
+      .user-name {
+        font-size: 12px;
+      }
+
+      .logout-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+      }
+
+      .login-modal {
+        max-width: 85%;
+        padding: 32px 24px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -593,10 +906,96 @@
       .footer-content {
         font-size: 11px;
       }
+
+      .login-modal {
+        padding: 24px 20px;
+        width: 95%;
+      }
+
+      .login-title {
+        font-size: 24px;
+      }
+
+      .user-profile {
+        flex-direction: column;
+        padding: 8px 12px;
+        gap: 8px;
+      }
+
+      .user-name {
+        font-size: 11px;
+      }
+
+      .logout-btn {
+        width: 100%;
+        margin-left: 0;
+        border-left: none;
+        border-top: 2px solid var(--text-light);
+        padding: 8px 12px;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Login Modal -->
+  <div id="loginModalOverlay" class="login-modal-overlay"></div>
+  
+  <div id="loginModal" class="login-modal">
+    <button class="modal-close-btn" onclick="closeLoginModal()">✕</button>
+    
+    <div class="login-header">
+      <h1 class="login-title">เข้าสู่ระบบ</h1>
+      <p class="login-subtitle">The Carpetmaker - Document Management</p>
+    </div>
+
+    <div class="demo-credentials">
+      <strong>🔐 บัญชีทดสอบ (Demo Accounts)</strong>
+      <div class="demo-item"><strong style="font-weight: 500;">Admin:</strong> admin / admin123</div>
+      <div class="demo-item"><strong style="font-weight: 500;">HR Staff:</strong> hr / hr123</div>
+      <div class="demo-item"><strong style="font-weight: 500;">User:</strong> user / user123</div>
+    </div>
+
+    <div id="loginError" class="login-error"></div>
+
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label class="form-label">ชื่อผู้ใช้</label>
+        <input 
+          id="usernameInput" 
+          type="text" 
+          class="form-input" 
+          placeholder="กรุณาใส่ชื่อผู้ใช้"
+          required
+          autocomplete="username"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">รหัสผ่าน</label>
+        <input 
+          id="passwordInput" 
+          type="password" 
+          class="form-input" 
+          placeholder="กรุณาใส่รหัสผ่าน"
+          required
+          autocomplete="current-password"
+        >
+      </div>
+
+      <button type="submit" class="login-btn">🔓 เข้าสู่ระบบ</button>
+    </form>
+  </div>
+
+  <!-- User Profile (Top Right) -->
+  <div id="userProfile" class="user-profile">
+    <div class="user-avatar" id="userAvatarInitial"></div>
+    <div class="user-info">
+      <div class="user-name" id="displayUserName"></div>
+      <div class="user-role" id="displayUserRole"></div>
+    </div>
+    <button class="logout-btn" onclick="handleLogout()">ออกจากระบบ</button>
+  </div>
+
   <!-- Header with Logo - Hero Section -->
   <div class="header-top">
     <div class="logo-container">
@@ -665,27 +1064,202 @@
 
   <script>
     // ========================================
-    // 🔧 Configuration
+    // 🔐 Authentication System
     // ========================================
 
-    const CONFIG = {
-      WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbwAL1ISDOIC_0TVh4RZniHn34vP0O7x5yBHlyxGZ1-u8ctgEg9OtG9dNMAZwxH7sNww/exec',
-      IT_SYSTEM_URL: 'it-system.html',
-      ACTION_FORM_URL: 'Action form hub.html'
+    // ข้อมูลผู้ใช้ตัวอย่าง
+    const USERS_DATABASE = {
+      'admin': {
+        password: 'admin123',
+        role: 'Admin',
+        fullName: 'ผู้ดูแลระบบ',
+        permissions: ['IT_REQUEST', 'ACTION_FORM', 'VIEW_ALL', 'EDIT_ALL']
+      },
+      'hr': {
+        password: 'hr123',
+        role: 'HR Staff',
+        fullName: 'เจ้าหน้าที่ HR',
+        permissions: ['IT_REQUEST', 'ACTION_FORM', 'VIEW_ALL']
+      },
+      'user': {
+        password: 'user123',
+        role: 'User',
+        fullName: 'ผู้ใช้ทั่วไป',
+        permissions: ['IT_REQUEST', 'ACTION_FORM']
+      }
     };
 
+    // ตัวแปรสำหรับเก็บข้อมูลผู้ใช้ปัจจุบัน
+    let currentUser = null;
+
     // ========================================
-    // 🎯 Open IT Request System
+    // 🎯 Modal Control
     // ========================================
-    function openITRequest() {
-      window.location.href = CONFIG.IT_SYSTEM_URL;
+    function openLoginModal() {
+      const modal = document.getElementById('loginModal');
+      const overlay = document.getElementById('loginModalOverlay');
+      modal.classList.add('active');
+      overlay.classList.add('active');
+      document.body.classList.add('modal-open');
+    }
+
+    function closeLoginModal() {
+      const modal = document.getElementById('loginModal');
+      const overlay = document.getElementById('loginModalOverlay');
+      modal.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.classList.remove('modal-open');
+    }
+
+    // ปิด modal เมื่อคลิก overlay
+    document.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.getElementById('loginModalOverlay');
+      overlay.addEventListener('click', closeLoginModal);
+    });
+
+    // ปิด modal เมื่อกด ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLoginModal();
+      }
+    });
+
+    // ========================================
+    // 📝 Handle Login
+    // ========================================
+    function handleLogin(event) {
+      event.preventDefault();
+
+      const username = document.getElementById('usernameInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const errorDiv = document.getElementById('loginError');
+
+      // ล้าง error message
+      errorDiv.classList.remove('show');
+
+      // ตรวจสอบข้อมูลผู้ใช้
+      if (USERS_DATABASE[username] && USERS_DATABASE[username].password === password) {
+        // ล็อกอินสำเร็จ
+        currentUser = {
+          username: username,
+          ...USERS_DATABASE[username]
+        };
+
+        // เก็บข้อมูลใน localStorage
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+        // ปิด modal และแสดง profile
+        closeLoginModal();
+        displayUserProfile();
+        showNotification(`✅ ยินดีต้อนรับ ${currentUser.fullName}!`, 'success');
+
+        // ล้างฟอร์ม
+        document.getElementById('usernameInput').value = '';
+        document.getElementById('passwordInput').value = '';
+      } else {
+        // แสดง error
+        errorDiv.textContent = '❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+        errorDiv.classList.add('show');
+      }
     }
 
     // ========================================
-    // 🎯 Open Action Form Hub
+    // 👤 Display User Profile
+    // ========================================
+    function displayUserProfile() {
+      if (!currentUser) return;
+
+      const userProfile = document.getElementById('userProfile');
+      const initial = currentUser.fullName.charAt(0);
+      const displayUserName = document.getElementById('displayUserName');
+      const displayUserRole = document.getElementById('displayUserRole');
+      const userAvatarInitial = document.getElementById('userAvatarInitial');
+
+      userAvatarInitial.textContent = initial;
+      displayUserName.textContent = currentUser.fullName;
+      displayUserRole.textContent = currentUser.role;
+      userProfile.classList.add('active');
+    }
+
+    // ========================================
+    // 🔓 Handle Logout
+    // ========================================
+    function handleLogout() {
+      // ยืนยันการออกจากระบบ
+      if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+        currentUser = null;
+        localStorage.removeItem('currentUser');
+
+        const userProfile = document.getElementById('userProfile');
+        userProfile.classList.remove('active');
+
+        // แสดง modal login
+        openLoginModal();
+
+        showNotification('👋 ออกจากระบบสำเร็จ', 'success');
+      }
+    }
+
+    // ========================================
+    // 🔒 Check Authentication on Load
+    // ========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('currentUser');
+      
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          displayUserProfile();
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          localStorage.removeItem('currentUser');
+          openLoginModal();
+        }
+      } else {
+        // ไม่มีผู้ใช้ ให้เปิด login modal
+        openLoginModal();
+      }
+
+      console.log('🎯 HR Document Management System Loaded');
+      console.log('📋 Available Demo Accounts:', Object.keys(USERS_DATABASE));
+    });
+
+    // ========================================
+    // 🔧 Open IT Request
+    // ========================================
+    function openITRequest() {
+      if (!currentUser) {
+        showNotification('❌ กรุณาล็อกอินก่อน', 'error');
+        openLoginModal();
+        return;
+      }
+      
+      if (!currentUser.permissions.includes('IT_REQUEST')) {
+        showNotification('❌ คุณไม่มีสิทธิ์เข้าถึงระบบนี้', 'error');
+        return;
+      }
+
+      showNotification('📋 เปิดแบบฟอร์มขออุปกรณ์ IT...', 'success');
+      // window.location.href = 'it-system.html';
+    }
+
+    // ========================================
+    // 🎯 Open Action Form
     // ========================================
     function openActionForm() {
-      window.location.href = CONFIG.ACTION_FORM_URL;
+      if (!currentUser) {
+        showNotification('❌ กรุณาล็อกอินก่อน', 'error');
+        openLoginModal();
+        return;
+      }
+
+      if (!currentUser.permissions.includes('ACTION_FORM')) {
+        showNotification('❌ คุณไม่มีสิทธิ์เข้าถึงระบบนี้', 'error');
+        return;
+      }
+
+      showNotification('📝 เปิดใบดำเนินการ HR...', 'success');
+      // window.location.href = 'Action form hub.html';
     }
 
     // ========================================
@@ -703,15 +1277,6 @@
         setTimeout(() => notification.classList.remove('hide'), 400);
       }, 3000);
     }
-
-    // ========================================
-    // 🚀 Initialize
-    // ========================================
-    console.log('🎯 HR Document Management System Loaded');
-    console.log('📋 Systems:', {
-      'IT Request': '✅ Active',
-      'Action Form': '✅ Active'
-    });
   </script>
 </body>
 </html>
