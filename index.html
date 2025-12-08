@@ -1087,6 +1087,10 @@
   <div id="adminSettings" class="admin-settings">
     <button class="admin-settings-btn" onclick="toggleAdminMenu()">🔧</button>
     <div id="adminMenu" class="admin-menu">
+      <button class="admin-menu-item" onclick="openLogs()">
+        <span class="admin-menu-icon">📋</span>
+        <span>View Logs</span>
+      </button>
       <button class="admin-menu-item" onclick="openAppScript()">
         <span class="admin-menu-icon">📊</span>
         <span>Google Apps Script</span>
@@ -1260,6 +1264,12 @@
         // เก็บข้อมูลใน localStorage
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
+        // บันทึก log
+        addLog('USER_LOGIN', {
+          username: username,
+          role: currentUser.role
+        });
+
         // ปิด modal และแสดง profile
         closeLoginModal();
         displayUserProfile();
@@ -1272,6 +1282,11 @@
         // แสดง error
         errorDiv.textContent = '❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
         errorDiv.classList.add('show');
+
+        // บันทึก failed login attempt
+        addLog('FAILED_LOGIN_ATTEMPT', {
+          username: username
+        });
       }
     }
 
@@ -1328,16 +1343,179 @@
       }
     });
 
-    function openAppScript() {
-      const appScriptUrl = 'https://script.google.com/u/0/home/projects/1l7psI_xZYdhHig9zQ1a1RbEhmEnk-VKI5A-c50Q14MUbJaIoHkwJ_gHA/edit';
-      window.open(appScriptUrl, '_blank');
-      document.getElementById('adminMenu').classList.remove('show');
+    // ========================================
+    // 📋 Log System
+    // ========================================
+    const LOG_CONFIG = {
+      MAX_LOGS: 100,
+      STORAGE_KEY: 'admin_logs'
+    };
+
+    function addLog(action, details = {}) {
+      const timestamp = new Date().toISOString();
+      const logEntry = {
+        timestamp,
+        action,
+        details,
+        user: currentUser ? currentUser.fullName : 'Unknown',
+        role: currentUser ? currentUser.role : 'Unknown'
+      };
+
+      // ดึง logs เก่า
+      let logs = [];
+      const savedLogs = localStorage.getItem(LOG_CONFIG.STORAGE_KEY);
+      if (savedLogs) {
+        try {
+          logs = JSON.parse(savedLogs);
+        } catch (e) {
+          console.error('Error parsing logs:', e);
+          logs = [];
+        }
+      }
+
+      // เพิ่ม log ใหม่
+      logs.unshift(logEntry);
+
+      // เก็บเฉพาะ MAX_LOGS รายการล่าสุด
+      if (logs.length > LOG_CONFIG.MAX_LOGS) {
+        logs = logs.slice(0, LOG_CONFIG.MAX_LOGS);
+      }
+
+      // บันทึกกลับไป localStorage
+      localStorage.setItem(LOG_CONFIG.STORAGE_KEY, JSON.stringify(logs));
     }
 
-    function openGitHub() {
-      const githubUrl = 'https://github.com/spank1122/hrd_project';
-      window.open(githubUrl, '_blank');
+    function openLogs() {
+      // บันทึก action นี้
+      addLog('ADMIN_OPENED_LOGS', {
+        action: 'Opened Admin Logs'
+      });
+
       document.getElementById('adminMenu').classList.remove('show');
+      showLogsModal();
+    }
+
+    function showLogsModal() {
+      // ดึง logs
+      let logs = [];
+      const savedLogs = localStorage.getItem(LOG_CONFIG.STORAGE_KEY);
+      if (savedLogs) {
+        try {
+          logs = JSON.parse(savedLogs);
+        } catch (e) {
+          console.error('Error parsing logs:', e);
+          logs = [];
+        }
+      }
+
+      // สร้าง HTML สำหรับ logs
+      let logsHTML = '<div style="max-width: 800px; margin: 20px auto;">';
+      logsHTML += '<h2 style="color: #2C3E50; margin-bottom: 20px;">📋 Activity Logs</h2>';
+      
+      if (logs.length === 0) {
+        logsHTML += '<p style="text-align: center; color: #888;">ยังไม่มีกิจกรรมที่บันทึก</p>';
+      } else {
+        logsHTML += '<table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">';
+        logsHTML += '<thead style="background: #3D3B54; color: white;">';
+        logsHTML += '<tr>';
+        logsHTML += '<th style="padding: 12px; text-align: left; border-right: 1px solid #ddd;">วันที่ / เวลา</th>';
+        logsHTML += '<th style="padding: 12px; text-align: left; border-right: 1px solid #ddd;">ผู้ใช้</th>';
+        logsHTML += '<th style="padding: 12px; text-align: left; border-right: 1px solid #ddd;">บทบาท</th>';
+        logsHTML += '<th style="padding: 12px; text-align: left;">กิจกรรม</th>';
+        logsHTML += '</tr>';
+        logsHTML += '</thead>';
+        logsHTML += '<tbody>';
+
+        logs.forEach((log, index) => {
+          const date = new Date(log.timestamp);
+          const dateStr = date.toLocaleDateString('th-TH', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
+
+          const bgColor = index % 2 === 0 ? '#f8f9fa' : 'white';
+          logsHTML += `<tr style="background: ${bgColor}; border-bottom: 1px solid #eee;">`;
+          logsHTML += `<td style="padding: 12px; border-right: 1px solid #ddd; font-size: 12px;">${dateStr}</td>`;
+          logsHTML += `<td style="padding: 12px; border-right: 1px solid #ddd; font-size: 12px;">${log.user}</td>`;
+          logsHTML += `<td style="padding: 12px; border-right: 1px solid #ddd; font-size: 12px;">
+            <span style="background: #B8A068; color: white; padding: 2px 8px; border-radius: 12px;">${log.role}</span>
+          </td>`;
+          logsHTML += `<td style="padding: 12px; font-size: 12px;">${log.action}</td>`;
+          logsHTML += '</tr>';
+        });
+
+        logsHTML += '</tbody>';
+        logsHTML += '</table>';
+      }
+
+      logsHTML += '<div style="text-align: center; margin-top: 20px;">';
+      logsHTML += `<p style="color: #888; font-size: 12px;">Total Logs: ${logs.length}</p>`;
+      logsHTML += '<button onclick="clearAllLogs()" style="background: #DC3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 10px;">Clear All Logs</button>';
+      logsHTML += '<button onclick="closeLogsModal()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">Close</button>';
+      logsHTML += '</div>';
+      logsHTML += '</div>';
+
+      // สร้าง modal
+      const modal = document.createElement('div');
+      modal.id = 'logsModal';
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      `;
+      modal.innerHTML = `
+        <div style="
+          background: white;
+          border-radius: 12px;
+          max-width: 900px;
+          width: 90%;
+          max-height: 80vh;
+          overflow-y: auto;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+          animation: slideUp 0.3s ease-out;
+        ">
+          ${logsHTML}
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      // ปิด modal เมื่อคลิกที่ background
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeLogsModal();
+        }
+      });
+    }
+
+    function closeLogsModal() {
+      const modal = document.getElementById('logsModal');
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    function clearAllLogs() {
+      if (confirm('คุณต้องการลบ logs ทั้งหมดหรือไม่?')) {
+        localStorage.removeItem(LOG_CONFIG.STORAGE_KEY);
+        addLog('ADMIN_CLEARED_ALL_LOGS', {
+          action: 'Cleared all logs'
+        });
+        showNotification('✅ ลบ logs ทั้งหมดสำเร็จ', 'success');
+        closeLogsModal();
+        showLogsModal();
+      }
     }
 
     // ========================================
@@ -1346,6 +1524,12 @@
     function handleLogout() {
       // ยืนยันการออกจากระบบ
       if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+        // บันทึก logout
+        addLog('USER_LOGOUT', {
+          username: currentUser.username,
+          role: currentUser.role
+        });
+
         currentUser = null;
         localStorage.removeItem('currentUser');
 
@@ -1403,8 +1587,16 @@
       
       if (!currentUser.permissions.includes('IT_REQUEST')) {
         showNotification('❌ คุณไม่มีสิทธิ์เข้าถึงระบบนี้', 'error');
+        addLog('UNAUTHORIZED_ACCESS_ATTEMPT', {
+          system: 'IT_REQUEST',
+          username: currentUser.username
+        });
         return;
       }
+
+      addLog('OPENED_IT_SYSTEM', {
+        system: 'IT Request System'
+      });
 
       showNotification('📋 เปิดแบบฟอร์มขออุปกรณ์ IT...', 'success');
       setTimeout(() => {
@@ -1424,8 +1616,16 @@
 
       if (!currentUser.permissions.includes('ACTION_FORM')) {
         showNotification('❌ คุณไม่มีสิทธิ์เข้าถึงระบบนี้', 'error');
+        addLog('UNAUTHORIZED_ACCESS_ATTEMPT', {
+          system: 'ACTION_FORM',
+          username: currentUser.username
+        });
         return;
       }
+
+      addLog('OPENED_ACTION_FORM', {
+        system: 'Action Form Hub'
+      });
 
       showNotification('📝 เปิดใบดำเนินการ HR...', 'success');
       setTimeout(() => {
