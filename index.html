@@ -1225,6 +1225,14 @@
     });
 
     // ========================================
+    // 🔧 Configuration
+    // ========================================
+    const CONFIG = {
+      IT_SYSTEM_URL: 'it-system.html',
+      ACTION_FORM_URL: 'Action form hub.html'
+    };
+
+    // ========================================
     // 🔧 Open IT Request
     // ========================================
     function openITRequest() {
@@ -1240,7 +1248,9 @@
       }
 
       showNotification('📋 เปิดแบบฟอร์มขออุปกรณ์ IT...', 'success');
-      // window.location.href = 'it-system.html';
+      setTimeout(() => {
+        window.location.href = CONFIG.IT_SYSTEM_URL;
+      }, 600);
     }
 
     // ========================================
@@ -1259,7 +1269,9 @@
       }
 
       showNotification('📝 เปิดใบดำเนินการ HR...', 'success');
-      // window.location.href = 'Action form hub.html';
+      setTimeout(() => {
+        window.location.href = CONFIG.ACTION_FORM_URL;
+      }, 600);
     }
 
     // ========================================
