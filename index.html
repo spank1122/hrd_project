@@ -1091,6 +1091,16 @@
         <span class="admin-menu-icon">📋</span>
         <span>View Logs</span>
       </button>
+      <hr style="margin: 4px 0; border: none; border-top: 1px solid #f0f0f0;">
+      <button class="admin-menu-item" onclick="openGoogleSheet1()">
+        <span class="admin-menu-icon">📊</span>
+        <span>Google Sheet 1</span>
+      </button>
+      <button class="admin-menu-item" onclick="openGoogleSheet2()">
+        <span class="admin-menu-icon">📈</span>
+        <span>Google Sheet 2</span>
+      </button>
+      <hr style="margin: 4px 0; border: none; border-top: 1px solid #f0f0f0;">
       <button class="admin-menu-item" onclick="openAppScript()">
         <span class="admin-menu-icon">📊</span>
         <span>Google Apps Script</span>
@@ -1647,6 +1657,47 @@
         notification.classList.remove('show');
         setTimeout(() => notification.classList.remove('hide'), 400);
       }, 3000);
+    }
+
+    // ========================================
+    // 🌐 Open External Links
+    // ========================================
+    function openGoogleSheet1() {
+      const sheetUrl = 'https://docs.google.com/spreadsheets/d/13ko9sbzz9_RlBqvb02g-A6_Tc3sMq1YP7-CjlhGKB9E/edit?resourcekey=&gid=2017441219#gid=2017441219';
+      window.open(sheetUrl, '_blank');
+      addLog('OPENED_GOOGLE_SHEET', {
+        sheet: 'Google Sheet 1',
+        sheetId: '13ko9sbzz9_RlBqvb02g-A6_Tc3sMq1YP7-CjlhGKB9E'
+      });
+      document.getElementById('adminMenu').classList.remove('show');
+    }
+
+    function openGoogleSheet2() {
+      const sheetUrl = 'https://docs.google.com/spreadsheets/d/15-ZZ-_JJv1odtRUwo48rnj9NYgrk65dFpigXv4Iuv70/edit?gid=1912768898#gid=1912768898';
+      window.open(sheetUrl, '_blank');
+      addLog('OPENED_GOOGLE_SHEET', {
+        sheet: 'Google Sheet 2',
+        sheetId: '15-ZZ-_JJv1odtRUwo48rnj9NYgrk65dFpigXv4Iuv70'
+      });
+      document.getElementById('adminMenu').classList.remove('show');
+    }
+
+    function openAppScript() {
+      const appScriptUrl = 'https://script.google.com/u/0/home/projects/1l7psI_xZYdhHig9zQ1a1RbEhmEnk-VKI5A-c50Q14MUbJaIoHkwJ_gHA/edit';
+      window.open(appScriptUrl, '_blank');
+      addLog('OPENED_GOOGLE_APPSCRIPT', {
+        system: 'Google Apps Script'
+      });
+      document.getElementById('adminMenu').classList.remove('show');
+    }
+
+    function openGitHub() {
+      const githubUrl = 'https://github.com/spank1122/hrd_project';
+      window.open(githubUrl, '_blank');
+      addLog('OPENED_GITHUB', {
+        system: 'GitHub HRD Project'
+      });
+      document.getElementById('adminMenu').classList.remove('show');
     }
   </script>
 </body>
