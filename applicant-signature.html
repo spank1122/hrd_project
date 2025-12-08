@@ -2,73 +2,166 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>ยืนยันข้อมูลใบสมัครและลงลายเซ็น</title>
+  <title>ยืนยันข้อมูลใบสมัครและลงลายเซ็น - The Carpetmaker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --navy-dark: #2C3E50;
+      --navy-medium: #34495E;
+      --navy-light: #3D5568;
+      --purple-pearl: #3D3B54;
+      --purple-pearl-dark: #2F2D45;
+      --gold-accent: #B8A068;
+      --text-dark: #1A252F;
+      --text-light: #5A6C7D;
+      --text-light-on-navy: #D4D4D4;
+    }
+
     body {
-      font-family: "Sarabun", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f7fb;
+      font-family: 'Sarabun', sans-serif;
+      background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 20px;
     }
-    .card {
+
+    .container {
       width: 100%;
-      max-width: 960px;
+      max-width: 1000px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn { 
+      from { opacity: 0; transform: translateY(-10px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+
+    /* Header */
+    .header { 
+      text-align: center; 
+      color: var(--text-light-on-navy); 
+      margin-bottom: 24px; 
+      animation: fadeInDown 0.6s ease-out;
+      background: linear-gradient(135deg, var(--purple-pearl) 0%, var(--purple-pearl-dark) 100%);
+      padding: 28px 24px;
+      border-radius: 12px;
+      border-bottom: 4px solid var(--gold-accent);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    @keyframes fadeInDown { 
+      from { opacity: 0; transform: translateY(-20px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+
+    .header h1 { 
+      font-size: 28px; 
+      font-weight: 600; 
+      margin-bottom: 8px; 
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      font-family: 'Playfair Display', serif;
+      letter-spacing: 0.5px;
+    }
+
+    .header p { 
+      font-size: 14px; 
+      opacity: 0.9;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-row {
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(184, 160, 104, 0.25);
+      color: var(--gold-accent);
+      font-weight: 600;
+      margin-left: 8px;
+      border: 1px solid rgba(184, 160, 104, 0.4);
+    }
+
+    .card {
       background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
-      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      padding: 28px;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
     }
+
+    @keyframes fadeInUp { 
+      from { opacity: 0; transform: translateY(20px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+
     .card-header {
-      margin-bottom: 16px;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f0f0f0;
     }
-    .card-header h1 {
-      font-size: 22px;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 4px;
+
+    .card-header h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-dark);
+      font-family: 'Playfair Display', serif;
+      margin-bottom: 6px;
     }
+
     .card-header p {
       font-size: 14px;
-      color: #6b7280;
+      color: var(--text-light);
     }
 
     .section-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
-      color: #111827;
-      margin: 16px 0 8px;
+      color: var(--text-dark);
+      margin: 24px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid var(--purple-pearl);
+      font-family: 'Playfair Display', serif;
+    }
+
+    .section-title:first-of-type {
+      margin-top: 0;
     }
 
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 8px 24px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px 24px;
       font-size: 14px;
+      margin-bottom: 8px;
     }
+
     .info-item-label {
       font-weight: 600;
-      color: #4b5563;
+      color: var(--text-light);
+      margin-bottom: 6px;
+      font-size: 13px;
     }
+
     .info-item-value {
-      margin-top: 2px;
-      color: #111827;
+      color: var(--text-dark);
       background: #f9fafb;
       border-radius: 8px;
-      padding: 6px 10px;
+      padding: 10px 14px;
       border: 1px solid #e5e7eb;
-      min-height: 32px;
+      min-height: 40px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
     }
 
     .address-box {
@@ -76,189 +169,279 @@
     }
 
     .signature-section {
-      margin-top: 20px;
+      margin-top: 24px;
       display: grid;
       grid-template-columns: minmax(0, 2.5fr) minmax(0, 2fr);
-      gap: 20px;
+      gap: 24px;
     }
+
     @media (max-width: 768px) {
       .signature-section {
         grid-template-columns: 1fr;
       }
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
     }
 
     #pad-container {
-      border: 1px dashed #cbd5f5;
+      border: 2px dashed #cbd5e1;
       border-radius: 12px;
-      padding: 10px;
+      padding: 12px;
       background: #f9fafb;
     }
 
     canvas {
       width: 100%;
-      height: 180px;
+      height: 200px;
       border-radius: 8px;
       background: #ffffff;
       box-shadow: inset 0 0 0 1px #e5e7eb;
       touch-action: none;
+      cursor: crosshair;
+      display: block;
     }
 
     .signature-actions {
-      margin-top: 8px;
+      margin-top: 10px;
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
+      gap: 10px;
     }
+
     .btn {
       border: none;
-      padding: 8px 16px;
-      border-radius: 999px;
+      padding: 10px 20px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      font-family: 'Sarabun', sans-serif;
+      transition: all 0.3s ease;
     }
+
     .btn-outline {
-      background: #f3f4f6;
-      color: #374151;
+      background: white;
+      color: var(--purple-pearl);
+      border: 1px solid #e5e7eb;
     }
+
+    .btn-outline:hover {
+      background: #f9fafb;
+      border-color: var(--purple-pearl);
+      transform: translateY(-1px);
+    }
+
     .btn-primary {
-      background: #4f46e5;
-      color: #fff;
+      background: linear-gradient(135deg, var(--purple-pearl) 0%, var(--purple-pearl-dark) 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(61, 59, 84, 0.3);
+      padding: 12px 28px;
     }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(61, 59, 84, 0.4);
+    }
+
     .btn-primary:disabled {
       opacity: 0.6;
-      cursor: default;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .confirm-box {
       font-size: 14px;
-      color: #111827;
+      color: var(--text-dark);
       background: #f9fafb;
       border-radius: 12px;
       border: 1px solid #e5e7eb;
-      padding: 12px 14px;
+      padding: 14px 16px;
       display: flex;
       align-items: flex-start;
-      gap: 8px;
+      gap: 10px;
+      line-height: 1.6;
     }
+
     .confirm-box input[type="checkbox"] {
       margin-top: 3px;
-      transform: scale(1.1);
+      transform: scale(1.2);
+      cursor: pointer;
+      accent-color: var(--purple-pearl);
+    }
+
+    .confirm-box label {
+      cursor: pointer;
+      user-select: none;
     }
 
     #status {
-      font-size: 13px;
-      color: #6b7280;
-      margin-top: 8px;
-      min-height: 18px;
-    }
-    #status.error { color: #b91c1c; }
-    #status.success { color: #047857; }
-
-    .badge-row {
-      display: inline-flex;
-      align-items: center;
-      font-size: 12px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: #eef2ff;
-      color: #3730a3;
+      font-size: 14px;
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: none;
       font-weight: 500;
-      margin-left: 4px;
+    }
+
+    #status.error { 
+      background: #fee2e2;
+      color: #b91c1c; 
+      border-left: 4px solid #dc2626;
+    }
+
+    #status.success { 
+      background: #dcfce7;
+      color: #047857; 
+      border-left: 4px solid #16a34a;
+    }
+
+    #status.loading {
+      background: #fef3c7;
+      color: #92400e;
+      border-left: 4px solid #f59e0b;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0,0,0,.1);
+      border-radius: 50%;
+      border-top-color: var(--purple-pearl);
+      animation: spin 0.8s ease-in-out infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { 
+      to { transform: rotate(360deg); } 
+    }
+
+    .signature-helper {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+
+    .confirmation-section {
+      margin-top: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header h1 { font-size: 22px; }
+      .card { padding: 20px; }
+      .section-title { font-size: 16px; }
+      canvas { height: 160px; }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="card-header">
-      <h1>ยืนยันข้อมูลใบสมัครและลงลายเซ็น</h1>
+  <div class="container">
+    <div class="header">
+      <h1>📋 ยืนยันข้อมูลใบสมัครและลงลายเซ็น</h1>
       <p>
         กรุณาตรวจสอบความถูกต้องของข้อมูลด้านล่าง แล้วลงลายเซ็นเพื่อยืนยัน
         <span class="badge-row" id="rowLabel"></span>
       </p>
     </div>
 
-    <!-- ข้อมูลผู้สมัคร -->
-    <h2 class="section-title">ข้อมูลผู้สมัคร</h2>
-    <div class="info-grid">
-      <div class="info-item">
-        <div class="info-item-label">เพศ</div>
-        <div class="info-item-value" id="gender"></div>
+    <div class="card">
+      <div class="card-header">
+        <h2>ข้อมูลผู้สมัคร</h2>
+        <p>โปรดตรวจสอบความถูกต้องของข้อมูลทุกรายการ</p>
       </div>
-      <div class="info-item">
-        <div class="info-item-label">คำนำหน้า</div>
-        <div class="info-item-value" id="title"></div>
-      </div>
-      <div class="info-item">
-        <div class="info-item-label">ชื่อ-สกุล ภาษาไทย</div>
-        <div class="info-item-value" id="nameTh"></div>
-      </div>
-      <div class="info-item">
-        <div class="info-item-label">ชื่อ-สกุล ภาษาอังกฤษ</div>
-        <div class="info-item-value" id="nameEn"></div>
-      </div>
-      <div class="info-item">
-        <div class="info-item-label">สัญชาติ</div>
-        <div class="info-item-value" id="nationality"></div>
-      </div>
-      <div class="info-item">
-        <div class="info-item-label">เชื้อชาติ</div>
-        <div class="info-item-value" id="race"></div>
-      </div>
-      <div class="info-item">
-        <div class="info-item-label">ศาสนา</div>
-        <div class="info-item-value" id="religion"></div>
-      </div>
-      <div class="info-item">
-        <div class="info-item-label">อายุ (ปี)</div>
-        <div class="info-item-value" id="age"></div>
-      </div>
-      <div class="info-item">
-        <div class="info-item-label">วัน เดือน ปีเกิด (พ.ศ.)</div>
-        <div class="info-item-value" id="birthDateBE"></div>
-      </div>
-      <div class="info-item">
-        <div class="info-item-label">โทรศัพท์มือถือ</div>
-        <div class="info-item-value" id="mobile"></div>
-      </div>
-      <div class="info-item address-box">
-        <div class="info-item-label">ที่อยู่ตามทะเบียนบ้าน</div>
-        <div class="info-item-value" id="address"></div>
-      </div>
-    </div>
 
-    <!-- ลายเซ็น + ยืนยัน -->
-    <div class="signature-section">
-      <div>
-        <h2 class="section-title">ลงลายเซ็น</h2>
-        <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;">
-          ใช้นิ้วหรือเมาส์ลากเซ็นในกรอบด้านล่าง
-        </p>
-        <div id="pad-container">
-          <canvas id="pad"></canvas>
+      <!-- ข้อมูลผู้สมัคร -->
+      <h3 class="section-title">ข้อมูลส่วนตัว</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-item-label">👤 เพศ</div>
+          <div class="info-item-value" id="gender"></div>
         </div>
-        <div class="signature-actions">
-          <button class="btn btn-outline" id="clearBtn">ล้างลายเซ็น</button>
+        <div class="info-item">
+          <div class="info-item-label">📛 คำนำหน้า</div>
+          <div class="info-item-value" id="title"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">🇹🇭 ชื่อ-สกุล (ไทย)</div>
+          <div class="info-item-value" id="nameTh"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">🔤 ชื่อ-สกุล (อังกฤษ)</div>
+          <div class="info-item-value" id="nameEn"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">🌏 สัญชาติ</div>
+          <div class="info-item-value" id="nationality"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">👥 เชื้อชาติ</div>
+          <div class="info-item-value" id="race"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">🕌 ศาสนา</div>
+          <div class="info-item-value" id="religion"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">🎂 อายุ (ปี)</div>
+          <div class="info-item-value" id="age"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">📅 วัน เดือน ปีเกิด (พ.ศ.)</div>
+          <div class="info-item-value" id="birthDateBE"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">📱 โทรศัพท์มือถือ</div>
+          <div class="info-item-value" id="mobile"></div>
         </div>
       </div>
 
-      <div>
-        <h2 class="section-title">การยืนยันข้อมูล</h2>
-        <label class="confirm-box">
-          <input type="checkbox" id="confirmCheckbox" />
-          <span>
-            ข้าพเจ้าขอรับรองว่าข้อมูลทั้งหมดที่ได้กรอกและแสดงไว้ในหน้านี้
-            เป็นความจริง ถูกต้อง และครบถ้วนทุกประการ
-            และยินยอมให้บริษัทใช้ข้อมูลดังกล่าวเพื่อประกอบการพิจารณารับเข้าทำงาน
-          </span>
-        </label>
-        <button class="btn btn-primary" id="saveBtn" style="margin-top: 14px;">
-          ✅ ยืนยันและส่งใบสมัคร
-        </button>
-        <div id="status"></div>
+      <h3 class="section-title">ที่อยู่</h3>
+      <div class="info-grid">
+        <div class="info-item address-box">
+          <div class="info-item-label">🏠 ที่อยู่ตามทะเบียนบ้าน</div>
+          <div class="info-item-value" id="address"></div>
+        </div>
+      </div>
+
+      <!-- ลายเซ็น + ยืนยัน -->
+      <div class="signature-section">
+        <div>
+          <h3 class="section-title">✍️ ลงลายเซ็น</h3>
+          <p class="signature-helper">
+            ใช้นิ้วหรือเมาส์ลากเพื่อเซ็นชื่อในกรอบด้านล่าง
+          </p>
+          <div id="pad-container">
+            <canvas id="pad"></canvas>
+          </div>
+          <div class="signature-actions">
+            <button class="btn btn-outline" id="clearBtn">🗑️ ล้างลายเซ็น</button>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="section-title">✅ การยืนยันข้อมูล</h3>
+          <label class="confirm-box">
+            <input type="checkbox" id="confirmCheckbox" />
+            <span>
+              ข้าพเจ้าขอรับรองว่าข้อมูลทั้งหมดที่ได้กรอกและแสดงไว้ในหน้านี้
+              เป็นความจริง ถูกต้อง และครบถ้วนทุกประการ
+              และยินยอมให้บริษัทใช้ข้อมูลดังกล่าวเพื่อประกอบการพิจารณารับเข้าทำงาน
+            </span>
+          </label>
+          <div class="confirmation-section">
+            <button class="btn btn-primary" id="saveBtn">
+              ✅ ยืนยันและส่งใบสมัคร
+            </button>
+            <div id="status"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -286,7 +469,7 @@
       const rect = canvas.getBoundingClientRect();
       const ratio = window.devicePixelRatio || 1;
       canvas.width = rect.width * ratio;
-      canvas.height = 180 * ratio;
+      canvas.height = 200 * ratio;
       canvas.getContext('2d').scale(ratio, ratio);
     }
     resizeCanvas();
@@ -301,6 +484,7 @@
       signaturePad.clear();
       statusEl.textContent = '';
       statusEl.className = '';
+      statusEl.style.display = 'none';
     });
 
     // ---- ดึงข้อมูลผู้สมัครจาก Apps Script ----
@@ -308,11 +492,13 @@
       if (!row) {
         statusEl.textContent = 'ไม่พบข้อมูลผู้สมัคร (ไม่มีพารามิเตอร์ row ใน URL)';
         statusEl.className = 'error';
+        statusEl.style.display = 'block';
         return;
       }
 
       statusEl.textContent = 'กำลังโหลดข้อมูลผู้สมัคร...';
-      statusEl.className = '';
+      statusEl.className = 'loading';
+      statusEl.style.display = 'block';
 
       try {
         const url = API_URL + '?action=getApplicant&row=' + encodeURIComponent(row);
@@ -326,24 +512,24 @@
         const a = data.applicant || {};
 
         // เซ็ตค่าให้ UI (ชื่อ key เหล่านี้ไป map ที่ Apps Script)
-        document.getElementById('gender').textContent      = a.gender      || '';
-        document.getElementById('title').textContent       = a.titleTh     || '';
-        document.getElementById('nameTh').textContent      = a.nameTh      || '';
-        document.getElementById('nameEn').textContent      = a.nameEn      || '';
-        document.getElementById('nationality').textContent = a.nationality || '';
-        document.getElementById('race').textContent        = a.race        || '';
-        document.getElementById('religion').textContent    = a.religion    || '';
-        document.getElementById('age').textContent         = a.age         || '';
-        document.getElementById('birthDateBE').textContent = a.birthDateBE || '';
-        document.getElementById('mobile').textContent      = a.mobile      || '';
-        document.getElementById('address').textContent     = a.address     || '';
+        document.getElementById('gender').textContent      = a.gender      || '-';
+        document.getElementById('title').textContent       = a.titleTh     || '-';
+        document.getElementById('nameTh').textContent      = a.nameTh      || '-';
+        document.getElementById('nameEn').textContent      = a.nameEn      || '-';
+        document.getElementById('nationality').textContent = a.nationality || '-';
+        document.getElementById('race').textContent        = a.race        || '-';
+        document.getElementById('religion').textContent    = a.religion    || '-';
+        document.getElementById('age').textContent         = a.age         || '-';
+        document.getElementById('birthDateBE').textContent = a.birthDateBE || '-';
+        document.getElementById('mobile').textContent      = a.mobile      || '-';
+        document.getElementById('address').textContent     = a.address     || '-';
 
-        statusEl.textContent = '';
-        statusEl.className = '';
+        statusEl.style.display = 'none';
       } catch (err) {
         console.error(err);
-        statusEl.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูลผู้สมัคร';
+        statusEl.textContent = '❌ เกิดข้อผิดพลาดในการโหลดข้อมูลผู้สมัคร';
         statusEl.className = 'error';
+        statusEl.style.display = 'block';
       }
     }
 
@@ -352,6 +538,7 @@
     // ---- กดบันทึกลายเซ็น + ยืนยัน ----
     document.getElementById('saveBtn').addEventListener('click', async () => {
       statusEl.className = '';
+      statusEl.style.display = 'none';
 
       if (!row) {
         alert('ไม่พบข้อมูลผู้สมัคร (row) ในลิงก์');
@@ -369,7 +556,10 @@
         return;
       }
 
-      statusEl.textContent = 'กำลังส่งข้อมูลและลายเซ็น...';
+      statusEl.innerHTML = '<span class="spinner"></span>กำลังส่งข้อมูลและลายเซ็น...';
+      statusEl.className = 'loading';
+      statusEl.style.display = 'block';
+
       const btn = document.getElementById('saveBtn');
       btn.disabled = true;
 
@@ -390,16 +580,18 @@
 
         const data = await res.json();
         if (data.ok) {
-          statusEl.textContent = 'บันทึกลายเซ็นและส่งใบสมัครให้ HR เรียบร้อยแล้ว ขอบคุณค่ะ/ครับ';
+          statusEl.textContent = '✅ บันทึกลายเซ็นและส่งใบสมัครให้ HR เรียบร้อยแล้ว ขอบคุณค่ะ/ครับ';
           statusEl.className = 'success';
+          statusEl.style.display = 'block';
           alert('ส่งใบสมัครเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ');
         } else {
           throw new Error(data.error || 'ไม่สามารถบันทึกลายเซ็นได้');
         }
       } catch (err) {
         console.error(err);
-        statusEl.textContent = 'เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง';
+        statusEl.textContent = '❌ เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง';
         statusEl.className = 'error';
+        statusEl.style.display = 'block';
         alert('เกิดข้อผิดพลาด: ' + err.message);
       } finally {
         btn.disabled = false;
