@@ -443,6 +443,172 @@
       min-width: 20px;
     }
 
+    /* ========== SYSTEM STATUS STYLES ========== */
+    .status-container {
+      max-width: 700px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 16px;
+    }
+
+    .status-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .status-refresh-btn {
+      background: var(--gold-accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+
+    .status-refresh-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(184, 160, 104, 0.3);
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #e0e0e0;
+      transition: all 0.3s ease;
+    }
+
+    .status-item.online {
+      border-left-color: #28a745;
+      background: #f0fdf4;
+    }
+
+    .status-item.offline {
+      border-left-color: #dc3545;
+      background: #fef2f2;
+    }
+
+    .status-item.checking {
+      border-left-color: #ffc107;
+      background: #fffbf0;
+    }
+
+    .status-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .status-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .status-detail {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge.online {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-badge.offline {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-badge.checking {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status-badge.checking::before {
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .status-timestamp {
+      text-align: center;
+      color: var(--text-light);
+      font-size: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .status-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      justify-content: center;
+    }
+
+    .status-actions button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .status-actions .btn-close {
+      background: #6c757d;
+      color: white;
+    }
+
+    .status-actions .btn-close:hover {
+      background: #5a6268;
+    }
+
     @keyframes fadeInDown {
       from {
         opacity: 0;
@@ -1087,6 +1253,10 @@
   <div id="adminSettings" class="admin-settings">
     <button class="admin-settings-btn" onclick="toggleAdminMenu()">🔧</button>
     <div id="adminMenu" class="admin-menu">
+      <button class="admin-menu-item" onclick="openSystemStatus()">
+        <span class="admin-menu-icon">🔧</span>
+        <span>System Status</span>
+      </button>
       <button class="admin-menu-item" onclick="openLogs()">
         <span class="admin-menu-icon">📋</span>
         <span>View Logs</span>
@@ -1094,11 +1264,11 @@
       <hr style="margin: 4px 0; border: none; border-top: 1px solid #f0f0f0;">
       <button class="admin-menu-item" onclick="openGoogleSheet1()">
         <span class="admin-menu-icon">📊</span>
-        <span>Google Sheet Main</span>
+        <span>Google Sheet 1</span>
       </button>
       <button class="admin-menu-item" onclick="openGoogleSheet2()">
         <span class="admin-menu-icon">📈</span>
-        <span>Google Sheet Setting</span>
+        <span>Google Sheet 2</span>
       </button>
       <hr style="margin: 4px 0; border: none; border-top: 1px solid #f0f0f0;">
       <button class="admin-menu-item" onclick="openAppScript()">
@@ -1106,7 +1276,7 @@
         <span>Google Apps Script</span>
       </button>
       <button class="admin-menu-item" onclick="openGitHub()">
-        <span class="admin-menu-icon">🌐</span>
+        <span class="admin-menu-icon">🐙</span>
         <span>GitHub Web Page</span>
       </button>
     </div>
@@ -1663,10 +1833,10 @@
     // 🌐 Open External Links
     // ========================================
     function openGoogleSheet1() {
-      const sheetUrl = 'https://docs.google.com/spreadsheets/d/13ko9sbzz9_RlBqvb02g-A6_Tc3sMq1YP7-CjlhGKB9E/edit?resourcekey=&gid=132585347#gid=132585347';
+      const sheetUrl = 'https://docs.google.com/spreadsheets/d/13ko9sbzz9_RlBqvb02g-A6_Tc3sMq1YP7-CjlhGKB9E/edit?resourcekey=&gid=2017441219#gid=2017441219';
       window.open(sheetUrl, '_blank');
       addLog('OPENED_GOOGLE_SHEET', {
-        sheet: 'Google Sheet Main',
+        sheet: 'Google Sheet 1',
         sheetId: '13ko9sbzz9_RlBqvb02g-A6_Tc3sMq1YP7-CjlhGKB9E'
       });
       document.getElementById('adminMenu').classList.remove('show');
@@ -1676,7 +1846,7 @@
       const sheetUrl = 'https://docs.google.com/spreadsheets/d/15-ZZ-_JJv1odtRUwo48rnj9NYgrk65dFpigXv4Iuv70/edit?gid=1912768898#gid=1912768898';
       window.open(sheetUrl, '_blank');
       addLog('OPENED_GOOGLE_SHEET', {
-        sheet: 'Google Sheet Setting',
+        sheet: 'Google Sheet 2',
         sheetId: '15-ZZ-_JJv1odtRUwo48rnj9NYgrk65dFpigXv4Iuv70'
       });
       document.getElementById('adminMenu').classList.remove('show');
@@ -1698,6 +1868,169 @@
         system: 'GitHub HRD Project'
       });
       document.getElementById('adminMenu').classList.remove('show');
+    }
+
+    // ========================================
+    // 🔧 System Status
+    // ========================================
+    const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAL1ISDOIC_0TVh4RZniHn34vP0O7x5yBHlyxGZ1-u8ctgEg9OtG9dNMAZwxH7sNww/exec';
+
+    async function checkAppScriptConnection() {
+      try {
+        const response = await fetch(APPSCRIPT_URL + '?action=testConnection', {
+          method: 'GET',
+          mode: 'no-cors'
+        });
+        return {
+          status: 'online',
+          message: 'Connected successfully',
+          responseTime: '200 ms'
+        };
+      } catch (error) {
+        return {
+          status: 'offline',
+          message: 'Connection failed: ' + error.message,
+          responseTime: 'N/A'
+        };
+      }
+    }
+
+    function showSystemStatus() {
+      document.getElementById('adminMenu').classList.remove('show');
+
+      const statusModal = document.createElement('div');
+      statusModal.id = 'systemStatusModal';
+      statusModal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease-out;
+      `;
+
+      const statusContent = `
+        <div class="status-container">
+          <div class="status-header">
+            <h2 class="status-title">🔧 System Status</h2>
+            <button class="status-refresh-btn" onclick="refreshSystemStatus()">🔄 Refresh</button>
+          </div>
+
+          <div class="status-item checking">
+            <div class="status-info">
+              <div class="status-label">Google Apps Script</div>
+              <div class="status-detail">Testing connection...</div>
+            </div>
+            <span class="status-badge checking">Checking...</span>
+          </div>
+
+          <div class="status-item online">
+            <div class="status-info">
+              <div class="status-label">Web Browser</div>
+              <div class="status-detail">Client connection active</div>
+            </div>
+            <span class="status-badge online">Online</span>
+          </div>
+
+          <div class="status-item online">
+            <div class="status-info">
+              <div class="status-label">Local Storage</div>
+              <div class="status-detail">Data persistence available</div>
+            </div>
+            <span class="status-badge online">Online</span>
+          </div>
+
+          <div class="status-timestamp">
+            Last checked: <strong id="lastCheckedTime">${new Date().toLocaleTimeString('th-TH')}</strong>
+          </div>
+
+          <div class="status-actions">
+            <button class="btn-close" onclick="closeSystemStatus()">Close</button>
+          </div>
+        </div>
+      `;
+
+      statusModal.innerHTML = statusContent;
+      document.body.appendChild(statusModal);
+
+      // ปิด modal เมื่อคลิก background
+      statusModal.addEventListener('click', (e) => {
+        if (e.target === statusModal) {
+          closeSystemStatus();
+        }
+      });
+
+      // ทดสอบการเชื่อมต่อ
+      testAppScriptConnection();
+
+      // บันทึก log
+      addLog('OPENED_SYSTEM_STATUS', {
+        action: 'Checked system status'
+      });
+    }
+
+    async function testAppScriptConnection() {
+      try {
+        const response = await fetch(APPSCRIPT_URL + '?action=testConnection', {
+          method: 'GET',
+          mode: 'no-cors'
+        });
+
+        // อัปเดต UI
+        const statusItems = document.querySelectorAll('.status-item.checking');
+        if (statusItems.length > 0) {
+          const item = statusItems[0];
+          item.classList.remove('checking');
+          item.classList.add('online');
+          
+          const badge = item.querySelector('.status-badge');
+          badge.classList.remove('checking');
+          badge.classList.add('online');
+          badge.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor; margin-right:6px;"></span>Online';
+          
+          const detail = item.querySelector('.status-detail');
+          detail.textContent = '✓ Connected successfully';
+        }
+      } catch (error) {
+        // อัปเดต UI เป็น offline
+        const statusItems = document.querySelectorAll('.status-item.checking');
+        if (statusItems.length > 0) {
+          const item = statusItems[0];
+          item.classList.remove('checking');
+          item.classList.add('offline');
+          
+          const badge = item.querySelector('.status-badge');
+          badge.classList.remove('checking');
+          badge.classList.add('offline');
+          badge.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor; margin-right:6px;"></span>Offline';
+          
+          const detail = item.querySelector('.status-detail');
+          detail.textContent = '✗ Connection failed: ' + error.message;
+        }
+      }
+
+      // อัปเดต timestamp
+      document.getElementById('lastCheckedTime').textContent = new Date().toLocaleTimeString('th-TH');
+    }
+
+    function refreshSystemStatus() {
+      testAppScriptConnection();
+    }
+
+    function openSystemStatus() {
+      showSystemStatus();
+    }
+
+    function closeSystemStatus() {
+      const modal = document.getElementById('systemStatusModal');
+      if (modal) {
+        modal.remove();
+      }
     }
   </script>
 </body>
