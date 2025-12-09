@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>เลือก / เปลี่ยนแปลงสถานพยาบาล</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #2c3e50;
+      --primary-dark: #1f2937;
+      --accent: #c9a961;
+      --text-dark: #1a1a1a;
+      --text-light: #666;
+      --border: #e5e7eb;
+      --bg-light: #f9f9f9;
+    }
+
+    body {
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #fafafa;
+      padding: 20px;
+      color: var(--text-dark);
+    }
+
+    .container {
+      max-width: 880px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2c3e50 0%, #1f2937 100%);
+      color: white;
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    .header-brand {
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .header-title {
+      font-size: 28px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .header-subtitle {
+      font-size: 13px;
+      opacity: 0.85;
+      line-height: 1.5;
+    }
+
+    .content {
+      padding: 28px;
+    }
+
+    /* ===== SECTION ===== */
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section:first-of-type {
+      margin-bottom: 28px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .section-icon {
+      font-size: 20px;
+      width: 28px;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    /* ===== INFO SECTION ===== */
+    .info-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .info-item {
+      min-width: 220px;
+    }
+
+    .info-label {
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-right: 4px;
+    }
+
+    .info-value {
+      color: var(--text-light);
+    }
+
+    .info-help {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: var(--bg-light);
+      border-left: 3px solid var(--accent);
+      border-radius: 3px;
+      line-height: 1.4;
+    }
+
+    /* ===== OPTIONS BOX ===== */
+    .options-wrapper {
+      background: var(--bg-light);
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .option-item:hover {
+      background: rgba(44, 62, 80, 0.04);
+    }
+
+    .option-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .option-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .option-content {
+      flex: 1;
+    }
+
+    .option-number {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      background: #2c3e50;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 22px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .option-label {
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .option-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .inline-label {
+      font-size: 13px;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+
+    .inline-input,
+    select {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.2s;
+      min-width: 180px;
+    }
+
+    .inline-input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.08);
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .inline-input.wide {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .option-help {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .nested-dropdown {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .nested-label {
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+
+    /* ===== ACTIONS ===== */
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2c3e50 0%, #1f2937 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(44, 62, 80, 0.25);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(44, 62, 80, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: var(--text-dark);
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+      transform: translateY(-2px);
+    }
+
+    /* ===== MESSAGE ===== */
+    .message {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      display: none;
+      animation: slideDown 0.3s ease-out;
+      border-left: 4px solid;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.success {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #22c55e;
+    }
+
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #ef4444;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .content {
+        padding: 20px;
+      }
+
+      .header {
+        padding: 20px 16px;
+      }
+
+      .header-title {
+        font-size: 22px;
+      }
+
+      .info-row {
+        flex-direction: column;
+        gap: 8px 0;
+      }
+
+      .option-inputs {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .inline-input,
+      select {
+        width: 100%;
+        min-width: unset;
+      }
+
+      .nested-dropdown {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+
+      .actions {
+        flex-direction: column-reverse;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-brand">บริษัท คาร์เปท เมกเกอร์ (ประเทศไทย) จำกัด</div>
+      <h1 class="header-title">เลือก / เปลี่ยนแปลงสถานพยาบาล</h1>
+      <p class="header-subtitle">
+        โปรดตรวจสอบข้อมูลส่วนตัวให้ถูกต้อง และเลือกตัวเลือกเกี่ยวกับสิทธิการรักษาพยาบาล
+      </p>
+    </div>
+
+    <div class="content">
+      <!-- ===== ข้อมูลพนักงาน ===== -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">👤</div>
+          <div class="section-title">ข้อมูลพนักงาน</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-item">
+            <span class="info-label">ชื่อพนักงาน:</span>
+            <span class="info-value" id="fullNameText">-</span>
+          </div>
+        </div>
+
+        <div class="info-help">
+          ℹ️ ข้อมูลนี้ระบบดึงจาก HR โดยอัตโนมัติ หากไม่ถูกต้องกรุณาติดต่อแผนกบุคคล
+        </div>
+
+        <!-- Hidden info for backend -->
+        <div class="hidden">
+          <span id="empIdText"></span>
+          <span id="sectionText"></span>
+          <span id="deptText"></span>
+          <span id="divisionText"></span>
+          <span id="positionText"></span>
+          <span id="startDateText"></span>
+        </div>
+      </div>
+
+      <!-- ===== ตัวเลือกการรักษาพยาบาล ===== -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">🏥</div>
+          <div class="section-title">ข้อมูลการใช้สิทธิรักษาพยาบาล</div>
+        </div>
+
+        <div class="options-wrapper">
+          <!-- ตัวเลือกที่ 1 -->
+          <div class="option-item">
+            <input type="checkbox" id="optHasCard" />
+            <div class="option-content">
+              <label class="option-label" for="optHasCard">
+                <span class="option-number">1</span>
+                <strong>มีบัตรรับรองสิทธิและกำลังใช้สิทธิที่</strong>
+              </label>
+              <div class="option-inputs">
+                <input
+                  type="text"
+                  id="currentHospitalInput"
+                  class="inline-input wide"
+                  placeholder="ระบุชื่อสถานพยาบาล"
+                />
+              </div>
+              <div class="option-help">
+                💡 กรอกเฉพาะกรณีมีบัตรรับรองสิทธิและกำลังใช้อยู่ในปัจจุบัน
+              </div>
+            </div>
+          </div>
+
+          <!-- ตัวเลือกที่ 2 -->
+          <div class="option-item">
+            <input type="checkbox" id="optNoChange" />
+            <div class="option-content">
+              <label class="option-label" for="optNoChange">
+                <span class="option-number">2</span>
+                <strong>ไม่เปลี่ยนแปลงสถานพยาบาล</strong>
+              </label>
+            </div>
+          </div>
+
+          <!-- ตัวเลือกที่ 3 -->
+          <div class="option-item">
+            <input type="checkbox" id="optWantChange" />
+            <div class="option-content">
+              <label class="option-label" for="optWantChange">
+                <span class="option-number">3</span>
+                <strong>ขอเปลี่ยนแปลงสถานพยาบาล</strong>
+              </label>
+              <div class="option-help">
+                💡 เลือกสถานพยาบาลลำดับที่ 1–3 (ไม่ซ้ำกัน) ตามความต้องการ
+              </div>
+
+              <div style="margin-top: 12px;">
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                  <span class="inline-label" style="min-width: 80px;">ลำดับที่ 1:</span>
+                  <select id="hospitalChoice1">
+                    <option value="">-- เลือกสถานพยาบาล --</option>
+                  </select>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                  <span class="inline-label" style="min-width: 80px;">ลำดับที่ 2:</span>
+                  <select id="hospitalChoice2">
+                    <option value="">-- เลือกสถานพยาบาล --</option>
+                  </select>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <span class="inline-label" style="min-width: 80px;">ลำดับที่ 3:</span>
+                  <select id="hospitalChoice3">
+                    <option value="">-- เลือกสถานพยาบาล --</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+                    <!-- ตัวเลือกที่ 4 -->
+          <div class="option-item">
+            <input type="checkbox" id="optNoCard" />
+            <div class="option-content">
+              <label class="option-label" for="optNoCard">
+                <span class="option-number">4</span>
+                <strong>ไม่มีบัตรรับรองสิทธิ ข้าพเจ้าขอเลือกสถานพยาบาล</strong>
+              </label>
+
+              <div class="option-help">
+                💡 เลือกสถานพยาบาลลำดับที่ 1–3 (ไม่ซ้ำกัน) สำหรับการขึ้นทะเบียนสิทธิใหม่
+              </div>
+
+              <div style="margin-top: 12px;">
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                  <span class="inline-label" style="min-width: 80px;">ลำดับที่ 1:</span>
+                  <select id="noCardChoice1">
+                    <option value="">-- เลือกสถานพยาบาล --</option>
+                  </select>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                  <span class="inline-label" style="min-width: 80px;">ลำดับที่ 2:</span>
+                  <select id="noCardChoice2">
+                    <option value="">-- เลือกสถานพยาบาล --</option>
+                  </select>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <span class="inline-label" style="min-width: 80px;">ลำดับที่ 3:</span>
+                  <select id="noCardChoice3">
+                    <option value="">-- เลือกสถานพยาบาล --</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+      <!-- ===== ปุ่มส่ง ===== -->
+      <div class="actions">
+        <button class="btn-secondary" type="button" onclick="window.close?.()">ปิด</button>
+        <button class="btn-primary" type="button" id="submitBtn">ยืนยันและส่งข้อมูล</button>
+      </div>
+
+      <div id="message" class="message"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== CONFIG =====
+    const API_URL = 'YOUR_WEB_APP_URL_HERE';
+    const urlParams = new URLSearchParams(window.location.search);
+    const key = urlParams.get('key');
+
+    // ===== HOSPITAL DATA =====
+    const HOSPITAL_GROUPS = [
+      {
+        region: 'โซนภาคอีสาน',
+        hospitals: [
+          'โรงพยาบาลขอนแก่น',
+          'โรงพยาบาลกรุงเทพขอนแก่น',
+          'โรงพยาบาลชนบท',
+          'โรงพยาบาลมหาสารคาม',
+          'โรงพยาบาลชัยภูมิ',
+          'โรงพยาบาลอุดรธานี',
+          'โรงพยาบาลอุบลราชธานี'
+        ]
+      },
+      {
+        region: 'โซนกรุงเทพฯ',
+        hospitals: [
+          'โรงพยาบาลกรุงเทพ',
+          'โรงพยาบาลบำรุงราษฎร์',
+          'โรงพยาบาลจุฬาลงกรณ์',
+          'โรงพยาบาลศิริราช',
+          'โรงพยาบาลรามาธิบดี',
+          'โรงพยาบาลพระมงกุฎเกล้า',
+          'โรงพยาบาลเปาโล'
+        ]
+      },
+      {
+        region: 'โซนภาคเหนือ',
+        hospitals: [
+          'โรงพยาบาลมหาราชนครเชียงใหม่',
+          'โรงพยาบาลเชียงใหม่ราม',
+          'โรงพยาบาลลำปาง',
+          'โรงพยาบาลลำพูน',
+          'โรงพยาบาลน่าน',
+          'โรงพยาบาลเชียงรายประชานุเคราะห์'
+        ]
+      },
+      {
+        region: 'โซนภาคกลาง',
+        hospitals: [
+          'โรงพยาบาลพระนครศรีอยุธยา',
+          'โรงพยาบาลสระบุรี',
+          'โรงพยาบาลนครสวรรค์',
+          'โรงพยาบาลอ่างทอง',
+          'โรงพยาบาลสุพรรณบุรี',
+          'โรงพยาบาลชัยนาทนเรนทร'
+        ]
+      },
+      {
+        region: 'โซนภาคตะวันออก',
+        hospitals: [
+          'โรงพยาบาลชลบุรี',
+          'โรงพยาบาลสมเด็จพระนางเจ้าสิริกิติ์',
+          'โรงพยาบาลศรีราชา',
+          'โรงพยาบาลระยอง',
+          'โรงพยาบาลจันทบุรี',
+          'โรงพยาบาลตราด'
+        ]
+      },
+      {
+        region: 'โซนภาคใต้',
+        hospitals: [
+          'โรงพยาบาลสงขลานครินทร์',
+          'โรงพยาบาลหาดใหญ่',
+          'โรงพยาบาลสุราษฎร์ธานี',
+          'โรงพยาบาลนครศรีธรรมราช',
+          'โรงพยาบาลภูเก็ต',
+          'โรงพยาบาลตรัง'
+        ]
+      }
+    ];
+
+    // ===== DOM =====
+    const fullNameText = document.getElementById('fullNameText');
+    const empIdText = document.getElementById('empIdText');
+    const sectionText = document.getElementById('sectionText');
+    const deptText = document.getElementById('deptText');
+    const divisionText = document.getElementById('divisionText');
+    const positionText = document.getElementById('positionText');
+    const startDateText = document.getElementById('startDateText');
+
+    const optHasCard = document.getElementById('optHasCard');
+    const currentHospitalInput = document.getElementById('currentHospitalInput');
+    const optNoChange = document.getElementById('optNoChange');
+    const optWantChange = document.getElementById('optWantChange');
+    const optNoCard = document.getElementById('optNoCard');
+
+    const hospitalChoice1 = document.getElementById('hospitalChoice1');
+    const hospitalChoice2 = document.getElementById('hospitalChoice2');
+    const hospitalChoice3 = document.getElementById('hospitalChoice3');
+    const noCardChoice1 = document.getElementById('noCardChoice1');
+    const noCardChoice2 = document.getElementById('noCardChoice2');
+    const noCardChoice3 = document.getElementById('noCardChoice3');
+
+    const submitBtn = document.getElementById('submitBtn');
+    const messageDiv = document.getElementById('message');
+
+    // ===== BUILD OPTIONS =====
+    let isUpdatingSelects = false;
+
+    function buildOptionsForSelect(selectEl, excludedValues, keepValue) {
+      while (selectEl.firstChild) {
+        selectEl.removeChild(selectEl.firstChild);
+      }
+
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = '-- เลือกสถานพยาบาล --';
+      selectEl.appendChild(placeholder);
+
+      HOSPITAL_GROUPS.forEach(group => {
+        const optGroup = document.createElement('optgroup');
+        optGroup.label = group.region;
+
+        group.hospitals.forEach(h => {
+          const shouldExclude = excludedValues.includes(h) && h !== keepValue;
+          if (!shouldExclude) {
+            const opt = document.createElement('option');
+            opt.value = h;
+            opt.textContent = h;
+            optGroup.appendChild(opt);
+          }
+        });
+
+        if (optGroup.children.length > 0) {
+          selectEl.appendChild(optGroup);
+        }
+      });
+
+      if (keepValue) {
+        selectEl.value = keepValue;
+      }
+    }
+
+    function updateHospitalSelects() {
+      if (isUpdatingSelects) return;
+      isUpdatingSelects = true;
+
+      const selects = [hospitalChoice1, hospitalChoice2, hospitalChoice3];
+      const currentValues = selects.map(s => s.value || '');
+
+      selects.forEach((select, idx) => {
+        const otherSelected = currentValues.filter((v, i) => i !== idx && v);
+        const keepValue = currentValues[idx];
+        buildOptionsForSelect(select, otherSelected, keepValue);
+      });
+
+      isUpdatingSelects = false;
+    }
+
+     hospitalChoice1.addEventListener('change', updateHospitalSelects);
+     hospitalChoice2.addEventListener('change', updateHospitalSelects);
+     hospitalChoice3.addEventListener('change', updateHospitalSelects);
+
+        function updateNoCardSelects() {
+      if (isUpdatingSelects) return;
+      isUpdatingSelects = true;
+
+      const selects = [noCardChoice1, noCardChoice2, noCardChoice3];
+      const currentValues = selects.map(s => s.value || '');
+
+      selects.forEach((select, idx) => {
+        const otherSelected = currentValues.filter((v, i) => i !== idx && v);
+        const keepValue = currentValues[idx];
+        buildOptionsForSelect(select, otherSelected, keepValue);
+      });
+
+      isUpdatingSelects = false;
+    }
+
+    noCardChoice1.addEventListener('change', updateNoCardSelects);
+    noCardChoice2.addEventListener('change', updateNoCardSelects);
+    noCardChoice3.addEventListener('change', updateNoCardSelects);
+
+    function initNoCardSelect() {
+      updateNoCardSelects();
+    }
+
+    // ===== LOAD DATA =====
+    function loadFormData() {
+      if (!key) {
+        showError('❌ ไม่พบ key ในลิงก์ กรุณาติดต่อแผนก HR');
+        return;
+      }
+
+      const callbackName = 'hospitalLoadCallback_' + Date.now();
+      window[callbackName] = function (res) {
+        if (res && res.success && res.data) {
+          const d = res.data;
+          empIdText.textContent = d.empId || '-';
+          fullNameText.textContent = d.fullName || '-';
+          sectionText.textContent = d.section || '-';
+          deptText.textContent = d.dept || '-';
+          divisionText.textContent = d.division || '-';
+          positionText.textContent = d.position || '-';
+          startDateText.textContent = d.startDate || '-';
+        } else {
+          showError('❌ ' + (res && res.message ? res.message : 'ไม่สามารถโหลดข้อมูลได้'));
+        }
+      };
+
+      const script = document.createElement('script');
+      script.src = API_URL + '?callback=' + callbackName + '&action=getHospitalFormData&key=' + encodeURIComponent(key);
+      document.body.appendChild(script);
+    }
+
+    // ===== SUBMIT =====
+    function submitForm() {
+      messageDiv.textContent = '';
+      messageDiv.className = '';
+
+      if (!optHasCard.checked && !optNoChange.checked && !optWantChange.checked && !optNoCard.checked) {
+        showError('❌ กรุณาเลือกอย่างน้อย 1 ตัวเลือก');
+        return;
+      }
+
+      if (optHasCard.checked && !currentHospitalInput.value.trim()) {
+        showError('❌ กรุณากรอกชื่อสถานพยาบาลในตัวเลือกที่ 1');
+        return;
+      }
+
+      if (optWantChange.checked && !hospitalChoice1.value && !hospitalChoice2.value && !hospitalChoice3.value) {
+        showError('❌ กรุณาเลือกสถานพยาบาลอย่างน้อย 1 ลำดับในตัวเลือกที่ 3');
+        return;
+      }
+
+         if (
+        optNoCard.checked &&
+        !noCardChoice1.value &&
+        !noCardChoice2.value &&
+        !noCardChoice3.value
+      ) {
+        showError('❌ กรุณาเลือกสถานพยาบาลอย่างน้อย 1 ลำดับในตัวเลือกที่ 4');
+        return;
+      }
+
+      const callbackName = 'hospitalSubmitCallback_' + Date.now();
+      window[callbackName] = function (res) {
+        if (res && res.success) {
+          showSuccess('✅ บันทึกข้อมูลเรียบร้อย ขอบคุณที่ให้ความร่วมมือค่ะ/ครับ');
+          submitBtn.disabled = true;
+        } else {
+          showError('❌ ' + (res && res.message ? res.message : 'เกิดข้อผิดพลาดในการบันทึกข้อมูล'));
+        }
+      };
+
+      const params = new URLSearchParams({
+        callback: callbackName,
+        action: 'submitHospitalForm',
+        key: key,
+
+        empId: empIdText.textContent || '',
+        fullName: fullNameText.textContent || '',
+        section: sectionText.textContent || '',
+        dept: deptText.textContent || '',
+        division: divisionText.textContent || '',
+        position: positionText.textContent || '',
+        startDate: startDateText.textContent || '',
+
+        hasCard: optHasCard.checked ? 'Y' : '',
+        currentHospital: currentHospitalInput.value.trim(),
+
+        noChange: optNoChange.checked ? 'Y' : '',
+        wantChange: optWantChange.checked ? 'Y' : '',
+        choice1: hospitalChoice1.value || '',
+        choice2: hospitalChoice2.value || '',
+        choice3: hospitalChoice3.value || '',
+
+         noCard: optNoCard.checked ? 'Y' : '',
+        noCardHospital: [
+          noCardChoice1.value || '',
+          noCardChoice2.value || '',
+          noCardChoice3.value || ''
+        ].filter(Boolean).join(' / ')
+      });
+
+      const script = document.createElement('script');
+      script.src = API_URL + '?' + params.toString();
+      document.body.appendChild(script);
+    }
+
+    // ===== HELPERS =====
+    function showError(msg) {
+      messageDiv.textContent = msg;
+      messageDiv.className = 'message show error';
+    }
+
+    function showSuccess(msg) {
+      messageDiv.textContent = msg;
+      messageDiv.className = 'message show success';
+    }
+
+    // ===== INIT =====
+    window.addEventListener('load', () => {
+      updateHospitalSelects();
+      initNoCardSelect();
+      loadFormData();
+    });
+
+    submitBtn.addEventListener('click', submitForm);
+  </script>
+</body>
+</html>
