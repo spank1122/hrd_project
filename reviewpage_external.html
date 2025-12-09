@@ -412,7 +412,7 @@
         script.onerror = function() {
           console.error('JSONP', action, 'onerror');
           cleanup();
-          callback && callback({ success: false, message: 'โหลด JSONP ไม่สำเร็จ' });
+          callback && callback({ success: false, message: 'โหลด JSONP ไม่สำเร็จ', networkError: true });
         };
 
         function cleanup() {
@@ -424,8 +424,8 @@
         timeoutId = setTimeout(function() {
           console.error('JSONP', action, 'timeout');
           cleanup();
-          callback && callback({ success: false, message: 'timeout' });
-        }, 150000    );
+          callback && callback({ success: false, message: 'timeout', networkError: true });
+        }, 150000);
 
         document.body.appendChild(script);
       }
@@ -610,18 +610,45 @@
           requestNo: requestNo,
           session:   sessionId,
           reviewAction: action,
-         // signature: base64,
+          signature: base64,
           comment:   comment
         };
 
         jsonpRequest('saveReviewAction', payload, function(res) {
           console.log('JSONP saveReviewAction result:', res);
-          if (!res || !res.success) {
-            setStatus('บันทึกไม่สำเร็จ: ' + (res && res.message ? res.message : ''), 'error');
+
+          // กรณี backend ตอบกลับปกติ แต่ success = false
+          if (res && !res.networkError && !res.success) {
+            setStatus('บันทึกไม่สำเร็จ: ' + (res.message || ''), 'error');
             btn.disabled = false;
             return;
           }
-          setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
+
+          // กรณี success ปกติ
+          if (res && res.success) {
+            setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
+            return;
+          }
+
+          // มาถึงตรงนี้ = networkError (onerror / timeout) → ลองเช็คสถานะจากระบบอีกครั้ง
+          setStatus('ระบบไม่ตอบกลับ กำลังตรวจสอบผลการบันทึก...', 'info');
+
+          jsonpRequest('getWorkflowRequest', { requestNo: requestNo, session: sessionId }, function(checkRes) {
+            console.log('check after error:', checkRes);
+
+            if (checkRes && checkRes.success && checkRes.data) {
+              const st = checkRes.data.status || '';
+              // สมมติว่าเมื่อบันทึกแล้ว status จะกลายเป็น Approved / Rejected
+              if (st === 'Approved' || st.indexOf('Rejected') === 0) {
+                setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว (ยืนยันจากระบบ)', 'success');
+                return;
+              }
+            }
+
+            // ถ้าดูแล้วเหมือนยังไม่บันทึกจริง → แจ้งว่าล้มเหลว
+            setStatus('บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+            btn.disabled = false;
+          });
         });
       }
 
