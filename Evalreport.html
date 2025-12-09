@@ -343,27 +343,19 @@
       margin-top: 12px;
     }
 
+    /* 🔄 ปรับสไตล์ canvas ให้เหมือน reviewpage_external */
     #signatureCanvas {
-      border: 2px dashed var(--purple-pearl);
+      border: 2px dashed #d4d4d8;
       border-radius: 8px;
-      cursor: crosshair;
+      width: 100%;
+      background: #ffffff;
+      margin: 10px 0 8px;
       touch-action: none;
       display: block;
-      width: 100%;
+      cursor: crosshair;
       max-width: 100%;
       height: 200px;
-      background: #fafafa;
       transition: all 0.3s;
-    }
-
-    #signatureCanvas:hover {
-      background: white;
-      border-color: var(--purple-pearl-dark);
-    }
-
-    #signatureCanvas.drawing {
-      border-style: solid;
-      background: white;
     }
 
     .canvas-hint {
@@ -669,76 +661,95 @@
     const rowIndex = urlParams.get('row') || '';
     const sessionId = urlParams.get('session') || '';
 
-    // ========== CANVAS SETUP ==========
-    const canvas = document.getElementById('signatureCanvas');
-    const ctx = canvas.getContext('2d');
-    let isDrawing = false;
-    let hasDrawn = false;
+    // ========== CANVAS SETUP (แบบเดียวกับ reviewpage_external) ==========
+    let canvas, ctx, isDrawing = false, hasDrawn = false;
 
-    // ตั้งค่า canvas
-    ctx.strokeStyle = '#1A252F';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    function initCanvas() {
+      canvas = document.getElementById('signatureCanvas');
+      if (!canvas) return;
 
-    // ========== CANVAS EVENTS (Mouse) ==========
-    canvas.addEventListener('mousedown', (e) => {
-      isDrawing = true;
-      canvas.classList.add('drawing');
+      ctx = canvas.getContext('2d');
+
+      // เติมพื้นหลังขาว
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+
+      // mouse
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mouseleave', stopDraw);
+
+      // touch
+      canvas.addEventListener('touchstart', handleTouch, { passive: false });
+      canvas.addEventListener('touchmove', handleTouch, { passive: false });
+      canvas.addEventListener('touchend', handleTouch, { passive: false });
+    }
+
+    // map ตำแหน่ง mouse/touch ให้ตรงกับขนาดจริงของ canvas
+    function getCanvasPos(e) {
       const rect = canvas.getBoundingClientRect();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    });
+      const scaleX = canvas.width  / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top)  * scaleY
+      };
+    }
 
-    canvas.addEventListener('mousemove', (e) => {
-      if (!isDrawing) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.stroke();
-      hasDrawn = true;
-    });
-
-    canvas.addEventListener('mouseup', () => {
-      isDrawing = false;
-      canvas.classList.remove('drawing');
-    });
-
-    canvas.addEventListener('mouseout', () => {
-      isDrawing = false;
-      canvas.classList.remove('drawing');
-    });
-
-    // ========== CANVAS EVENTS (Touch) ==========
-    canvas.addEventListener('touchstart', (e) => {
+    function startDraw(e) {
       e.preventDefault();
       isDrawing = true;
-      canvas.classList.add('drawing');
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      ctx.beginPath();
-      ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
-    });
-
-    canvas.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-      if (!isDrawing) return;
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
-      ctx.stroke();
       hasDrawn = true;
-    });
 
-    canvas.addEventListener('touchend', (e) => {
+      const pos = getCanvasPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
       e.preventDefault();
+
+      const pos = getCanvasPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    function stopDraw(e) {
+      if (e) e.preventDefault();
       isDrawing = false;
-      canvas.classList.remove('drawing');
-    });
+    }
+
+    function handleTouch(e) {
+      e.preventDefault();
+      const t = e.touches[0] || e.changedTouches[0];
+      if (!t) return;
+
+      const mouseEventType =
+        e.type === 'touchstart' ? 'mousedown' :
+        e.type === 'touchmove'  ? 'mousemove' :
+                                  'mouseup';
+
+      const ev = new MouseEvent(mouseEventType, {
+        clientX: t.clientX,
+        clientY: t.clientY,
+        bubbles: true,
+        cancelable: true
+      });
+      canvas.dispatchEvent(ev);
+    }
 
     // ========== FUNCTIONS ==========
 
     function clearSignature() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!ctx || !canvas) return;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       hasDrawn = false;
       hideStatus();
     }
@@ -800,7 +811,7 @@
       // เหตุผลที่ต้นสังกัดไม่เลือกรับ
       displayReasons(data.reasons);
 
-      // ✅ สรุปผลการพิจารณา (ให้ Apps Script ส่ง data.summary มาด้วย)
+      // ✅ สรุปผลการพิจารณา
       displaySummary(data.summary);
 
       // ความคิดเห็นเพิ่มเติม
@@ -843,79 +854,78 @@
     }
 
     function displayReasons(reasons) {
-  const section = document.getElementById('reasonsSection');
-  if (!reasons || typeof reasons !== 'object') return;
+      const section = document.getElementById('reasonsSection');
+      if (!reasons || typeof reasons !== 'object') return;
 
-  const html = `
-    <div class="reasons-section">
-      <div class="reasons-title">
-        <span>⚠️</span>
-        <span>เหตุผลที่ต้นสังกัดไม่เลือกรับผู้สมัครรายนี้ เนื่องจาก</span>
-      </div>
-      <div class="reasons-grid">
-        <!-- ผลตอบแทน / ค่าจ้าง -->
-        <div class="reason-category">
-          <div class="reason-category-title">ผลตอบแทน / ค่าจ้าง</div>
-          ${createReasonItem('ฐานเงินเดือนเดิมสูงมาก', reasons.pay1)}
-          ${createReasonItem('เงินเดือนที่คาดหวังสูงเกินกว่าบริษัทจะให้ได้', reasons.pay2)}
-          ${createReasonItem(
-            reasons.pay3_text
-              ? 'อื่นๆ ' + reasons.pay3_text
-              : 'อื่นๆ ........................................................',
-            reasons.pay3
-          )}
+      const html = `
+        <div class="reasons-section">
+          <div class="reasons-title">
+            <span>⚠️</span>
+            <span>เหตุผลที่ต้นสังกัดไม่เลือกรับผู้สมัครรายนี้ เนื่องจาก</span>
+          </div>
+          <div class="reasons-grid">
+            <!-- ผลตอบแทน / ค่าจ้าง -->
+            <div class="reason-category">
+              <div class="reason-category-title">ผลตอบแทน / ค่าจ้าง</div>
+              ${createReasonItem('ฐานเงินเดือนเดิมสูงมาก', reasons.pay1)}
+              ${createReasonItem('เงินเดือนที่คาดหวังสูงเกินกว่าบริษัทจะให้ได้', reasons.pay2)}
+              ${createReasonItem(
+                reasons.pay3_text
+                  ? 'อื่นๆ ' + reasons.pay3_text
+                  : 'อื่นๆ ........................................................',
+                reasons.pay3
+              )}
+            </div>
+
+            <!-- ประสบการณ์ในการทำงาน -->
+            <div class="reason-category">
+              <div class="reason-category-title">ประสบการณ์ในการทำงาน</div>
+              ${createReasonItem('ไม่ตรงกับตำแหน่งที่เปิดรับสมัคร', reasons.exp1)}
+              ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่น้อยเกินไป', reasons.exp2)}
+              ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่มากเกินไป', reasons.exp3)}
+              ${createReasonItem(
+                reasons.exp4_text
+                  ? 'อื่นๆ ' + reasons.exp4_text
+                  : 'อื่นๆ ........................................................',
+                reasons.exp4
+              )}
+            </div>
+
+            <!-- บุคลิกภาพ -->
+            <div class="reason-category">
+              <div class="reason-category-title">บุคลิกภาพ</div>
+              ${createReasonItem('ไม่เหมาะสมกับตำแหน่งที่ต้องการรับ', reasons.personality1)}
+              ${createReasonItem('ขาดปฏิภาณ ไหวพริบในการตอบคำถาม', reasons.personality2)}
+              ${createReasonItem(
+                reasons.personality3_text
+                  ? 'อื่นๆ ' + reasons.personality3_text
+                  : 'อื่นๆ ........................................................',
+                reasons.personality3
+              )}
+            </div>
+
+            <!-- ความคิดเห็น / เหตุผลอื่นๆ -->
+            <div class="reason-category">
+              <div class="reason-category-title">ความคิดเห็น / เหตุผลอื่นๆ</div>
+              ${createReasonItem(
+                `ถ้าจัดกลุ่มผู้สมัครเป็น A-B-C-D ผู้สมัครท่านนี้อยู่ในกลุ่ม ${reasons.group || '.......'}`,
+                reasons.other1
+              )}
+              ${createReasonItem('ขาดความตั้งใจในการเข้าร่วมงานกับองค์กร', reasons.other2)}
+              ${createReasonItem('ต้องการตรวจสอบประวัติการทำงานจากที่เดิมก่อน', reasons.other3)}
+              ${createReasonItem(
+                reasons.other4_text
+                  ? 'อื่นๆ ' + reasons.other4_text
+                  : 'อื่นๆ ........................................................',
+                reasons.other4
+              )}
+            </div>
+          </div>
         </div>
+      `;
 
-        <!-- ประสบการณ์ในการทำงาน -->
-        <div class="reason-category">
-          <div class="reason-category-title">ประสบการณ์ในการทำงาน</div>
-          ${createReasonItem('ไม่ตรงกับตำแหน่งที่เปิดรับสมัคร', reasons.exp1)}
-          ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่น้อยเกินไป', reasons.exp2)}
-          ${createReasonItem('ตรงกับตำแหน่งที่เปิดรับสมัคร แต่มากเกินไป', reasons.exp3)}
-          ${createReasonItem(
-            reasons.exp4_text
-              ? 'อื่นๆ ' + reasons.exp4_text
-              : 'อื่นๆ ........................................................',
-            reasons.exp4
-          )}
-        </div>
-
-        <!-- บุคลิกภาพ -->
-        <div class="reason-category">
-          <div class="reason-category-title">บุคลิกภาพ</div>
-          ${createReasonItem('ไม่เหมาะสมกับตำแหน่งที่ต้องการรับ', reasons.personality1)}
-          ${createReasonItem('ขาดปฏิภาณ ไหวพริบในการตอบคำถาม', reasons.personality2)}
-          ${createReasonItem(
-            reasons.personality3_text
-              ? 'อื่นๆ ' + reasons.personality3_text
-              : 'อื่นๆ ........................................................',
-            reasons.personality3
-          )}
-        </div>
-
-        <!-- ความคิดเห็น / เหตุผลอื่นๆ -->
-        <div class="reason-category">
-          <div class="reason-category-title">ความคิดเห็น / เหตุผลอื่นๆ</div>
-          ${createReasonItem(
-            `ถ้าจัดกลุ่มผู้สมัครเป็น A-B-C-D ผู้สมัครท่านนี้อยู่ในกลุ่ม ${reasons.group || '.......'}`,
-            reasons.other1
-          )}
-          ${createReasonItem('ขาดความตั้งใจในการเข้าร่วมงานกับองค์กร', reasons.other2)}
-          ${createReasonItem('ต้องการตรวจสอบประวัติการทำงานจากที่เดิมก่อน', reasons.other3)}
-          ${createReasonItem(
-            reasons.other4_text
-              ? 'อื่นๆ ' + reasons.other4_text
-              : 'อื่นๆ ........................................................',
-            reasons.other4
-          )}
-        </div>
-      </div>
-    </div>
-  `;
-
-  section.innerHTML = html;
-}
-
+      section.innerHTML = html;
+    }
 
     // ใช้สร้างแต่ละบรรทัด (มี checkbox / ไม่มี)
     function createReasonItem(text, checked) {
@@ -930,16 +940,6 @@
       `;
     }
 
-    // แสดง "สรุปผลการพิจารณา"
-    // ให้ Apps Script ส่ง data.summary มาประมาณนี้:
-    // summary = {
-    //   trial: true/false,
-    //   trialDate: '01/01/2569',
-    //   compare: true/false,
-    //   otherPos: true/false,
-    //   otherPosText: 'ตำแหน่งอื่น',
-    //   reject: true/false
-    // };
     function displaySummary(summary) {
       const section = document.getElementById('summarySection');
       section.innerHTML = '';
@@ -1005,7 +1005,7 @@
         return;
       }
 
-      // Get signature
+      // Get signature (ยังใช้ PNG + dataURL แบบเดิม)
       const signatureBase64 = canvas.toDataURL('image/png');
 
       // Disable button
@@ -1059,6 +1059,9 @@
     window.addEventListener('load', () => {
       console.log('🎨 Evalreport.html loaded');
       console.log('Row:', rowIndex, 'Session:', sessionId);
+
+      // ✅ ใช้ initCanvas แบบเดียวกับ reviewpage_external
+      initCanvas();
       
       if (!rowIndex) {
         document.getElementById('loading').innerHTML = '❌ ไม่พบข้อมูล (missing row parameter)';
