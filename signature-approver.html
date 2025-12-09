@@ -1336,6 +1336,7 @@
         mode: 'no-cors',
         body: formData
       }).then(() => {
+        // ปกติ no-cors มองว่า success เสมอถ้า network ไปถึง → แสดง success ทันที
         const successMessage = document.getElementById('successMessage');
         const statusBadge = document.getElementById('statusBadge');
 
@@ -1354,7 +1355,64 @@
         successMessage.classList.add('show');
       }).catch(err => {
         console.error(err);
-        showStatus('❌ เกิดข้อผิดพลาดในการส่งข้อมูล: ' + err.message, 'error');
+        // 🟡 ถ้า fetch error (เช่น เน็ตหลุด/CORS) → ลองเช็คในระบบว่าบันทึกสำเร็จหรือยัง
+        showStatus('ระบบไม่ตอบกลับ กำลังตรวจสอบผลการบันทึก...', 'loading');
+
+        const cbName = 'docCheck_' + Date.now();
+        const script = document.createElement('script');
+        script.src =
+          `${WEB_APP_URL}?action=getDoc&docNo=${encodeURIComponent(DOC_NO)}&callback=${cbName}`;
+
+        window[cbName] = function(res) {
+          console.log('check after fetch error:', res);
+
+          let ok = false;
+          if (res && res.success && res.data) {
+            const doc = res.data;
+            const steps = doc.steps || [];
+            // step[2] = ผู้อนุมัติ (ตามโฟลว์ 3 ฝ่าย)
+            let approverStep = steps[2] || null;
+            if (!approverStep && steps.length) {
+              approverStep = steps.find(s => {
+                const role = (s.role || '').toLowerCase();
+                return role.includes('approver') || role.includes('ผู้อนุมัติ');
+              });
+            }
+
+            if (approverStep && approverStep.signature) {
+              ok = true;
+              const successMessage = document.getElementById('successMessage');
+              const statusBadge = document.getElementById('statusBadge');
+
+              if (currentDecision === 'approve') {
+                successMessage.classList.remove('reject');
+                successMessage.textContent = '✅ อนุมัติเรียบร้อย! (ยืนยันจากระบบ)';
+                if (statusBadge) statusBadge.textContent = '✓ อนุมัติแล้ว';
+                showStatus('✅ อนุมัติเรียบร้อยแล้ว (ยืนยันจากระบบ)', 'success');
+              } else {
+                successMessage.classList.add('reject');
+                successMessage.textContent = '✅ ไม่อนุมัติเรียบร้อย! (ยืนยันจากระบบ)';
+                if (statusBadge) statusBadge.textContent = '✗ ไม่อนุมัติ';
+                showStatus('✅ ไม่อนุมัติเรียบร้อยแล้ว (ยืนยันจากระบบ)', 'success');
+              }
+              successMessage.classList.add('show');
+            }
+          }
+
+          if (!ok) {
+            // ถ้าดูจาก getDoc แล้ว ยังไม่เจอลายเซ็น → ถือว่าบันทึกไม่สำเร็จ
+            showStatus('❌ เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง', 'error');
+          }
+
+          cleanupJSONP(cbName);
+        };
+
+        script.onerror = function() {
+          showStatus('❌ เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง', 'error');
+          cleanupJSONP(cbName);
+        };
+
+        document.head.appendChild(script);
       }).finally(() => {
         isSubmitting = false;
         setSubmitButtonLoading(false);
