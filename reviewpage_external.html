@@ -341,7 +341,7 @@
       </div>
 
       <!-- โซนการตัดสินใจ + ลายเซ็น -->
-      <div class="card" id="reviewCard" style="display:none;">
+      <div class="card" id="reviewCard" style="display:none%;">
         <div class="header" style="font-size:16px;">การทบทวนและลงลายเซ็น</div>
         <div class="radio-group">
           <label><input type="radio" name="reviewAction" value="Approved" checked> อนุมัติ</label>
@@ -450,9 +450,9 @@
         canvas.addEventListener('mouseleave', stopDraw);
 
         // touch
-        canvas.addEventListener('touchstart', handleTouch);
-        canvas.addEventListener('touchmove', handleTouch);
-        canvas.addEventListener('touchend', handleTouch);
+        canvas.addEventListener('touchstart', handleTouch, { passive: false });
+        canvas.addEventListener('touchmove', handleTouch, { passive: false });
+        canvas.addEventListener('touchend', handleTouch, { passive: false });
       }
 
       // map ตำแหน่ง mouse/touch ให้ตรงกับขนาดจริงของ canvas
@@ -600,6 +600,7 @@
         const comment = document.getElementById('comment').value || '';
 
         const btn = document.getElementById('submitBtn');
+        if (btn.disabled) return; // กันเค้ากดรัว ๆ
         btn.disabled = true;
         setStatus('กำลังบันทึกผลการทบทวน...', 'info');
 
@@ -617,7 +618,7 @@
         jsonpRequest('saveReviewAction', payload, function(res) {
           console.log('JSONP saveReviewAction result:', res);
 
-          // กรณี backend ตอบกลับปกติ แต่ success = false
+          // ถ้า backend ตอบกลับปกติ แต่ success = false → ถือว่าบันทึกไม่สำเร็จจริง
           if (res && !res.networkError && !res.success) {
             setStatus('บันทึกไม่สำเร็จ: ' + (res.message || ''), 'error');
             btn.disabled = false;
@@ -631,22 +632,43 @@
           }
 
           // มาถึงตรงนี้ = networkError (onerror / timeout) → ลองเช็คสถานะจากระบบอีกครั้ง
-          setStatus('ระบบไม่ตอบกลับ กำลังตรวจสอบผลการบันทึก...', 'info');
+          setStatus('ระบบไม่ตอบกลับ กำลังตรวจสอบผลการบันทึกจากระบบ...', 'info');
 
           jsonpRequest('getWorkflowRequest', { requestNo: requestNo, session: sessionId }, function(checkRes) {
             console.log('check after error:', checkRes);
 
             if (checkRes && checkRes.success && checkRes.data) {
-              const st = checkRes.data.status || '';
-              // สมมติว่าเมื่อบันทึกแล้ว status จะกลายเป็น Approved / Rejected
-              if (st === 'Approved' || st.indexOf('Rejected') === 0) {
+              const stRaw = (checkRes.data.status || '').toString();
+              const stLower = stRaw.toLowerCase();
+              let ok = false;
+
+              if (action === 'Approved') {
+                // หลัง Reviewer อนุมัติ ปกติ status จะกลายเป็น Pending Approval / Approved
+                if (
+                  stLower.includes('pending approval') ||
+                  stLower === 'approved' ||
+                  stLower.includes('approved')
+                ) {
+                  ok = true;
+                }
+              } else {
+                // Reviewer ไม่อนุมัติ → สถานะจะมีคำว่า Rejected
+                if (stLower.includes('rejected')) {
+                  ok = true;
+                }
+              }
+
+              if (ok) {
                 setStatus('บันทึกผลการทบทวนเรียบร้อยแล้ว (ยืนยันจากระบบ)', 'success');
                 return;
               }
             }
 
-            // ถ้าดูแล้วเหมือนยังไม่บันทึกจริง → แจ้งว่าล้มเหลว
-            setStatus('บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+            // ถ้าดูแล้วยังไม่แน่ใจว่าเซฟสำเร็จไหม → ใช้ข้อความแบบ "ยืนยันไม่ได้" แทนคำว่าล้มเหลวตรง ๆ
+            setStatus(
+              'ระบบไม่สามารถยืนยันผลการบันทึกได้ในขณะนี้ กรุณาตรวจสอบสถานะในระบบภายหลัง หรือแจ้ง HR/IT',
+              'error'
+            );
             btn.disabled = false;
           });
         });
