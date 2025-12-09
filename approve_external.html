@@ -107,7 +107,6 @@
         color: #b91c1c; 
       }
 
-      /* canvas ลายเซ็น: กว้างเต็ม card */
       canvas {
         border: 2px dashed #d4d4d8;
         border-radius: 8px;
@@ -366,7 +365,6 @@
 
         <div style="margin-top:16px;">
           <div style="font-size:14px; margin-bottom:4px; color: var(--text-dark); font-weight: 500;">ลายเซ็นผู้อนุมัติ (จำเป็น)</div>
-          <!-- ขนาดจริงของ canvas -->
           <canvas id="signCanvas" width="600" height="200"></canvas>
         </div>
 
@@ -473,7 +471,7 @@
         canvas.addEventListener('touchend', stopDraw);
       }
 
-      // scale ตำแหน่งเมาส์ตามขนาดจริงของ canvas (เพราะเราให้ width:100% ใน CSS)
+      // scale ตำแหน่งเมาส์ตามขนาดจริงของ canvas
       function getCanvasPos(e) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width  / rect.width;
@@ -537,7 +535,6 @@
       function formatDateOnly(value) {
         if (!value) return '-';
 
-        // ถ้าเป็น string แบบ ISO (2025-12-26T17:00:00.000Z)
         const d = new Date(value);
         if (!isNaN(d.getTime())) {
           const yyyy = d.getFullYear();
@@ -545,8 +542,6 @@
           const dd   = String(d.getDate()).padStart(2, '0');
           return `${yyyy}-${mm}-${dd}`;
         }
-
-        // ถ้า new Date() ไม่ได้ (เช่น เป็นข้อความธรรมดา) ก็คืนค่าตามเดิม
         return value;
       }
 
@@ -569,7 +564,7 @@
             }
 
             const d    = res.data || {};
-            const form = d.form || {};  // 👈 ค่าจากฟอร์มทั้งหมด (ถ้า backend ส่งมา)
+            const form = d.form || {};
 
             document.getElementById('requestCard').style.display = 'block';
             document.getElementById('reviewCard').style.display  = 'block';
@@ -585,7 +580,6 @@
             else if (st.indexOf('Rejected') === 0) cls = 'badge badge-rejected';
             statusEl.innerHTML = '<span class="'+cls+'">'+st+'</span>';
 
-            // map field หลักจาก form ถ้ามี
             document.getElementById('emploemail').textContent =
               getFormValue(form, 'Email', d.emploemail);
 
@@ -648,6 +642,44 @@
         );
       }
 
+      // ---------- เช็คผลจากระบบหลักหลัง JSONP error ----------
+      function checkApproveResult(expectedAction) {
+        setStatus('ระบบไม่ตอบสนอง กำลังตรวจสอบผลการบันทึกจากระบบหลัก...', 'info');
+
+        jsonpRequest(
+          'getWorkflowRequest',
+          { requestNo: requestNo, session: sessionId },
+          function(res2) {
+            console.log('checkApproveResult:', res2);
+
+            const btn = document.getElementById('submitBtn');
+            let ok = false;
+
+            if (res2 && res2.success && res2.data) {
+              const d = res2.data;
+              const stRaw = (d.status || '').toString().toLowerCase();
+              const isApproved = stRaw.includes('approved');
+              const isRejected = stRaw.includes('rejected');
+
+              if ((expectedAction === 'Approved' && isApproved) ||
+                  (expectedAction === 'Rejected' && isRejected)) {
+                setStatus('บันทึกผลการอนุมัติเรียบร้อยแล้ว (ยืนยันจากระบบหลัก)', 'success');
+                ok = true;
+              }
+            }
+
+            if (!ok) {
+              setStatus(
+                '⚠️ ระบบไม่สามารถยืนยันผลการบันทึกได้ในขณะนี้ ' +
+                'กรุณาตรวจสอบในระบบภายหลัง หรือแจ้ง HR/IT เพื่อช่วยตรวจสอบ',
+                'error'
+              );
+              btn.disabled = false;
+            }
+          }
+        );
+      }
+
       // ---------- submit approve ----------
       function submitApprove() {
         if (!hasSignature) {
@@ -677,16 +709,26 @@
           approveAction: action,
           signature: base64,
           comment:   comment
-          // finalPdfUrl: ''  // ให้ backend generate เอง
         };
 
         jsonpRequest('saveApproveAction', payload, function(res) {
           console.log('JSONP saveApproveAction result:', res);
+
           if (!res || !res.success) {
-            setStatus('บันทึกไม่สำเร็จ: ' + (res && res.message ? res.message : ''), 'error');
+            const msg = res && res.message ? res.message : '';
+
+            // ถ้าเป็น error ประเภท network/JSONP → เช็คซ้ำจากระบบหลัก
+            if (msg === 'โหลด JSONP ไม่สำเร็จ' || msg === 'timeout') {
+              checkApproveResult(action);
+              return;
+            }
+
+            // ถ้าเป็น error จาก logic backend เอง → แจ้งตรง ๆ
+            setStatus('บันทึกไม่สำเร็จ: ' + msg, 'error');
             btn.disabled = false;
             return;
           }
+
           setStatus('บันทึกผลการอนุมัติเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
         });
       }
