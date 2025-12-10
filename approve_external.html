@@ -417,7 +417,7 @@
         script.src = WEB_APP_URL + '?' + buildQuery(params);
 
         let timeoutId;
-        const timeoutMs = (action === 'saveApproveAction') ? 120000 : 30000;
+        const timeoutMs = 30000; // ตอนนี้ใช้ JSONP แค่ getWorkflowRequest
 
         window[cbName] = function(res) {
           console.log('JSONP', action, 'result:', res);
@@ -642,9 +642,9 @@
         );
       }
 
-      // ---------- เช็คผลจากระบบหลักหลัง JSONP error ----------
+      // ---------- เช็คผลจากระบบหลักหลังส่ง POST ----------
       function checkApproveResult(expectedAction) {
-        setStatus('ระบบไม่ตอบสนอง กำลังตรวจสอบผลการบันทึกจากระบบหลัก...', 'info');
+        setStatus('ระบบกำลังตรวจสอบผลการบันทึกจากระบบหลัก...', 'info');
 
         jsonpRequest(
           'getWorkflowRequest',
@@ -680,8 +680,8 @@
         );
       }
 
-      // ---------- submit approve ----------
-      function submitApprove() {
+      // ---------- submit approve (ใช้ POST + no-cors แทน JSONP) ----------
+      async function submitApprove() {
         if (!hasSignature) {
           setStatus('กรุณาวาดลายเซ็นก่อนบันทึก', 'error');
           canvas.scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -694,7 +694,7 @@
 
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        setStatus('กำลังบันทึกผลการอนุมัติ...', 'info');
+        setStatus('กำลังส่งข้อมูลไปยังระบบหลัก...', 'info');
 
         // ลดขนาด signature ให้เล็กลง (JPEG คุณภาพ 0.4)
         const dataUrl = canvas.toDataURL('image/jpeg', 0.4);
@@ -704,38 +704,40 @@
         console.log('signature base64 length  =', base64.length);
 
         const payload = {
-          requestNo: requestNo,
-          session:   sessionId,
+          action:        'saveApproveAction',
+          requestNo:     requestNo,
+          session:       sessionId,
           approveAction: action,
-          signature: base64,
-          comment:   comment
+          signature:     base64,
+          comment:       comment
         };
 
-        jsonpRequest('saveApproveAction', payload, function(res) {
-          console.log('JSONP saveApproveAction result:', res);
+        try {
+          await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify(payload)
+          });
 
-          if (!res || !res.success) {
-            const msg = res && res.message ? res.message : '';
+          setStatus('ส่งข้อมูลเรียบร้อย กำลังตรวจสอบผลการบันทึกจากระบบหลัก...', 'info');
 
-            // ถ้าเป็น error ประเภท network/JSONP → เช็คซ้ำจากระบบหลัก
-            if (msg === 'โหลด JSONP ไม่สำเร็จ' || msg === 'timeout') {
-              checkApproveResult(action);
-              return;
-            }
+          setTimeout(function() {
+            checkApproveResult(action);
+          }, 4000);
 
-            // ถ้าเป็น error จาก logic backend เอง → แจ้งตรง ๆ
-            setStatus('บันทึกไม่สำเร็จ: ' + msg, 'error');
-            btn.disabled = false;
-            return;
-          }
-
-          setStatus('บันทึกผลการอนุมัติเรียบร้อยแล้ว ขอบคุณค่ะ/ครับ', 'success');
-        });
+        } catch (err) {
+          console.error('fetch saveApproveAction error:', err);
+          setStatus('⚠️ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง', 'error');
+          btn.disabled = false;
+        }
       }
 
       // ---------- init ----------
       window.addEventListener('DOMContentLoaded', function() {
-        console.log('Approve page (external JSONP) DOMContentLoaded');
+        console.log('Approve page (external) DOMContentLoaded');
         initCanvas();
         document.getElementById('clearSignBtn').addEventListener('click', clearSignature);
         document.getElementById('submitBtn').addEventListener('click', submitApprove);
