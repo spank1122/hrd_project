@@ -590,32 +590,26 @@
     });
 
     // ========================================
-    // PARSE DATE HELPER (สำคัญ!)
+    // PARSE DATE HELPER (อ่านเป็น DD/MM/YYYY ก่อน)
     // ========================================
     function parseDateValue(value) {
       if (!value) return 0;
 
-      // ถ้าเป็นตัวเลข (timestamp) ใช้ได้เลย
+      // ถ้าเป็น number (timestamp) ใช้ได้เลย
       if (typeof value === 'number') {
         return value;
       }
 
       const str = String(value).trim();
 
-      // ลองให้ Date.parse จัดการก่อน
-      const direct = Date.parse(str);
-      if (!isNaN(direct)) {
-        return direct;
-      }
-
-      // รองรับรูปแบบ DD/MM/YYYY หรือ DD-MM-YYYY
+      // 1) จับรูปแบบ DD/MM/YYYY หรือ DD-MM-YYYY (ด้านหลังจะมีหรือไม่มีเวลาต่อก็ได้)
       const m1 = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
       if (m1) {
         const day = Number(m1[1]);
-        const month = Number(m1[2]) - 1; // JS เริ่มเดือนที่ 0
+        const month = Number(m1[2]) - 1; // JS: 0 = ม.ค.
         let year = Number(m1[3]);
 
-        // ถ้าเป็นปี พ.ศ. (> 2500) แปลงเป็น ค.ศ.
+        // เผื่อเป็นปี พ.ศ.
         if (year > 2500) {
           year -= 543;
         }
@@ -623,7 +617,13 @@
         return new Date(year, month, day).getTime();
       }
 
-      // ถ้าแปลงไม่ได้ ให้ 0 (จะไปอยู่ท้ายๆ ตอน sort)
+      // 2) ถ้าไม่เข้ารูปแบบข้างบน ให้ลอง Date.parse
+      const direct = Date.parse(str);
+      if (!isNaN(direct)) {
+        return direct;
+      }
+
+      // 3) ถ้าแปลงไม่ได้เลย ส่ง 0 (จะไปอยู่ท้ายสุดเวลา sort)
       return 0;
     }
 
@@ -726,7 +726,7 @@
     }
 
     // ========================================
-    // SORT DOCUMENTS (ใช้ parseDateValue)
+    // SORT DOCUMENTS
     // ========================================
     function sortDocuments(sortBy) {
       if (sortBy === 'newest') {
@@ -896,7 +896,8 @@
     function formatDate(dateStr) {
       if (!dateStr) return '-';
       const ts = parseDateValue(dateStr);
-      if (!ts) return dateStr; // ถ้า parse ไม่ได้ แสดงค่าดิบ
+      if (!ts) return dateStr;  // ถ้า parse ไม่ได้ แสดงค่าดิบ
+
       const d = new Date(ts);
       return d.toLocaleDateString('th-TH', {
         year: 'numeric',
