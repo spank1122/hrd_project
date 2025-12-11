@@ -638,6 +638,8 @@
         });
 
         // เรียงจากใหม่ไปเก่า (default)
+        // 🔧 แก้ไข: อัปเดต dropdown ก่อนเรียก sortDocuments
+        document.getElementById('sortFilter').value = 'newest';
         sortDocuments('newest');
         currentPage = 1;
         applyFilters();
