@@ -602,29 +602,33 @@
 
       const str = String(value).trim();
 
-      // 1) จับรูปแบบ DD/MM/YYYY หรือ DD-MM-YYYY (ด้านหลังจะมีหรือไม่มีเวลาต่อก็ได้)
+      // 1) DD/MM/YYYY หรือ DD-MM-YYYY (+ เวลา ต่อท้ายได้)
       const m1 = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
       if (m1) {
         const day = Number(m1[1]);
-        const month = Number(m1[2]) - 1; // JS: 0 = ม.ค.
+        const month = Number(m1[2]) - 1;
         let year = Number(m1[3]);
 
-        // เผื่อเป็นปี พ.ศ.
-        if (year > 2500) {
-          year -= 543;
-        }
+        // ปี พ.ศ. → ค.ศ.
+        if (year > 2500) year -= 543;
 
         return new Date(year, month, day).getTime();
       }
 
-      // 2) ถ้าไม่เข้ารูปแบบข้างบน ให้ลอง Date.parse
+      // 2) ลองให้ Date.parse จัดการ
       const direct = Date.parse(str);
-      if (!isNaN(direct)) {
-        return direct;
-      }
+      if (!isNaN(direct)) return direct;
 
-      // 3) ถ้าแปลงไม่ได้เลย ส่ง 0 (จะไปอยู่ท้ายสุดเวลา sort)
+      // 3) ถ้าแปลงไม่ได้เลย
       return 0;
+    }
+
+    // ดึงเลข DOC จาก id เช่น "DOC-066" → 66
+    function getDocNumber(id) {
+      if (!id) return 0;
+      const str = String(id);
+      const match = str.match(/(\d+)(?!.*\d)/);
+      return match ? parseInt(match[1], 10) : 0;
     }
 
     // ========================================
@@ -645,7 +649,6 @@
           return;
         }
 
-        // ประมวลผลข้อมูลจาก tracking API
         allDocuments = (response.documents || []).map(doc => {
           const typeMap = {
             'appoint': 'appoint',
@@ -674,7 +677,7 @@
           };
         });
 
-        // เรียงจากใหม่ไปเก่า (default)
+        // default: ใหม่สุด
         document.getElementById('sortFilter').value = 'newest';
         sortDocuments('newest');
         currentPage = 1;
@@ -726,20 +729,30 @@
     }
 
     // ========================================
-    // SORT DOCUMENTS
+    // SORT DOCUMENTS (ใหม่สุด/เก่าสุด + เลข DOC เป็นตัวช่วย)
     // ========================================
     function sortDocuments(sortBy) {
       if (sortBy === 'newest') {
         allDocuments.sort((a, b) => {
           const da = parseDateValue(a.createdDate);
           const db = parseDateValue(b.createdDate);
-          return db - da; // ใหม่สุดก่อน
+
+          if (db !== da) return db - da;     // วันที่ใหม่ก่อน
+
+          const na = getDocNumber(a.id);     // วันที่เท่ากัน → ดูเลข DOC
+          const nb = getDocNumber(b.id);
+          return nb - na;                    // เลขมาก = ใหม่กว่า
         });
       } else if (sortBy === 'oldest') {
         allDocuments.sort((a, b) => {
           const da = parseDateValue(a.createdDate);
           const db = parseDateValue(b.createdDate);
-          return da - db; // เก่าสุดก่อน
+
+          if (da !== db) return da - db;     // เก่าสุดก่อน
+
+          const na = getDocNumber(a.id);     // วันที่เท่ากัน → DOC เล็กก่อน
+          const nb = getDocNumber(b.id);
+          return na - nb;
         });
       } else if (sortBy === 'name') {
         allDocuments.sort((a, b) => {
@@ -896,7 +909,7 @@
     function formatDate(dateStr) {
       if (!dateStr) return '-';
       const ts = parseDateValue(dateStr);
-      if (!ts) return dateStr;  // ถ้า parse ไม่ได้ แสดงค่าดิบ
+      if (!ts) return dateStr;
 
       const d = new Date(ts);
       return d.toLocaleDateString('th-TH', {
@@ -919,7 +932,7 @@
       window.history.back();
     }
 
-    // Close modal when clicking backdrop
+    // ปิด modal เมื่อคลิกพื้นหลัง
     document.getElementById('timelineModal').addEventListener('click', function(e) {
       if (e.target === this) closeModal();
     });
