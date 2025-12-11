@@ -590,6 +590,44 @@
     });
 
     // ========================================
+    // PARSE DATE HELPER (สำคัญ!)
+    // ========================================
+    function parseDateValue(value) {
+      if (!value) return 0;
+
+      // ถ้าเป็นตัวเลข (timestamp) ใช้ได้เลย
+      if (typeof value === 'number') {
+        return value;
+      }
+
+      const str = String(value).trim();
+
+      // ลองให้ Date.parse จัดการก่อน
+      const direct = Date.parse(str);
+      if (!isNaN(direct)) {
+        return direct;
+      }
+
+      // รองรับรูปแบบ DD/MM/YYYY หรือ DD-MM-YYYY
+      const m1 = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (m1) {
+        const day = Number(m1[1]);
+        const month = Number(m1[2]) - 1; // JS เริ่มเดือนที่ 0
+        let year = Number(m1[3]);
+
+        // ถ้าเป็นปี พ.ศ. (> 2500) แปลงเป็น ค.ศ.
+        if (year > 2500) {
+          year -= 543;
+        }
+
+        return new Date(year, month, day).getTime();
+      }
+
+      // ถ้าแปลงไม่ได้ ให้ 0 (จะไปอยู่ท้ายๆ ตอน sort)
+      return 0;
+    }
+
+    // ========================================
     // LOAD DOCUMENTS FROM GAS
     // ========================================
     function loadDocuments() {
@@ -609,7 +647,6 @@
 
         // ประมวลผลข้อมูลจาก tracking API
         allDocuments = (response.documents || []).map(doc => {
-          // แปลง type เป็นแบบเดียวกับระบบเดิม
           const typeMap = {
             'appoint': 'appoint',
             'transfer': 'transfer',
@@ -638,7 +675,6 @@
         });
 
         // เรียงจากใหม่ไปเก่า (default)
-        // 🔧 แก้ไข: อัปเดต dropdown ก่อนเรียก sortDocuments
         document.getElementById('sortFilter').value = 'newest';
         sortDocuments('newest');
         currentPage = 1;
@@ -676,8 +712,8 @@
 
       filteredDocuments = allDocuments.filter(doc => {
         const matchSearch = !search || 
-          doc.id.toLowerCase().includes(search) || 
-          doc.employee.toLowerCase().includes(search);
+          (doc.id && doc.id.toLowerCase().includes(search)) || 
+          (doc.employee && doc.employee.toLowerCase().includes(search));
         
         const matchStatus = !status || doc.status === status;
         const matchType = !type || doc.type === type;
@@ -690,23 +726,27 @@
     }
 
     // ========================================
-    // SORT DOCUMENTS
+    // SORT DOCUMENTS (ใช้ parseDateValue)
     // ========================================
     function sortDocuments(sortBy) {
       if (sortBy === 'newest') {
         allDocuments.sort((a, b) => {
-          const da = new Date(a.createdDate).getTime();
-          const db = new Date(b.createdDate).getTime();
-          return db - da;
+          const da = parseDateValue(a.createdDate);
+          const db = parseDateValue(b.createdDate);
+          return db - da; // ใหม่สุดก่อน
         });
       } else if (sortBy === 'oldest') {
         allDocuments.sort((a, b) => {
-          const da = new Date(a.createdDate).getTime();
-          const db = new Date(b.createdDate).getTime();
-          return da - db;
+          const da = parseDateValue(a.createdDate);
+          const db = parseDateValue(b.createdDate);
+          return da - db; // เก่าสุดก่อน
         });
       } else if (sortBy === 'name') {
-        allDocuments.sort((a, b) => a.employee.localeCompare(b.employee, 'th'));
+        allDocuments.sort((a, b) => {
+          const nameA = a.employee || '';
+          const nameB = b.employee || '';
+          return nameA.localeCompare(nameB, 'th');
+        });
       }
     }
 
@@ -738,7 +778,7 @@
         html += `
           <div class="document-item ${statusClass}" onclick="showTimeline('${doc.id}')">
             <div class="document-header">
-              <div class="document-title">${doc.id} - ${doc.employee}</div>
+              <div class="document-title">${doc.id || ''} - ${doc.employee || ''}</div>
               <span class="status-badge ${statusBadgeClass}">${statusText}</span>
             </div>
 
@@ -820,7 +860,6 @@
             <div class="timeline-detail">${dateFormatted} เวลา ${timeFormatted}</div>
         `;
 
-        // เพิ่มเหตุผลไม่อนุมัติ (ถ้ามี)
         if (statusClass === 'rejected' && step.rejectReason) {
           html += `<div class="reject-reason">🔴 เหตุผล: ${step.rejectReason}</div>`;
         }
@@ -856,16 +895,14 @@
 
     function formatDate(dateStr) {
       if (!dateStr) return '-';
-      try {
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('th-TH', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        });
-      } catch (e) {
-        return dateStr;
-      }
+      const ts = parseDateValue(dateStr);
+      if (!ts) return dateStr; // ถ้า parse ไม่ได้ แสดงค่าดิบ
+      const d = new Date(ts);
+      return d.toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
     }
 
     function showEmptyState(message) {
@@ -881,7 +918,7 @@
       window.history.back();
     }
 
-    // Close modal when clicking 
+    // Close modal when clicking backdrop
     document.getElementById('timelineModal').addEventListener('click', function(e) {
       if (e.target === this) closeModal();
     });
