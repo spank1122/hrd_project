@@ -816,7 +816,7 @@
         html += `
           <div class="timeline-item ${statusClass}">
             <div class="timeline-role">${step.role || '-'}</div>
-            <div class="timeline-signer">${step.signer || '-'}</div>
+            ${step.signer ? `<div class="timeline-signer">${step.signer}</div>` : ''}
             <div class="timeline-detail">${dateFormatted} เวลา ${timeFormatted}</div>
         `;
 
