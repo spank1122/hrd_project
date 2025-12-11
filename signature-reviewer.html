@@ -618,11 +618,11 @@
 
       <!-- ฝั่งขวา: ลายเซ็นผู้ทบทวน -->
       <div class="card">
-        <div class="card-title">ลายเซ็นผู้ทบทวน</div>
+        <div class="card-title">ลายเซ็นของคุณ</div>
 
         <div class="info-item">
           <div class="info-label">สถานะ</div>
-          <div>แบบฟอร์มนี้สำหรับ "เซ็นรับทราบ " เท่านั้น</div>
+          <div>แบบฟอร์มนี้สำหรับ "เซ็นรับทราบ" เท่านั้น</div>
         </div>
 
         <canvas id="signaturePad" class="signature-pad" height="170"></canvas>
@@ -638,14 +638,22 @@
 
         <div id="statusMessage" class="status-message"></div>
 
+        <!-- รหัสเอกสาร -->
         <div class="info-item">
           <div class="info-label">รหัสเอกสาร</div>
           <div id="docIdDisplay">-</div>
         </div>
 
+        <!-- บทบาท (fix ไว้ที่หน้าเว็บ แต่ยังให้ role=... จากลิงก์มา override ได้) -->
         <div class="info-item">
-          <div class="info-label">ตำแหน่งผู้ทบทวน</div>
-          <div id="reviewerRoleDisplay">ผู้จัดการฝ่าย</div>
+          <div class="info-label">บทบาท</div>
+          <div id="reviewerRoleDisplay">ผู้จัดการฝ่าย (ผู้ทบทวน)</div>
+        </div>
+
+        <!-- ชื่อผู้ทบทวน (รับจากพารามิเตอร์ ?reviewer=... ถ้ามี) -->
+        <div class="info-item">
+          <div class="info-label">ชื่อผู้ทบทวน</div>
+          <div id="reviewerNameDisplay">ผู้จัดการฝ่าย</div>
         </div>
 
         <div style="font-size: 11px; color: var(--text-light); margin-top: 6px;">
@@ -653,8 +661,6 @@
           <code>?docNo=...&reviewer=...&role=...</code> ในลิงก์
         </div>
       </div>
-    </div>
-  </div>
 
   <script>
     // ================================
